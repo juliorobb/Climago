@@ -4,3 +4,73 @@
 @media(min-width:600px){body{padding:18px 0}.app-shell{border:1px solid #1b4664;border-radius:24px;overflow:hidden;min-height:calc(100vh - 36px)}.topbar{position:relative}.bottom-nav{bottom:18px;border-radius:0 0 24px 24px}}
 
 .location-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}.location-actions .text-button{font-size:10px;padding:6px 4px}.saved-location{min-width:0}.saved-location>div:nth-child(2){min-width:0}.saved-location b{overflow-wrap:anywhere}button:disabled{opacity:.6;cursor:wait}
+
+/* Etapa 2: jerarquía de Inicio y mapa real */
+.brand-mark{display:none}
+.weather-hero{grid-template-columns:82px 1fr;gap:4px 12px;padding:15px}
+.weather-meta{gap:7px;margin-top:10px}
+.weather-meta>div{padding:7px 5px;gap:2px}
+.weather-meta span{font-size:16px}
+.weather-meta b{font-size:11px}
+.weather-meta small{font-size:9px}
+.data-source{grid-column:1/-1;margin:3px 0 0;text-align:right;font-size:9px;color:var(--muted)}
+.risk-card{width:100%;text-align:left;color:var(--text);cursor:pointer;margin-top:10px;padding:12px 13px;min-height:68px}
+.risk-icon{font-size:25px;color:#7bd9a9;width:28px;text-align:center}
+.risk-copy{display:grid;gap:4px;flex:1}
+.risk-copy>small:first-child{font-size:9px;letter-spacing:.8px;color:var(--muted)}
+.risk-copy b{font-size:12px}
+.risk-copy>small:last-child{font-size:9px;color:var(--muted);line-height:1.35}
+.risk-chevron{font-size:23px;color:var(--muted)}
+.risk-neutral{background:linear-gradient(120deg,#102d3b,#10283c);border-color:#28604e}
+.risk-watch{background:linear-gradient(120deg,#44391b,#2b2a26);border-color:#9b7a2b}.risk-watch .risk-icon{color:#ffd36a}
+.risk-warning{background:linear-gradient(120deg,#50301c,#34283a);border-color:#bd7136}.risk-warning .risk-icon{color:#ffb36a}
+.risk-danger{background:linear-gradient(120deg,#4a202b,#30243a);border-color:#b84b5b}.risk-danger .risk-icon{color:#ff7480}
+.section-heading{margin:16px 1px 8px}
+.hourly-strip{gap:6px}
+.hour{padding:8px 3px;gap:4px}
+.hour span{font-size:20px}
+.hour b{font-size:12px}
+.tip-card{width:100%;text-align:left;color:var(--text);cursor:pointer;margin-top:12px;padding:14px;background:linear-gradient(135deg,#2a2442,#172c48);border-color:#66568f;display:grid;gap:10px}
+.tip-title{font-size:13px;font-weight:700;color:#e6d8ff}
+.tip-content{display:flex;align-items:center;gap:12px}
+.tip-illustration{width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:15px;background:#42375f;color:#f1d7ff;font-size:28px}
+.tip-copy{display:grid;gap:5px}
+.tip-copy b{font-size:13px;color:#fff}
+.tip-copy span{font-size:11px;line-height:1.45;color:#d7d2e7}
+.tip-action{display:flex;justify-content:flex-end;align-items:center;gap:8px;color:#e4c9ff;font-size:12px;font-weight:700;padding-top:7px;border-top:1px solid #66568f66}
+.tip-action span{font-size:19px}
+.map-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;font-weight:700}
+.map-gps{width:auto;margin:0;padding:9px 12px;font-size:11px}
+.weather-map{height:440px;overflow:hidden;border-radius:18px;z-index:1}
+.map-status{display:grid;gap:5px;padding:12px;margin-top:10px}
+.map-status b{font-size:12px}.map-status span{font-size:10px;line-height:1.45;color:var(--muted)}
+.map-attribution-note{font-size:9px;line-height:1.5;color:var(--muted)}
+.leaflet-container{background:#dce6e8;font:12px Inter,system-ui,sans-serif}
+.leaflet-control-attribution{font-size:9px!important}
+@media(max-width:380px){.weather-hero{grid-template-columns:70px 1fr;padding:12px}.weather-character{width:66px;height:66px;font-size:43px}.temperature{font-size:42px}.weather-meta>div{padding:7px 3px}.weather-meta b{font-size:10px}}
+
+.prevention-current{padding:14px;margin-bottom:12px;background:linear-gradient(135deg,#2a2442,#172c48);border:1px solid #66568f;border-radius:17px}.prevention-current>small{font-size:9px;letter-spacing:1px;color:#d9c7f4}.prevention-current>div{display:flex;align-items:center;gap:12px;margin-top:10px}.prevention-current>div>span{font-size:29px;width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:#42375f}.prevention-current section{display:grid;gap:5px}.prevention-current b{font-size:13px}.prevention-current p{font-size:11px;color:#d7d2e7;line-height:1.45;margin:0}
+
+.nav-item{color:#f3f8fc}.nav-item.active{color:#f04caf}.alerts-unavailable{display:flex;gap:12px;align-items:flex-start;padding:15px;margin-bottom:12px;background:linear-gradient(135deg,#182b3d,#102337);border:1px solid #38536a;border-radius:16px}.alerts-unavailable>span{font-size:25px;color:#9eb6c8}.alerts-unavailable b{font-size:13px}.alerts-unavailable p{font-size:11px;line-height:1.5;color:#c0cfda;margin:6px 0 0}
+
+/* Mascota oficial y escenario meteorológico dinámico de Inicio */
+.weather-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;background:linear-gradient(120deg,#123c61,#176b91 52%,#0d2c49);border-color:#28769b;transition:background .45s ease,border-color .45s ease}
+.weather-hero:before{content:"";position:absolute;z-index:-1;inset:0;opacity:.9;background:radial-gradient(ellipse at 18% 12%,#fff9 0 3%,transparent 22%),radial-gradient(ellipse at 85% 0%,#7bdcff66,transparent 40%),linear-gradient(180deg,#62b8df33,transparent 65%)}
+.weather-hero:after{content:"";position:absolute;z-index:-1;left:-8%;right:-8%;bottom:-48px;height:105px;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#54b5ce55,#0b2944 78%);filter:blur(2px)}
+.weather-hero[data-weather="cloud"]{background:linear-gradient(125deg,#405d75,#71899b 55%,#263f58);border-color:#718da4}
+.weather-hero[data-weather="cloud"]:before{background:radial-gradient(ellipse at 20% 10%,#fff8,transparent 32%),radial-gradient(ellipse at 80% 0%,#d9e5ed77,transparent 44%),linear-gradient(180deg,#b8cbd533,transparent)}
+.weather-hero[data-weather="rain"]{background:linear-gradient(125deg,#183d5d,#286080 52%,#102b49);border-color:#3989ad}
+.weather-hero[data-weather="rain"]:before{background:repeating-linear-gradient(108deg,transparent 0 24px,#b8eaff22 25px 27px),linear-gradient(180deg,#8fc5e044,transparent)}
+.weather-hero[data-weather="storm"]{background:linear-gradient(125deg,#171f39,#39415e 55%,#101b32);border-color:#66718e}
+.weather-hero[data-weather="storm"]:before{background:radial-gradient(ellipse at 75% 0%,#a7b9df55,transparent 45%),linear-gradient(180deg,#11172c77,transparent)}
+.weather-hero[data-weather="cold"]{background:linear-gradient(125deg,#285477,#75a9c6 55%,#183d61);border-color:#82c7e8}
+.weather-hero[data-weather="cold"]:before{background:radial-gradient(ellipse at 20% 0%,#fff9,transparent 35%),radial-gradient(ellipse at 85% 0%,#d8f6ff88,transparent 48%)}
+.weather-hero[data-weather="wind"]{background:linear-gradient(125deg,#1c536e,#4d9eb0 55%,#173b5a);border-color:#5ac4d2}
+.weather-hero[data-weather="wind"]:before{background:repeating-linear-gradient(165deg,transparent 0 28px,#d6ffff22 29px 31px),radial-gradient(ellipse at 75% 0%,#b9faff55,transparent 40%)}
+.weather-hero[data-weather="heat"]{background:linear-gradient(125deg,#6b3c36,#c77a45 54%,#4b3441);border-color:#e3a15f}
+.weather-hero[data-weather="heat"]:before{background:radial-gradient(ellipse at 18% 0%,#fff7b888,transparent 34%),radial-gradient(ellipse at 85% 5%,#ffbd6666,transparent 45%)}
+.weather-character{width:100px;height:100px;border:0;background:radial-gradient(circle,#ffffff30,transparent 70%);border-radius:0;position:relative;z-index:1}
+.weather-character img{display:block;width:112px;height:112px;object-fit:contain;filter:drop-shadow(0 8px 12px #001a2c66)}
+.weather-main,.weather-meta,.data-source{position:relative;z-index:1}
+.weather-main{ text-shadow:0 1px 8px #001b2b55}
+@media(max-width:380px){.weather-character{width:76px;height:82px}.weather-character img{width:90px;height:90px}}
