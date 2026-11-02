@@ -231,62 +231,69 @@ initializeWeatherLocation();
 startWeatherRefresh();
 
 
-// ClimaGo · Diagnóstico de conexión con alertas oficiales del SMN (CAP/RSS).
-const SMN_CAP_FEED = "https://ssl.smn.gob.ar/CAP/AR.php";
-function smnSetStatus(message, state="info") {
-  const el=document.getElementById("smn-connection-status");
-  if(el) el.textContent=message;
-  const title=document.getElementById("home-smn-title");
-  const detail=document.getElementById("home-smn-detail");
-  const dot=document.getElementById("home-smn-dot");
-  if(title) title.textContent=state==="ok"?"Canal oficial del SMN conectado":state==="error"?"No se pudo consultar al SMN":"Consultando alertas oficiales…";
-  if(detail) detail.textContent=message;
-  if(dot) dot.style.background=state==="ok"?"#39d6a0":state==="error"?"#ff6878":"#f5c451";
+// ClimaGo · Prueba de lectura del canal público CAP del SMN.
+// Esta etapa verifica acceso al feed; aún no determina polígonos/áreas CAP para Córdoba.
+const CLIMAGO_SMN_FEED = "https://ssl.smn.gob.ar/CAP/AR.php";
+function updateSMNConnection(title, message, state) {
+  const titleEl = document.getElementById("smn-connection-title");
+  const messageEl = document.getElementById("smn-connection-status");
+  if (titleEl) titleEl.textContent = title;
+  if (messageEl) messageEl.textContent = message;
+  const homeTitle = document.getElementById("home-alert-text");
+  const homeDetail = document.getElementById("home-alert-detail");
+  if (homeTitle) homeTitle.textContent = state === "ok" ? "Canal oficial del SMN accesible" : state === "error" ? "No se pudo consultar al SMN" : "Consultando canal oficial del SMN…";
+  if (homeDetail) homeDetail.textContent = state === "ok" ? "Feed recibido; falta validar áreas geográficas de cada alerta." : "Una consulta fallida no significa que no existan alertas.";
 }
-function smnLocalName(node,name){return Array.from(node?.children||[]).find(child=>child.localName===name)||null;}
-function smnText(node,name){const child=smnLocalName(node,name);return child?.textContent?.trim()||"";}
-function smnEscape(value){return escapeHtml(value);}
-async function checkSMNAlerts(){
-  const host=document.getElementById("smn-alerts-list");
-  smnSetStatus("Intentando leer el feed CAP público del SMN desde este navegador…","info");
-  try{
-    const response=await fetch(SMN_CAP_FEED,{method:"GET",cache:"no-store",mode:"cors",headers:{"Accept":"application/rss+xml, application/xml, text/xml, */*"}});
-    if(!response.ok) throw new Error(`El servidor respondió HTTP ${response.status}.`);
-    const xmlText=await response.text();
-    const xml=new DOMParser().parseFromString(xmlText,"application/xml");
-    if(xml.querySelector("parsererror")) throw new Error("El SMN respondió, pero el contenido no se pudo interpretar como RSS/XML.");
-    const items=Array.from(xml.getElementsByTagName("item"));
-    if(!items.length) throw new Error("El SMN respondió, pero el feed no contiene elementos RSS reconocibles.");
-    const alerts=items.map(item=>({
-      title:smnText(item,"title")||"Aviso meteorológico",
-      description:smnText(item,"description"),
-      link:smnText(item,"link"),
-      date:smnText(item,"pubDate")
-    }));
-    const cordoba=alerts.filter(a=>/cordoba|córdoba/i.test(`${a.title} ${a.description}`));
-    const unique=[];const seen=new Set();
-    for(const a of (cordoba.length?cordoba:alerts)){
-      const key=`${a.title}|${a.description}`;
-      if(!seen.has(key)){seen.add(key);unique.push(a);}
+function smnChildText(parent, name) {
+  const child = Array.from(parent.children || []).find(node => node.localName === name);
+  return child ? child.textContent.trim() : "";
+}
+async function checkSMNFeed() {
+  const list = document.getElementById("smn-alerts-list");
+  updateSMNConnection("Consultando el canal oficial del SMN…", "Intentando leer el feed CAP público desde este navegador.", "loading");
+  try {
+    const response = await fetch(CLIMAGO_SMN_FEED, { method: "GET", mode: "cors", cache: "no-store", headers: { Accept: "application/rss+xml, application/xml, text/xml, */*" } });
+    if (!response.ok) throw new Error("El servidor respondió HTTP " + response.status + ".");
+    const body = await response.text();
+    const xml = new DOMParser().parseFromString(body, "application/xml");
+    if (xml.querySelector("parsererror")) throw new Error("La respuesta llegó, pero no se pudo interpretar como XML/RSS.");
+    const items = Array.from(xml.getElementsByTagName("item"));
+    if (!items.length) throw new Error("La respuesta no contiene elementos RSS reconocibles.");
+    const stamp = new Date().toLocaleString("es-AR");
+    updateSMNConnection("Canal del SMN accesible", "Conexión correcta: se recibieron " + items.length + " entradas del feed. Esto todavía no confirma cuáles afectan a Córdoba; falta interpretar las áreas de los archivos CAP. Consulta: " + stamp + ".", "ok");
+    const source = document.getElementById("smn-connection-source");
+    if (source) source.textContent = "Fuente oficial: " + CLIMAGO_SMN_FEED;
+    if (list) {
+      list.replaceChildren();
+      const note = document.createElement("p");
+      note.className = "muted-note";
+      note.textContent = "El feed respondió. La siguiente etapa será leer cada documento CAP y verificar sus zonas de cobertura antes de mostrar alertas locales.";
+      list.appendChild(note);
+      items.slice(0, 5).forEach(item => {
+        const card = document.createElement("article");
+        card.className = "alert-card warning";
+        const content = document.createElement("div");
+        const heading = document.createElement("b");
+        heading.textContent = smnChildText(item, "title") || "Aviso meteorológico del SMN";
+        const description = document.createElement("p");
+        description.textContent = smnChildText(item, "description") || "El SMN publicó una entrada. El alcance geográfico se verificará en el documento CAP.";
+        content.append(heading, description);
+        card.appendChild(content);
+        list.appendChild(card);
+      });
     }
-    const stamp=new Date().toLocaleString("es-AR");
-    const scopeNote=cordoba.length?`Se encontraron ${cordoba.length} entradas que mencionan Córdoba (pueden ser duplicados por zona).`:`El feed respondió correctamente, pero sus resúmenes no mencionan Córdoba. No se puede concluir solo con este resumen que no haya alertas aplicables.`;
-    smnSetStatus(`Conexión correcta. ${items.length} entradas recibidas. ${scopeNote} Última consulta: ${stamp}.`,"ok");
-    const time=document.getElementById("smn-connection-time");if(time)time.textContent=`Fuente oficial: SMN · Consulta: ${stamp}`;
-    if(host){
-      host.innerHTML=unique.slice(0,12).map(a=>{
-        const relevant=/cordoba|córdoba/i.test(`${a.title} ${a.description}`);
-        const safeLink=/^https:\/\//i.test(a.link)?a.link:"https://www.smn.gob.ar/alertas";
-        return `<article class="alert-card ${relevant?"danger":"warning"}"><span>🌩️</span><div><b>${smnEscape(a.title)}</b><p>${smnEscape(a.description||"El SMN publicó un aviso. Consultá la fuente oficial para ver el detalle.")}</p><small>${relevant?"El resumen menciona Córdoba · ":"Alerta nacional/regional · "}${smnEscape(a.date||"Fecha no informada")} · <a href="${safeLink}" target="_blank" rel="noopener" style="color:#bdefff">Fuente</a></small></div></article>`;
-      }).join("");
+  } catch (error) {
+    const detail = error instanceof TypeError || /fetch|network|failed/i.test(String(error))
+      ? "El navegador no permitió leer directamente el feed (posible CORS o problema de red). El feed es público; esta falla no significa que sea pago ni que no haya alertas. Necesitamos un intermediario gratuito."
+      : "No se pudo validar la respuesta: " + error.message;
+    updateSMNConnection("No se pudo consultar directamente al SMN", detail, "error");
+    if (list) {
+      list.replaceChildren();
+      const note = document.createElement("p");
+      note.className = "muted-note";
+      note.textContent = "No se muestran alertas porque la consulta no pudo verificarse. Esto no significa que no haya alertas activas.";
+      list.appendChild(note);
     }
-  }catch(error){
-    const message=(error instanceof TypeError||/fetch|network|failed/i.test(String(error)))
-      ?"El navegador no permitió leer directamente el feed del SMN (posible restricción CORS o problema de red). Esto no significa que el feed sea pago ni que no existan alertas. El siguiente paso será usar un intermediario gratuito."
-      :`No se pudo validar el feed: ${error.message}`;
-    smnSetStatus(message,"error");
-    if(host)host.innerHTML='<div class="empty-state">No se muestran alertas porque la consulta no pudo verificarse. Esto no significa que no haya alertas activas. Consultá el <a href="https://www.smn.gob.ar/alertas" target="_blank" rel="noopener" style="color:#bdefff">sitio oficial del SMN</a>.</div>';
   }
 }
-checkSMNAlerts();
-setInterval(checkSMNAlerts,10*60*1000);
+checkSMNFeed();
