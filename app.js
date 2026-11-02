@@ -157,23 +157,19 @@ function setWeatherVisual(code,temperature,wind){
 let weatherRequestId=0;
 let weatherRefreshTimer=null;
 let lastWeatherRefresh=0;
-let weatherInitialized=false;
 async function loadWeather(lat,lon,name){
   const requestId=++weatherRequestId;
-  weatherInitialized=true;
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
-    const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code);
-    const uvHourIndex=h.time.reduce((best,t,i)=>Math.abs(new Date(t).getTime()-new Date(c.time).getTime())<Math.abs(new Date(h.time[best]).getTime()-new Date(c.time).getTime())?i:best,0);
-    const uvIndex=h.uv_index?.[uvHourIndex]??d.uv_index_max?.[0]??0;
+    const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code),uvIndex=h.uv_index?.[Math.max(0,h.time.findIndex(t=>t>=c.time))]??d.uv_index_max?.[0]??0;
     lastWeatherRefresh=Date.now();
     setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m));
-    if(source)source.textContent=`Open-Meteo · datos válidos ${new Date(c.time).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
+    if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
     const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
     renderHourly(h,c.time);renderDaily(d);
     setText("map-location-label",activeCoords.name);setText("map-weather-status",`${weatherText[code]||"Tiempo variable"} · ${Math.round(c.temperature_2m)}°`);setText("map-weather-detail",`Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${Math.round(c.relative_humidity_2m)}%. Datos de Open-Meteo.`);
@@ -196,11 +192,11 @@ function startWeatherRefresh(){
   },10*60*1000);
 }
 window.addEventListener("pageshow",()=>{
-  if(weatherInitialized&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
+  if(Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
   startWeatherRefresh();
 });
 document.addEventListener("visibilitychange",()=>{
-  if(weatherInitialized&&document.visibilityState==="visible"&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
+  if(document.visibilityState==="visible"&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
 });
 function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 function renderHourly(hourly,currentTime){const host=document.getElementById("home-hourly");if(!host||!hourly)return;let index=hourly.time.findIndex(t=>t>=currentTime);if(index<0)index=0;const items=[];for(let i=index;i<Math.min(index+4,hourly.time.length);i++){const date=new Date(hourly.time[i]);items.push(`<div class="hour"><small>${i===index?"Ahora":date.toLocaleTimeString("es-AR",{hour:"2-digit",hour12:false})+" h"}</small><span>${weatherEmoji(Number(hourly.weather_code[i]))}</span><b>${Math.round(hourly.temperature_2m[i])}°</b></div>`);}host.innerHTML=items.join("");}
@@ -226,10 +222,71 @@ async function initializeWeatherLocation(){
       loadWeather(latitude,longitude,"Mi ubicación actual");
     },()=>{
       const fallback=getSelectedCoordinates();loadWeather(fallback.lat,fallback.lon,fallback.name);
-    },{enableHighAccuracy:true,timeout:15000,maximumAge:60*1000});
+    },{enableHighAccuracy:false,timeout:10000,maximumAge:10*60*1000});
   }else{
     const fallback=getSelectedCoordinates();loadWeather(fallback.lat,fallback.lon,fallback.name);
   }
 }
 initializeWeatherLocation();
 startWeatherRefresh();
+
+
+// ClimaGo · Diagnóstico de conexión con alertas oficiales del SMN (CAP/RSS).
+const SMN_CAP_FEED = "https://ssl.smn.gob.ar/CAP/AR.php";
+function smnSetStatus(message, state="info") {
+  const el=document.getElementById("smn-connection-status");
+  if(el) el.textContent=message;
+  const title=document.getElementById("home-smn-title");
+  const detail=document.getElementById("home-smn-detail");
+  const dot=document.getElementById("home-smn-dot");
+  if(title) title.textContent=state==="ok"?"Canal oficial del SMN conectado":state==="error"?"No se pudo consultar al SMN":"Consultando alertas oficiales…";
+  if(detail) detail.textContent=message;
+  if(dot) dot.style.background=state==="ok"?"#39d6a0":state==="error"?"#ff6878":"#f5c451";
+}
+function smnLocalName(node,name){return Array.from(node?.children||[]).find(child=>child.localName===name)||null;}
+function smnText(node,name){const child=smnLocalName(node,name);return child?.textContent?.trim()||"";}
+function smnEscape(value){return escapeHtml(value);}
+async function checkSMNAlerts(){
+  const host=document.getElementById("smn-alerts-list");
+  smnSetStatus("Intentando leer el feed CAP público del SMN desde este navegador…","info");
+  try{
+    const response=await fetch(SMN_CAP_FEED,{method:"GET",cache:"no-store",mode:"cors",headers:{"Accept":"application/rss+xml, application/xml, text/xml, */*"}});
+    if(!response.ok) throw new Error(`El servidor respondió HTTP ${response.status}.`);
+    const xmlText=await response.text();
+    const xml=new DOMParser().parseFromString(xmlText,"application/xml");
+    if(xml.querySelector("parsererror")) throw new Error("El SMN respondió, pero el contenido no se pudo interpretar como RSS/XML.");
+    const items=Array.from(xml.getElementsByTagName("item"));
+    if(!items.length) throw new Error("El SMN respondió, pero el feed no contiene elementos RSS reconocibles.");
+    const alerts=items.map(item=>({
+      title:smnText(item,"title")||"Aviso meteorológico",
+      description:smnText(item,"description"),
+      link:smnText(item,"link"),
+      date:smnText(item,"pubDate")
+    }));
+    const cordoba=alerts.filter(a=>/cordoba|córdoba/i.test(`${a.title} ${a.description}`));
+    const unique=[];const seen=new Set();
+    for(const a of (cordoba.length?cordoba:alerts)){
+      const key=`${a.title}|${a.description}`;
+      if(!seen.has(key)){seen.add(key);unique.push(a);}
+    }
+    const stamp=new Date().toLocaleString("es-AR");
+    const scopeNote=cordoba.length?`Se encontraron ${cordoba.length} entradas que mencionan Córdoba (pueden ser duplicados por zona).`:`El feed respondió correctamente, pero sus resúmenes no mencionan Córdoba. No se puede concluir solo con este resumen que no haya alertas aplicables.`;
+    smnSetStatus(`Conexión correcta. ${items.length} entradas recibidas. ${scopeNote} Última consulta: ${stamp}.`,"ok");
+    const time=document.getElementById("smn-connection-time");if(time)time.textContent=`Fuente oficial: SMN · Consulta: ${stamp}`;
+    if(host){
+      host.innerHTML=unique.slice(0,12).map(a=>{
+        const relevant=/cordoba|córdoba/i.test(`${a.title} ${a.description}`);
+        const safeLink=/^https:\/\//i.test(a.link)?a.link:"https://www.smn.gob.ar/alertas";
+        return `<article class="alert-card ${relevant?"danger":"warning"}"><span>🌩️</span><div><b>${smnEscape(a.title)}</b><p>${smnEscape(a.description||"El SMN publicó un aviso. Consultá la fuente oficial para ver el detalle.")}</p><small>${relevant?"El resumen menciona Córdoba · ":"Alerta nacional/regional · "}${smnEscape(a.date||"Fecha no informada")} · <a href="${safeLink}" target="_blank" rel="noopener" style="color:#bdefff">Fuente</a></small></div></article>`;
+      }).join("");
+    }
+  }catch(error){
+    const message=(error instanceof TypeError||/fetch|network|failed/i.test(String(error)))
+      ?"El navegador no permitió leer directamente el feed del SMN (posible restricción CORS o problema de red). Esto no significa que el feed sea pago ni que no existan alertas. El siguiente paso será usar un intermediario gratuito."
+      :`No se pudo validar el feed: ${error.message}`;
+    smnSetStatus(message,"error");
+    if(host)host.innerHTML='<div class="empty-state">No se muestran alertas porque la consulta no pudo verificarse. Esto no significa que no haya alertas activas. Consultá el <a href="https://www.smn.gob.ar/alertas" target="_blank" rel="noopener" style="color:#bdefff">sitio oficial del SMN</a>.</div>';
+  }
+}
+checkSMNAlerts();
+setInterval(checkSMNAlerts,10*60*1000);
