@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071a2b">
+  <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>ClimaGo</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" data-page="home" aria-label="ClimaGo inicio">
+        <span class="brand-mark">☀</span><span>Clima<span class="cyan">Go</span></span>
+      </a>
+      <button class="icon-button" id="location-shortcut" aria-label="Mis lugares">⌖</button>
+    </header>
+
+    <main id="app-main">
+      <section class="page active" id="page-home">
+        <div class="location-line"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div>
+        <article class="weather-hero panel">
+          <div class="weather-character" id="weather-character" aria-label="Personaje del clima">☀️</div>
+          <div class="weather-main"><div class="temperature">28°</div><div class="condition">Mayormente despejado</div><div class="feels">Sensación térmica: 30°</div></div>
+          <div class="weather-meta">
+            <div><span>☀</span><b>UV alto</b><small>Radiación</small></div>
+            <div><span>〰</span><b>32 km/h</b><small>Viento</small></div>
+            <div><span>💧</span><b>58%</b><small>Humedad</small></div>
+          </div>
+        </article>
+        <article class="risk-card panel">
+          <div class="risk-icon">🛡️</div><div><small>RIESGO METEOROLÓGICO</small><b>Sin alertas activas</b><p>Datos de demostración · No es un aviso oficial</p></div><span class="status-dot"></span>
+        </article>
+        <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico</button></div>
+        <div class="hourly-strip">
+          <div class="hour"><small>Ahora</small><span>☀️</span><b>28°</b></div><div class="hour"><small>15 h</small><span>🌤️</span><b>29°</b></div><div class="hour"><small>16 h</small><span>🌤️</span><b>28°</b></div><div class="hour"><small>17 h</small><span>☁️</span><b>26°</b></div>
+        </div>
+        <article class="tip-card panel"><div class="tip-title">☀️ Una recomendación para hoy</div><p>Índice UV elevado: considerá protección solar y buena hidratación.</p></article>
+        <div class="section-heading"><h2>Accesos rápidos</h2></div>
+        <div class="quick-grid">
+          <button class="quick-tile" data-page="vehicle"><span>🚗</span>Mi vehículo</button>
+          <button class="quick-tile" data-page="myday"><span>📅</span>Mi día</button>
+          <button class="quick-tile" data-page="prevention"><span>🛡️</span>Prevención</button>
+          <button class="quick-tile" data-page="locations"><span>📍</span>Mis lugares</button>
+        </div>
+      </section>
+
+      <section class="page" id="page-radar">
+        <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Vista de prueba</span></div>
+        <div class="radar-placeholder panel"><div class="radar-rings"></div><div class="radar-pin">📍</div><div class="radar-label">Córdoba</div><p>El radar real se integrará con un proveedor meteorológico verificado.</p></div>
+        <div class="legend panel"><b>Capas previstas</b><div><span class="legend-dot rain"></span>Lluvia <span class="legend-dot storm"></span>Tormenta <span class="legend-dot hail"></span>Riesgo de granizo</div></div>
+        <p class="muted-note">Esta pantalla es una maqueta funcional de navegación; no muestra imágenes de radar reales.</p>
+      </section>
+
+      <section class="page" id="page-forecast">
+        <div class="page-heading"><div><small>EL TIEMPO EN TU ZONA</small><h1>Pronóstico</h1></div></div>
+        <div class="segmented"><button class="selected">Hoy</button><button>7 días</button><button>15 días</button></div>
+        <article class="forecast-today panel"><span>Hoy · Córdoba</span><div><span class="big-weather">🌤️</span><strong>28°</strong><span>18° mínima</span></div><p>Mayormente despejado · Datos de demostración</p></article>
+        <div class="forecast-list panel">
+          <div><b>Mañana</b><span>☀️</span><span>30° / 19°</span></div><div><b>Miércoles</b><span>🌧️</span><span>26° / 18°</span></div><div><b>Jueves</b><span>🌤️</span><span>29° / 18°</span></div><div><b>Viernes</b><span>☀️</span><span>31° / 20°</span></div><div><b>Sábado</b><span>⛈️</span><span>27° / 17°</span></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-alerts">
+        <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas</h1></div></div>
+        <article class="alert-card danger"><span>⚡</span><div><b>Tormentas fuertes</b><p>Cuando exista un aviso verificado, aparecerá aquí con su fuente y vigencia.</p><small>Ejemplo de diseño · Sin alerta activa</small></div></article>
+        <article class="alert-card warning"><span>🛡️</span><div><b>Recomendaciones preventivas</b><p>Prepará tus espacios exteriores y protegé los objetos expuestos si se aproxima una tormenta.</p></div></article>
+        <div class="section-heading"><h2>Configurar avisos</h2><button class="text-button" data-page="settings">Ajustes</button></div>
+        <div class="panel setting-row"><span>🌩️ Tormentas y granizo</span><span class="muted-note">Configurable próximamente</span></div>
+        <div class="panel setting-row"><span>🌡️ Calor y frío</span><span class="muted-note">Configurable próximamente</span></div>
+      </section>
+
+      <section class="page" id="page-myday">
+        <div class="page-heading"><div><small>ORGANIZÁ TU JORNADA</small><h1>Mi día</h1></div><span class="pill">Agenda</span></div>
+        <div class="date-card panel"><span>HOY</span><b>Tu día, organizado</b><p>El clima podrá ayudarte a elegir el mejor momento para tus actividades.</p></div>
+        <div id="task-list" class="task-list panel"><div class="task"><span class="check">✓</span><div><b>Ejemplo: actividad al aire libre</b><small>Revisar el pronóstico antes de salir</small></div></div></div>
+        <button class="primary-button" id="add-task">＋ Agregar actividad</button>
+      </section>
+
+      <section class="page" id="page-vehicle">
+        <div class="page-heading"><div><small>REGISTROS Y MANTENIMIENTO</small><h1>Mi vehículo</h1></div><span class="pill">Personal</span></div>
+        <article class="vehicle-summary panel"><div class="vehicle-emoji">🚗</div><div><b>Tu vehículo</b><p>Registrá sus datos para llevar el historial de mantenimiento.</p></div></article>
+        <div class="vehicle-actions"><button class="primary-button" id="add-vehicle-record">＋ Nuevo registro</button></div>
+        <div class="section-heading"><h2>Historial</h2></div>
+        <div id="vehicle-records" class="record-list panel"><div class="empty-state">Todavía no hay registros. Podés guardar cambios de aceite, filtros, correa, batería, reparaciones, lavados y sus costos.</div></div>
+        <p class="muted-note">ClimaGo registra tus propios trabajos y gastos. No conecta clientes con mecánicos ni lavaderos.</p>
+      </section>
+
+      <section class="page" id="page-locations">
+        <div class="page-heading"><div><small>PERSONALIZÁ TUS ZONAS</small><h1>Mis lugares</h1></div></div>
+        <label class="search-label">Buscar localidad o dirección<input id="location-search" placeholder="Ej.: Córdoba, Villa Allende..." autocomplete="off"></label>
+        <button class="secondary-button" id="use-location">⌖ Usar mi ubicación actual</button>
+        <div class="location-tags"><button data-tag="Casa">Casa</button><button data-tag="Trabajo">Trabajo</button><button data-tag="Campo">Campo</button><button data-tag="Familia">Familia</button><button data-tag="Auto">Auto</button></div>
+        <div class="section-heading"><h2>Lugares guardados</h2><button class="text-button" id="save-location">＋ Agregar</button></div>
+        <div id="saved-locations" class="saved-locations panel"><div class="saved-location"><span>🏠</span><div><b>Córdoba, Argentina</b><small>Principal · Datos de demostración</small></div><span class="check">✓</span></div></div>
+        <p class="muted-note">La ubicación precisa requiere tu permiso. Podés elegir una localidad manualmente sin compartir tu ubicación GPS.</p>
+      </section>
+
+      <section class="page" id="page-prevention">
+        <div class="page-heading"><div><small>CUIDÁ LO QUE TE IMPORTA</small><h1>Prevención</h1></div></div>
+        <div class="prevention-grid">
+          <article class="panel prevention-item"><span>🚗</span><b>Vehículo</b><p>Granizo, calor, frío y mantenimiento.</p></article>
+          <article class="panel prevention-item"><span>🏠</span><b>Hogar</b><p>Techos, ventanas y objetos exteriores.</p></article>
+          <article class="panel prevention-item"><span>🌱</span><b>Jardín</b><p>Plantas, riego, heladas y viento.</p></article>
+          <article class="panel prevention-item"><span>👟</span><b>Actividades</b><p>Elegí horarios según las condiciones.</p></article>
+        </div>
+      </section>
+
+      <section class="page" id="page-more">
+        <div class="page-heading"><div><small>TUS HERRAMIENTAS</small><h1>Más</h1></div></div>
+        <button class="menu-row" data-page="locations">📍 <span>Mis lugares<small>Casa, trabajo y otras zonas</small></span>›</button>
+        <button class="menu-row" data-page="vehicle">🚗 <span>Mi vehículo<small>Servicios, reparaciones, lavados y gastos</small></span>›</button>
+        <button class="menu-row" data-page="prevention">🛡️ <span>Prevención y consejos<small>Recomendaciones por clima</small></span>›</button>
+        <button class="menu-row" data-page="myday">📅 <span>Agenda y actividades<small>Organizá tu día y tu semana</small></span>›</button>
+        <button class="menu-row" data-page="settings">⚙️ <span>Configuración<small>Voz, sonidos, apariencia y privacidad</small></span>›</button>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="page-heading"><div><small>PERSONALIZÁ CLIMAGO</small><h1>Configuración</h1></div></div>
+        <div class="panel settings-panel">
+          <div class="setting-row"><b>Apariencia</b><span>Oscura (inicial)</span></div>
+          <div class="setting-row"><b>Asistente por voz</b><span>Opcional · Se configurará más adelante</span></div>
+          <div class="setting-row"><b>Sonidos y notificaciones</b><span>Preferencias configurables</span></div>
+          <div class="setting-row"><b>Privacidad y ubicación</b><span>Permisos bajo tu control</span></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <button class="nav-item active" data-page="home"><span>⌂</span><small>Inicio</small></button>
+      <button class="nav-item" data-page="radar"><span>◎</span><small>Radar</small></button>
+      <button class="nav-item" data-page="myday"><span>▦</span><small>Mi día</small></button>
+      <button class="nav-item" data-page="alerts"><span>♧</span><small>Alertas</small></button>
+      <button class="nav-item" data-page="more"><span>☰</span><small>Más</small></button>
+    </nav>
+  </div>
+  <dialog id="simple-dialog">
+    <form method="dialog" class="dialog-card">
+      <button class="dialog-close" aria-label="Cerrar">×</button>
+      <h2 id="dialog-title">Nuevo registro</h2>
+      <div id="dialog-content"></div>
+      <button class="primary-button" id="dialog-save" value="save">Guardar</button>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
