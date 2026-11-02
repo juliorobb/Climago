@@ -34,7 +34,7 @@
           <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
         </article>
         <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
-          <span class="risk-icon">⚠</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
+          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
         </button>
         <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
         <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
@@ -65,8 +65,7 @@
 
       <section class="page" id="page-alerts">
         <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas</h1></div></div>
-        <article class="panel alerts-unavailable" id="smn-connection-card"><span>⚠</span><div><b id="smn-connection-title">Comprobando conexión con el SMN…</b><p id="smn-connection-status">Consultando el canal oficial de alertas. Si la consulta falla, no se interpretará como ausencia de alertas.</p><small id="smn-connection-source">Fuente: SMN · Canal CAP oficial</small></div></article>
-        <div id="smn-alerts-list" aria-live="polite"><p class="muted-note">Esperando respuesta del canal oficial.</p></div>
+        <article class="panel alerts-unavailable"><span>△</span><div><b>Avisos oficiales todavía no conectados</b><p>Cuando integremos una fuente oficial, mostraremos aquí el nivel de riesgo, la zona afectada, el horario de vigencia y el organismo emisor.</p></div></article>
         <article class="alert-card warning"><span>🛡️</span><div><b>Prevención</b><p>Consultá las recomendaciones según el pronóstico y las condiciones de tu zona.</p></div></article>
         <div class="section-heading"><h2>Configurar avisos</h2><button class="text-button" data-page="settings">Ajustes</button></div>
         <div class="panel setting-row"><span>🌩️ Tormentas y granizo</span><span class="muted-note">Configurable próximamente</span></div>
@@ -134,8 +133,8 @@
       <button class="nav-item active" data-page="home"><span>⌂</span><small>Inicio</small></button>
       <button class="nav-item" data-page="radar"><span>◎</span><small>Radar</small></button>
       <button class="nav-item" data-page="myday"><span>▦</span><small>Mi día</small></button>
-      <button class="nav-item" data-page="alerts"><span>♧</span><small>Alertas</small></button>
-      <button class="nav-item" data-page="more"><span>≡</span><small>Más</small></button>
+      <button class="nav-item" data-page="alerts"><span>△</span><small>Alertas</small></button>
+      <button class="nav-item" data-page="more"><span>☰</span><small>Más</small></button>
     </nav>
   </div>
   <dialog id="simple-dialog">
@@ -147,6 +146,6 @@
     </form>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=smn-base-1"></script>
+  <script src="app.js"></script>
 </body>
 </html>
