@@ -1,0 +1,24 @@
+CLIMAGO — CORRECCIÓN PARA VALIDAR DATOS METEOROLÓGICOS
+
+Archivos incluidos:
+- app.js
+- service-worker.js
+
+Preparado sobre los dos archivos que Julio subió desde la rama prueba-mascota-escenarios.
+Se conservaron las funciones y referencias existentes de la aplicación, incluidas las mascotas.
+
+Cambios:
+1. El service worker deja de interceptar y almacenar respuestas de servicios externos.
+   Open-Meteo, geocodificación y teselas del mapa pasan directamente por la red.
+2. La app shell conserva una estrategia de red primero con respaldo offline y cambia a caché v6.
+3. La ubicación inicial solicita GPS de mayor precisión (hasta 15 segundos; datos de ubicación de hasta 1 minuto).
+4. Se evita que los refrescos automáticos se adelanten a la resolución inicial del GPS.
+5. El índice UV horario se toma del registro temporal más cercano a la hora actual devuelta por Open-Meteo.
+6. La etiqueta de actualización muestra la hora de los datos devuelta por el servicio, no la hora del reloj del teléfono.
+7. Se solicitan también dirección del viento, ráfagas y nubosidad para habilitar ampliaciones posteriores, sin alterar la interfaz actual.
+
+IMPORTANTE:
+- No se modificaron index.html, styles.css, manifest.json ni imágenes.
+- No subir estos archivos a main sin antes probarlos en la rama de prueba.
+- Estos cambios no agregan radar meteorológico real ni alertas oficiales.
+- Open-Meteo entrega información basada en modelos meteorológicos; una consulta cada 10 minutos no significa que el modelo se actualice cada 10 minutos.
