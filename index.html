@@ -8,45 +8,50 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ClimaGo</title>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="#" data-page="home" aria-label="ClimaGo inicio">
-        <span class="brand-mark">☀</span><span>Clima<span class="cyan">Go</span></span>
+        <span>Clima<span class="cyan">Go</span></span>
       </a>
-      <button class="icon-button" id="location-shortcut" aria-label="Mis lugares">⌖</button>
+      <button class="icon-button" id="location-shortcut" aria-label="Abrir radar">◎</button>
     </header>
 
     <main id="app-main">
       <section class="page active" id="page-home">
         <div class="location-line"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div>
         <article class="weather-hero panel">
-          <div class="weather-character" id="weather-character" aria-label="Personaje del clima">☀️</div>
-          <div class="weather-main"><div class="temperature">28°</div><div class="condition">Mayormente despejado</div><div class="feels">Sensación térmica: 30°</div></div>
+          <div class="weather-character" id="weather-character" aria-label="Personaje oficial del clima"><img id="weather-mascot" src="assets/mascot-sun.png" alt="Mascota ClimaGo: sol" /></div>
+          <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
-            <div><span>☀</span><b>UV alto</b><small>Radiación</small></div>
-            <div><span>〰</span><b>32 km/h</b><small>Viento</small></div>
-            <div><span>💧</span><b>58%</b><small>Humedad</small></div>
+            <div><span>☀</span><b id="home-uv">UV —</b><small>Índice UV</small></div>
+            <div><span>〰</span><b id="home-wind">— km/h</b><small>Viento</small></div>
+            <div><span>💧</span><b id="home-humidity">—%</b><small>Humedad</small></div>
           </div>
+          <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
         </article>
-        <article class="risk-card panel">
-          <div class="risk-icon">🛡️</div><div><small>RIESGO METEOROLÓGICO</small><b>Sin alertas activas</b><p>Datos de demostración · No es un aviso oficial</p></div><span class="status-dot"></span>
-        </article>
-        <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico</button></div>
-        <div class="hourly-strip">
-          <div class="hour"><small>Ahora</small><span>☀️</span><b>28°</b></div><div class="hour"><small>15 h</small><span>🌤️</span><b>29°</b></div><div class="hour"><small>16 h</small><span>🌤️</span><b>28°</b></div><div class="hour"><small>17 h</small><span>☁️</span><b>26°</b></div>
-        </div>
-        <article class="tip-card panel"><div class="tip-title">☀️ Una recomendación para hoy</div><p>Índice UV elevado: considerá protección solar y buena hidratación.</p></article>
+        <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
+          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
+        </button>
+        <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
+        <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
+        <button class="tip-card panel" id="home-recommendation" data-page="prevention">
+          <span class="tip-title">Una recomendación para hoy</span>
+          <span class="tip-content"><span class="tip-illustration" id="tip-illustration">☂</span><span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span></span>
+          <span class="tip-action">Ver recomendaciones <span>›</span></span>
+        </button>
 
       </section>
 
       <section class="page" id="page-radar">
-        <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Vista de prueba</span></div>
-        <div class="radar-placeholder panel"><div class="radar-rings"></div><div class="radar-pin">📍</div><div class="radar-label">Córdoba</div><p>El radar real se integrará con un proveedor meteorológico verificado.</p></div>
-        <div class="legend panel"><b>Capas previstas</b><div><span class="legend-dot rain"></span>Lluvia <span class="legend-dot storm"></span>Tormenta <span class="legend-dot hail"></span>Riesgo de granizo</div></div>
-        <p class="muted-note">Esta pantalla es una maqueta funcional de navegación; no muestra imágenes de radar reales.</p>
+        <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Mapa interactivo</span></div>
+        <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
+        <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
+        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">La capa de radar meteorológico se incorporará con una fuente adecuada.</span></div>
+        <p class="map-attribution-note">Mapa © OpenStreetMap · El mapa y la ubicación funcionan; todavía no se muestran ecos de radar ni trayectoria de tormentas.</p>
       </section>
 
       <section class="page" id="page-forecast">
@@ -60,8 +65,8 @@
 
       <section class="page" id="page-alerts">
         <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas</h1></div></div>
-        <article class="alert-card danger"><span>⚡</span><div><b>Tormentas fuertes</b><p>Cuando exista un aviso verificado, aparecerá aquí con su fuente y vigencia.</p><small>Ejemplo de diseño · Sin alerta activa</small></div></article>
-        <article class="alert-card warning"><span>🛡️</span><div><b>Recomendaciones preventivas</b><p>Prepará tus espacios exteriores y protegé los objetos expuestos si se aproxima una tormenta.</p></div></article>
+        <article class="panel alerts-unavailable"><span>△</span><div><b>Avisos oficiales todavía no conectados</b><p>Cuando integremos una fuente oficial, mostraremos aquí el nivel de riesgo, la zona afectada, el horario de vigencia y el organismo emisor.</p></div></article>
+        <article class="alert-card warning"><span>🛡️</span><div><b>Prevención</b><p>Consultá las recomendaciones según el pronóstico y las condiciones de tu zona.</p></div></article>
         <div class="section-heading"><h2>Configurar avisos</h2><button class="text-button" data-page="settings">Ajustes</button></div>
         <div class="panel setting-row"><span>🌩️ Tormentas y granizo</span><span class="muted-note">Configurable próximamente</span></div>
         <div class="panel setting-row"><span>🌡️ Calor y frío</span><span class="muted-note">Configurable próximamente</span></div>
@@ -90,11 +95,12 @@
         <div class="location-tags"><button data-tag="Casa">Casa</button><button data-tag="Trabajo">Trabajo</button><button data-tag="Campo">Campo</button><button data-tag="Familia">Familia</button><button data-tag="Auto">Auto</button></div>
         <div class="section-heading"><h2>Lugares guardados</h2><button class="text-button" id="save-location">＋ Agregar</button></div>
         <div id="saved-locations" class="saved-locations panel"><div class="empty-state">Todavía no guardaste lugares. Agregá uno por nombre o guardá tu ubicación actual.</div></div>
-        <p class="muted-note">Podés guardar lugares por nombre o registrar las coordenadas de tu ubicación actual con permiso del teléfono. La búsqueda de direcciones y el mapa interactivo se incorporarán en una etapa posterior.</p>
+        <p class="muted-note">Podés guardar lugares por nombre; ClimaGo intentará encontrar sus coordenadas. También podés guardar tu ubicación actual con permiso del teléfono.</p>
       </section>
 
       <section class="page" id="page-prevention">
         <div class="page-heading"><div><small>CUIDÁ LO QUE TE IMPORTA</small><h1>Prevención</h1></div></div>
+        <article class="panel prevention-current"><small>RECOMENDACIÓN ACTUAL</small><div><span id="prevention-tip-icon">🧴</span><section><b id="prevention-tip-title">Preparando recomendación…</b><p id="prevention-tip-text">Consejos según las condiciones meteorológicas de tu ubicación.</p></section></div></article>
         <div class="prevention-grid">
           <article class="panel prevention-item"><span>🚗</span><b>Vehículo</b><p>Granizo, calor, frío y mantenimiento.</p></article>
           <article class="panel prevention-item"><span>🏠</span><b>Hogar</b><p>Techos, ventanas y objetos exteriores.</p></article>
@@ -127,7 +133,7 @@
       <button class="nav-item active" data-page="home"><span>⌂</span><small>Inicio</small></button>
       <button class="nav-item" data-page="radar"><span>◎</span><small>Radar</small></button>
       <button class="nav-item" data-page="myday"><span>▦</span><small>Mi día</small></button>
-      <button class="nav-item" data-page="alerts"><span>♧</span><small>Alertas</small></button>
+      <button class="nav-item" data-page="alerts"><span>△</span><small>Alertas</small></button>
       <button class="nav-item" data-page="more"><span>☰</span><small>Más</small></button>
     </nav>
   </div>
@@ -139,6 +145,7 @@
       <button class="primary-button" id="dialog-save" value="save">Guardar</button>
     </form>
   </dialog>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="app.js"></script>
 </body>
 </html>

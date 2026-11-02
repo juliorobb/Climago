@@ -30,3 +30,13 @@ Abrir `index.html` mediante un servidor web local o un alojamiento HTTPS. Las fu
 - Todavía no hay geocodificación, mapa interactivo ni búsqueda de direcciones.
 - Los datos meteorológicos continúan siendo ilustrativos; esta etapa no incorpora un proveedor meteorológico.
 - Los lugares y registros se guardan en el almacenamiento local del navegador/dispositivo.
+
+
+## Etapa 2 — Inicio con datos reales y mapa base
+- Inicio consulta condiciones actuales, UV, viento, humedad y pronóstico horario/diario mediante Open-Meteo.
+- La recomendación prioritaria cambia según las condiciones consultadas y usa un símbolo relacionado con la acción sugerida.
+- Se ajustó la jerarquía visual: indicadores compactos, alertas intermedias, próximas horas resumidas y recomendación destacada en lila.
+- Se incorporó un mapa interactivo Leaflet con cartografía OpenStreetMap y botón GPS en Radar.
+- El radar de precipitación superpuesto todavía no está conectado: falta seleccionar un proveedor apto para el uso previsto y comprobar cobertura/condiciones.
+- Las alertas oficiales todavía no están conectadas; la pantalla no debe interpretarse como un sistema de avisos activo.
+- Los datos meteorológicos dependen de conexión a internet. Open-Meteo requiere atribución y sus condiciones deben revisarse antes de un uso comercial.
