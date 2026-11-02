@@ -157,19 +157,23 @@ function setWeatherVisual(code,temperature,wind){
 let weatherRequestId=0;
 let weatherRefreshTimer=null;
 let lastWeatherRefresh=0;
+let weatherInitialized=false;
 async function loadWeather(lat,lon,name){
   const requestId=++weatherRequestId;
+  weatherInitialized=true;
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
-    const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code),uvIndex=h.uv_index?.[Math.max(0,h.time.findIndex(t=>t>=c.time))]??d.uv_index_max?.[0]??0;
+    const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code);
+    const uvHourIndex=h.time.reduce((best,t,i)=>Math.abs(new Date(t).getTime()-new Date(c.time).getTime())<Math.abs(new Date(h.time[best]).getTime()-new Date(c.time).getTime())?i:best,0);
+    const uvIndex=h.uv_index?.[uvHourIndex]??d.uv_index_max?.[0]??0;
     lastWeatherRefresh=Date.now();
     setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m));
-    if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
+    if(source)source.textContent=`Open-Meteo · datos válidos ${new Date(c.time).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
     const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
     renderHourly(h,c.time);renderDaily(d);
     setText("map-location-label",activeCoords.name);setText("map-weather-status",`${weatherText[code]||"Tiempo variable"} · ${Math.round(c.temperature_2m)}°`);setText("map-weather-detail",`Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${Math.round(c.relative_humidity_2m)}%. Datos de Open-Meteo.`);
@@ -192,11 +196,11 @@ function startWeatherRefresh(){
   },10*60*1000);
 }
 window.addEventListener("pageshow",()=>{
-  if(Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
+  if(weatherInitialized&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
   startWeatherRefresh();
 });
 document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible"&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
+  if(weatherInitialized&&document.visibilityState==="visible"&&Date.now()-lastWeatherRefresh>60*1000)refreshWeatherForActiveLocation();
 });
 function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 function renderHourly(hourly,currentTime){const host=document.getElementById("home-hourly");if(!host||!hourly)return;let index=hourly.time.findIndex(t=>t>=currentTime);if(index<0)index=0;const items=[];for(let i=index;i<Math.min(index+4,hourly.time.length);i++){const date=new Date(hourly.time[i]);items.push(`<div class="hour"><small>${i===index?"Ahora":date.toLocaleTimeString("es-AR",{hour:"2-digit",hour12:false})+" h"}</small><span>${weatherEmoji(Number(hourly.weather_code[i]))}</span><b>${Math.round(hourly.temperature_2m[i])}°</b></div>`);}host.innerHTML=items.join("");}
@@ -222,7 +226,7 @@ async function initializeWeatherLocation(){
       loadWeather(latitude,longitude,"Mi ubicación actual");
     },()=>{
       const fallback=getSelectedCoordinates();loadWeather(fallback.lat,fallback.lon,fallback.name);
-    },{enableHighAccuracy:false,timeout:10000,maximumAge:10*60*1000});
+    },{enableHighAccuracy:true,timeout:15000,maximumAge:60*1000});
   }else{
     const fallback=getSelectedCoordinates();loadWeather(fallback.lat,fallback.lon,fallback.name);
   }
