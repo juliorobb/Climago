@@ -39,13 +39,7 @@
           <div class="hour"><small>Ahora</small><span>☀️</span><b>28°</b></div><div class="hour"><small>15 h</small><span>🌤️</span><b>29°</b></div><div class="hour"><small>16 h</small><span>🌤️</span><b>28°</b></div><div class="hour"><small>17 h</small><span>☁️</span><b>26°</b></div>
         </div>
         <article class="tip-card panel"><div class="tip-title">☀️ Una recomendación para hoy</div><p>Índice UV elevado: considerá protección solar y buena hidratación.</p></article>
-        <div class="section-heading"><h2>Accesos rápidos</h2></div>
-        <div class="quick-grid">
-          <button class="quick-tile" data-page="vehicle"><span>🚗</span>Mi vehículo</button>
-          <button class="quick-tile" data-page="myday"><span>📅</span>Mi día</button>
-          <button class="quick-tile" data-page="prevention"><span>🛡️</span>Prevención</button>
-          <button class="quick-tile" data-page="locations"><span>📍</span>Mis lugares</button>
-        </div>
+
       </section>
 
       <section class="page" id="page-radar">
@@ -91,12 +85,12 @@
 
       <section class="page" id="page-locations">
         <div class="page-heading"><div><small>PERSONALIZÁ TUS ZONAS</small><h1>Mis lugares</h1></div></div>
-        <label class="search-label">Buscar localidad o dirección<input id="location-search" placeholder="Ej.: Córdoba, Villa Allende..." autocomplete="off"></label>
-        <button class="secondary-button" id="use-location">⌖ Usar mi ubicación actual</button>
+        <label class="search-label">Agregar un lugar manualmente<input id="location-search" placeholder="Ej.: Casa en Córdoba, Villa Allende..." autocomplete="off"></label>
+        <button class="secondary-button" id="use-location">⌖ Guardar mi ubicación actual</button>
         <div class="location-tags"><button data-tag="Casa">Casa</button><button data-tag="Trabajo">Trabajo</button><button data-tag="Campo">Campo</button><button data-tag="Familia">Familia</button><button data-tag="Auto">Auto</button></div>
         <div class="section-heading"><h2>Lugares guardados</h2><button class="text-button" id="save-location">＋ Agregar</button></div>
-        <div id="saved-locations" class="saved-locations panel"><div class="saved-location"><span>🏠</span><div><b>Córdoba, Argentina</b><small>Principal · Datos de demostración</small></div><span class="check">✓</span></div></div>
-        <p class="muted-note">La ubicación precisa requiere tu permiso. Podés elegir una localidad manualmente sin compartir tu ubicación GPS.</p>
+        <div id="saved-locations" class="saved-locations panel"><div class="empty-state">Todavía no guardaste lugares. Agregá uno por nombre o guardá tu ubicación actual.</div></div>
+        <p class="muted-note">Podés guardar lugares por nombre o registrar las coordenadas de tu ubicación actual con permiso del teléfono. La búsqueda de direcciones y el mapa interactivo se incorporarán en una etapa posterior.</p>
       </section>
 
       <section class="page" id="page-prevention">
