@@ -281,7 +281,10 @@ function smnRender(payload) {
     risk.classList.toggle("risk-danger", relevant.length > 0);
   }
   if (!allRows.length) {
-    const message = capComplete ? "El feed CAP del SMN se consultó completo y no informa alertas vigentes para este punto." : "No hay avisos disponibles para mostrar. La consulta del feed CAP no fue completa; esto no significa que no exista riesgo meteorológico.";
+    const diag = cap.diagnostics || {};
+    const message = capComplete ? "El feed CAP del SMN se consultó completo y no informa alertas vigentes para este punto." :
+      cap.dataStatus === "rate_limited" ? "El SMN está limitando temporalmente las descargas (HTTP 429). Se intentaron " + (diag.documentsAttempted || 0) + " documentos y se descargaron " + (diag.documentsDownloaded || 0) + ". No se puede confirmar si hay avisos para esta ubicación." :
+      "No hay avisos disponibles para mostrar. La consulta del feed CAP no fue completa; esto no significa que no exista riesgo meteorológico.";
     host.innerHTML = '<div class="panel empty-state">'+escapeHtml(message)+'</div>';
   } else {
     host.innerHTML = allRows.slice().sort((a,b) => Number(b.affectsLocation)-Number(a.affectsLocation)).map(a => {
@@ -348,14 +351,15 @@ async function initRainViewerRadar(){
     slider.max=String(frames.length-1);slider.value=String(frames.length-1);slider.disabled=false;
     rainRadarIndex=frames.length-1;
     showRainViewerFrame(rainRadarIndex,rainRadarHost);
-    if(status)status.textContent="Radar de precipitación · RainViewer (prototipo)";
+    if(status)status.textContent="Radar de precipitación disponible · RainViewer";
     const play=document.getElementById("radar-play");if(play)play.disabled=false;
-    setText("map-weather-detail","Imágenes de radar de los últimos 120 minutos. Actualización aproximada cada 10 minutos. Fuente: RainViewer.");
+    setText("map-weather-detail","Imágenes de radar de las últimas 2 horas, en intervalos de 10 minutos. Fuente: RainViewer. Zoom máximo de datos: 7.");
     setText("radar-frame-label","Imágenes recientes · "+frames.length+" pasos");
   }catch(error){
     const play=document.getElementById("radar-play");if(play)play.disabled=true;
     if(status)status.textContent="Radar no disponible en este momento";
-    setText("map-weather-detail","No se pudo obtener la secuencia de RainViewer. El mapa base sigue disponible.");
+    document.getElementById("radar-toggle-rain")?.classList.remove("active");
+    setText("map-weather-detail","No se pudo obtener la secuencia de RainViewer ("+(error?.message||"error de conexión")+"). El mapa base sigue disponible.");
     setText("radar-frame-time","Sin datos");
   }
 }
@@ -366,7 +370,7 @@ function showRainViewerFrame(index,host){
   const base=host||rainRadarHost;
   const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
   if(rainRadarLayer)rainRadarLayer.remove();
-  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.68,transparent:true,maxNativeZoom:7,maxZoom:19,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
+  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.72,transparent:true,maxNativeZoom:7,maxZoom:7,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
   rainRadarLayer.addTo(rainRadarMapRef);
   const date=new Date(frame.time*1000);
   setText("radar-frame-time",date.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})+" · "+date.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}));
@@ -394,7 +398,15 @@ document.getElementById("radar-toggle-alerts")?.addEventListener("click",()=>{
   const features=relevantAlerts.flatMap(alert=>(alert.areas||[])
     .filter(area=>area.affected&&area.geometry)
     .map(area=>({type:"Feature",properties:{title:alert.headline||alert.event||"Alerta SMN",zone:area.description||""},geometry:area.geometry})));
-  if(!features.length){setText("map-weather-detail","Los avisos CAP recibidos todavía no incluyen geometrías para dibujar en el mapa.");return;}
+  if(!features.length){
+    const cap=smnLastPayload?.cap||{};
+    const diag=cap.diagnostics||{};
+    const detail=cap.dataStatus==="rate_limited"
+      ? "El SMN está limitando las descargas (HTTP 429). No hay geometrías oficiales disponibles para dibujar; esto no significa que no existan alertas."
+      : "Los avisos recibidos no incluyen geometrías que afecten el punto consultado. No se dibujaron áreas para evitar indicar zonas incorrectas.";
+    setText("map-weather-detail",detail+" Documentos descargados: "+(diag.documentsDownloaded||0)+".");
+    return;
+  }
   smnRadarLayer=L.geoJSON({type:"FeatureCollection",features},{style:()=>({color:"#ffb45c",weight:2,fillColor:"#ff784f",fillOpacity:.16})}).addTo(weatherMap);
   button.classList.add("active");
 });
