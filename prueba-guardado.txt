@@ -1,0 +1,3 @@
+Prueba de escritura desde ChatGPT.
+
+Este archivo se creó únicamente para verificar la conexión de escritura con GitHub. No modifica archivos existentes ni la rama main.
