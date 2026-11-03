@@ -390,9 +390,14 @@ document.getElementById("radar-toggle-rain")?.addEventListener("click",()=>{
 document.getElementById("radar-toggle-alerts")?.addEventListener("click",()=>{
   const button=document.getElementById("radar-toggle-alerts");
   if(smnRadarLayer){smnRadarLayer.remove();smnRadarLayer=null;button.classList.remove("active");return;}
-  const items=window.climagoLastSmnAlerts||[];
-  const features=items.filter(a=>a.geometry).map(a=>({type:"Feature",properties:{title:a.title||"Aviso SMN"},geometry:a.geometry}));
-  if(!features.length){setText("map-weather-detail","No hay polígonos SMN disponibles en la consulta actual.");return;}
+  const capAlerts=Array.isArray(smnLastPayload?.cap?.alerts)?smnLastPayload.cap.alerts:[];
+  const capFeatures=capAlerts.flatMap(alert=>(alert.areas||[])
+    .filter(area=>area.geometry)
+    .map(area=>({type:"Feature",properties:{title:alert.headline||alert.event||"Alerta SMN",zone:area.description||""},geometry:area.geometry})));
+  const acpItems=window.climagoLastSmnAlerts||[];
+  const acpFeatures=acpItems.filter(a=>a.geometry).map(a=>({type:"Feature",properties:{title:a.title||"Aviso SMN"},geometry:a.geometry}));
+  const features=[...capFeatures,...acpFeatures];
+  if(!features.length){setText("map-weather-detail","Los avisos CAP recibidos todavía no incluyen geometrías para dibujar en el mapa.");return;}
   smnRadarLayer=L.geoJSON({type:"FeatureCollection",features},{style:()=>({color:"#ffb45c",weight:2,fillColor:"#ff784f",fillOpacity:.16})}).addTo(weatherMap);
   button.classList.add("active");
 });
