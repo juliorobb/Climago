@@ -1,0 +1,27 @@
+name: Package ClimaGo test build
+on:
+  push:
+    branches:
+      - mvp-alertas-radar-2026-11-03
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact test branch
+        uses: actions/checkout@v4
+        with:
+          ref: mvp-alertas-radar-2026-11-03
+      - name: Prepare distributable ZIP
+        run: |
+          mkdir -p dist
+          zip -r dist/ClimaGo-prueba-alertas-radar.zip index.html app.js styles.css manifest.json service-worker.js assets README.md
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClimaGo-prueba-alertas-radar
+          path: dist/ClimaGo-prueba-alertas-radar.zip
+          if-no-files-found: error
+          retention-days: 14
