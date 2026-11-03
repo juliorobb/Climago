@@ -50,8 +50,9 @@
         <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Mapa interactivo</span></div>
         <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
         <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
-        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">La capa de radar meteorológico se incorporará con una fuente adecuada.</span></div>
-        <p class="map-attribution-note">Mapa © OpenStreetMap · El mapa y la ubicación funcionan; todavía no se muestran ecos de radar ni trayectoria de tormentas.</p>
+        <div class="radar-layer-bar"><span class="radar-layer-label">CAPAS</span><span class="radar-layer-chip active">Precipitación</span><span class="radar-layer-chip">Alertas</span></div>
+        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">Mapa base y ubicación activos. La capa de radar se habilitará al terminar de validar el proveedor.</span></div>
+        <p class="map-attribution-note">Mapa © OpenStreetMap · La capa de precipitación se incorporará con una fuente compatible con el uso de ClimaGo.</p>
       </section>
 
       <section class="page" id="page-forecast">
@@ -65,8 +66,10 @@
 
       <section class="page" id="page-alerts">
         <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas</h1></div></div>
-        <article class="panel alerts-unavailable"><span>△</span><div><b>Avisos oficiales todavía no conectados</b><p>Cuando integremos una fuente oficial, mostraremos aquí el nivel de riesgo, la zona afectada, el horario de vigencia y el organismo emisor.</p></div></article>
-        <article class="alert-card warning"><span>🛡️</span><div><b>Prevención</b><p>Consultá las recomendaciones según el pronóstico y las condiciones de tu zona.</p></div></article>
+        <article class="panel alerts-summary" id="alerts-summary"><span class="alerts-summary-icon">⌁</span><div><b id="alerts-summary-title">Avisos oficiales del SMN</b><p id="alerts-summary-detail">Estado de alertas para tu ubicación.</p></div></article>
+        <div class="alerts-toolbar"><span id="alerts-updated">Esperando datos…</span><button class="text-button" id="refresh-alerts">Actualizar</button></div>
+        <div id="official-alert-list" class="official-alert-list"><div class="panel empty-state">Preparando consulta de avisos oficiales…</div></div>
+        <article class="alert-card warning"><span>🛡️</span><div><b>Prevención</b><p>La ausencia de un aviso no garantiza ausencia de riesgo. Seguí las indicaciones de las autoridades.</p></div></article>
         <div class="section-heading"><h2>Configurar avisos</h2><button class="text-button" data-page="settings">Ajustes</button></div>
         <div class="panel setting-row"><span>🌩️ Tormentas y granizo</span><span class="muted-note">Configurable próximamente</span></div>
         <div class="panel setting-row"><span>🌡️ Calor y frío</span><span class="muted-note">Configurable próximamente</span></div>
