@@ -229,3 +229,72 @@ async function initializeWeatherLocation(){
 }
 initializeWeatherLocation();
 startWeatherRefresh();
+
+
+/* ClimaGo MVP: avisos ACP del SMN (diagnóstico en rama aislada) */
+const SMN_DIAGNOSTIC_URL = "https://climago-smn-diagnostico.juliorobbles01.workers.dev/";
+let smnRefreshHandle = null;
+let smnBusy = false;
+function smnZoneLabel(zones) {
+  if (Array.isArray(zones)) return zones.map(z => typeof z === "string" ? z : (z && (z.areaDesc || z.name)) || "").filter(Boolean).join(" · ");
+  return String(zones || "Zona indicada por el SMN");
+}
+function smnRender(payload) {
+  const rows = (payload.results || []).flatMap(r => Array.isArray(r.items) ? r.items : []).filter(a => a.active);
+  const relevant = rows.filter(a => a.affectsLocation);
+  const host = document.getElementById("official-alert-list");
+  const summary = document.getElementById("alerts-summary");
+  if (!host) return;
+  if (summary) summary.classList.toggle("has-alert", relevant.length > 0);
+  setText("alerts-summary-title", relevant.length ? relevant.length + " aviso(s) alcanzan tu ubicación" : "Sin avisos ACP sobre el punto seleccionado");
+  setText("alerts-summary-detail", rows.length + " avisos vigentes consultados al SMN. Se compara el polígono con las coordenadas seleccionadas.");
+  setText("home-alert-text", relevant.length ? relevant.length + " aviso(s) oficiales para tu zona" : "Sin avisos oficiales para este punto");
+  setText("home-alert-detail", "Consulta de Avisos a Muy Corto Plazo del SMN. Revisá también las alertas generales.");
+  const risk = document.getElementById("home-alert-status");
+  if (risk) {
+    risk.classList.toggle("risk-neutral", relevant.length === 0);
+    risk.classList.toggle("risk-danger", relevant.length > 0);
+  }
+  if (!rows.length) {
+    host.innerHTML = '<div class="panel empty-state">El SMN no devolvió avisos ACP vigentes en esta consulta. Esto no significa que no exista riesgo meteorológico.</div>';
+  } else {
+    host.innerHTML = rows.slice().sort((a,b) => Number(b.affectsLocation)-Number(a.affectsLocation)).map(a => {
+      const start = a.date ? new Date(a.date).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "—";
+      const end = a.endDate ? new Date(a.endDate).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}) : "—";
+      const title = escapeHtml(a.title || "Aviso meteorológico");
+      const zones = escapeHtml(smnZoneLabel(a.zones));
+      const state = a.affectsLocation ? "AFECTA TU UBICACIÓN" : "OTRA ZONA";
+      const severity = String(a.severity || "").toLowerCase();
+      const cls = severity === "extreme" ? "danger" : severity === "severe" ? "warning" : "watch";
+      return '<article class="official-alert-card '+cls+(a.affectsLocation?' for-location':'')+'"><div class="official-alert-top"><span>⚠</span><small>'+state+'</small></div><b>'+title+'</b><p>'+zones+'</p><div class="official-alert-time">Vigencia: '+start+' a '+end+' · hora local</div><small class="official-alert-source">SMN · Aviso a Muy Corto Plazo</small></article>';
+    }).join("");
+  }
+  setText("alerts-updated", "Actualizado " + new Date(payload.testedAt || Date.now()).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
+}
+async function smnLoadAlerts() {
+  if (smnBusy) return;
+  smnBusy = true;
+  const coords = getSelectedCoordinates();
+  const host = document.getElementById("official-alert-list");
+  try {
+    const url = new URL(SMN_DIAGNOSTIC_URL);
+    url.searchParams.set("resource","smn-json-probe");
+    url.searchParams.set("lat",coords.lat);
+    url.searchParams.set("lon",coords.lon);
+    const response = await fetch(url.toString(), {cache:"no-store"});
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const payload = await response.json();
+    if (!payload.results || !payload.results.some(r => r.name === "shortterm_global" && r.ok)) throw new Error("Fuente SMN no disponible");
+    smnRender(payload);
+  } catch (error) {
+    setText("alerts-summary-title","Avisos temporalmente no disponibles");
+    setText("alerts-summary-detail","No se pudo consultar el SMN. No se interpreta como ausencia de riesgo.");
+    setText("home-alert-text","Avisos oficiales temporalmente no disponibles");
+    setText("home-alert-detail","No se debe interpretar como ausencia de riesgo.");
+    if (host) host.innerHTML = '<div class="panel empty-state">No se pudieron cargar los avisos oficiales. Intentá actualizar más tarde.</div>';
+  } finally { smnBusy = false; }
+}
+document.getElementById("refresh-alerts")?.addEventListener("click",smnLoadAlerts);
+document.querySelectorAll('[data-page="alerts"]').forEach(el => el.addEventListener("click",() => smnLoadAlerts()));
+smnLoadAlerts();
+smnRefreshHandle = setInterval(() => { if (document.visibilityState === "visible") smnLoadAlerts(); }, 5 * 60 * 1000);
