@@ -248,35 +248,40 @@ function smnFormatTime(value) {
 }
 function smnRender(payload) {
   const cap = payload.cap || {};
-  const acp = payload.acp || {};
   const capRows = Array.isArray(cap.alerts) ? cap.alerts : [];
-  const acpRows = (acp.results || []).flatMap(r => Array.isArray(r.items) ? r.items : []).filter(a => a.active);
-  const allRows = [
-    ...capRows.map(a => ({...a, feedType:"CAP", title:a.headline || a.event || "Alerta meteorológica", zones:(a.areas||[]).map(x=>x.description).filter(Boolean), affectsLocation:!!a.affectsLocation, date:a.onset||a.effective||a.sent, endDate:a.expires, sourceLabel:"SMN · Alerta general"})),
-    ...acpRows.map(a => ({...a, feedType:"ACP", sourceLabel:"SMN · Aviso a Muy Corto Plazo"}))
-  ];
+  const allRows = capRows.map(a => ({
+    ...a,
+    feedType:"CAP",
+    title:a.headline || a.event || "Alerta meteorológica",
+    zones:(a.areas||[]).map(x=>x.description).filter(Boolean),
+    affectsLocation:!!a.affectsLocation,
+    date:a.onset||a.effective||a.sent,
+    endDate:a.expires,
+    sourceLabel:"SMN · Alertas oficiales CAP"
+  }));
   const relevant = allRows.filter(a => a.affectsLocation);
-  window.climagoLastSmnAlerts = acpRows;
   smnLastPayload = payload;
+  window.climagoLastSmnAlerts = allRows;
   const host = document.getElementById("official-alert-list");
   if (!host) return;
   const capComplete = cap.coverageComplete === true && cap.dataStatus === "ok";
-  const capAvailable = cap.dataStatus === "ok" || cap.dataStatus === "partial";
-  const acpAvailable = !!acp.results?.some(r => r.name === "shortterm_global" && r.ok);
+  const capAvailable = ["ok","partial","rate_limited"].includes(cap.dataStatus);
   const summary = document.getElementById("alerts-summary");
   if (summary) summary.classList.toggle("has-alert", relevant.length > 0);
-  setText("alerts-summary-title", relevant.length ? relevant.length + " aviso(s) para tu ubicación" : capComplete ? "Sin alertas generales vigentes para el punto" : "Consulta de alertas incompleta");
-  const coverageText = capComplete ? "Feed general CAP completo" : capAvailable ? "Feed general CAP parcial" : "Feed general CAP no disponible";
-  setText("alerts-summary-detail", coverageText + (acpAvailable ? " · Avisos a muy corto plazo consultados" : " · Avisos a muy corto plazo no disponibles") + ". La ubicación se compara con las áreas informadas.");
-  setText("home-alert-text", relevant.length ? relevant.length + " aviso(s) para tu zona" : capComplete ? "Sin alertas generales vigentes" : "No se pudo confirmar el estado de alertas");
-  setText("home-alert-detail", capComplete ? "Consulta completa del feed general del SMN; mantenete atento a las actualizaciones." : "La consulta no está completa. No se debe interpretar como ausencia de riesgo.");
+  const coverageText = capComplete ? "Feed oficial CAP consultado completamente" :
+    cap.dataStatus === "rate_limited" ? "Consulta parcial: el SMN aplicó un límite temporal" :
+    capAvailable ? "Feed oficial CAP consultado parcialmente" : "Feed oficial CAP no disponible";
+  setText("alerts-summary-title", relevant.length ? relevant.length + " aviso(s) para tu ubicación" : capComplete ? "Sin alertas generales vigentes para el punto" : "No se pudo confirmar el estado completo de alertas");
+  setText("alerts-summary-detail", coverageText + ". Se comparan las coordenadas con las áreas publicadas por el SMN.");
+  setText("home-alert-text", relevant.length ? relevant.length + " aviso(s) para tu zona" : capComplete ? "Sin alertas generales vigentes" : "Consulta incompleta: revisá los avisos oficiales");
+  setText("home-alert-detail", capComplete ? "Consulta completa del feed CAP del SMN. Mantenete atento a las actualizaciones." : "La consulta fue parcial o no estuvo disponible. No se debe interpretar como ausencia de riesgo.");
   const risk = document.getElementById("home-alert-status");
   if (risk) {
     risk.classList.toggle("risk-neutral", relevant.length === 0 && capComplete);
     risk.classList.toggle("risk-danger", relevant.length > 0);
   }
   if (!allRows.length) {
-    const message = capComplete ? "El feed general CAP se consultó completo y no informa alertas vigentes para esta consulta." : "No hay avisos disponibles para mostrar. La consulta del feed general no fue completa; esto no significa que no exista riesgo meteorológico.";
+    const message = capComplete ? "El feed CAP del SMN se consultó completo y no informa alertas vigentes para este punto." : "No hay avisos disponibles para mostrar. La consulta del feed CAP no fue completa; esto no significa que no exista riesgo meteorológico.";
     host.innerHTML = '<div class="panel empty-state">'+escapeHtml(message)+'</div>';
   } else {
     host.innerHTML = allRows.slice().sort((a,b) => Number(b.affectsLocation)-Number(a.affectsLocation)).map(a => {
@@ -297,32 +302,26 @@ async function smnLoadAlerts() {
   const requestId = ++smnRequestId;
   const coords = activeCoords && Number.isFinite(activeCoords.lat) && Number.isFinite(activeCoords.lon) ? {...activeCoords} : getSelectedCoordinates();
   const host = document.getElementById("official-alert-list");
-  setText("alerts-summary-detail","Consultando las fuentes oficiales del SMN para "+(coords.name||"la ubicación seleccionada")+"…");
-  const request = async (resource) => {
+  setText("alerts-summary-detail","Consultando el feed oficial CAP del SMN para "+(coords.name||"la ubicación seleccionada")+"…");
+  try {
     const url = new URL(SMN_DIAGNOSTIC_URL);
-    url.searchParams.set("resource",resource);
+    url.searchParams.set("resource","alerts");
     url.searchParams.set("lat",coords.lat);
     url.searchParams.set("lon",coords.lon);
     const response = await fetch(url.toString(),{cache:"no-store"});
-    const data = await response.json().catch(()=>({}));
-    return {httpStatus:response.status,ok:response.ok,data};
-  };
-  try {
-    const [capResult,acpResult] = await Promise.allSettled([request("alerts"),request("smn-json-probe")]);
+    const cap = await response.json().catch(()=>({dataStatus:"unavailable",coverageComplete:false,alerts:[]}));
     if(requestId!==smnRequestId)return;
-    const cap = capResult.status==="fulfilled" ? capResult.value.data : {dataStatus:"unavailable",coverageComplete:false,alerts:[],error:String(capResult.reason)};
-    const acp = acpResult.status==="fulfilled" ? acpResult.value.data : {results:[],error:String(acpResult.reason)};
-    if(capResult.status==="rejected" && acpResult.status==="rejected") throw new Error("No se pudo consultar ninguna fuente del SMN.");
-    smnRender({cap,acp,testedAt:new Date().toISOString(),location:coords});
+    if(!response.ok && !["partial","rate_limited"].includes(cap.dataStatus)) throw new Error("SMN HTTP "+response.status);
+    smnRender({cap,testedAt:new Date().toISOString(),location:coords});
   } catch(error) {
     if(requestId!==smnRequestId)return;
     setText("alerts-summary-title","Avisos temporalmente no disponibles");
-    setText("alerts-summary-detail","No se pudo consultar el SMN. No se interpreta como ausencia de riesgo.");
+    setText("alerts-summary-detail","No se pudo consultar el feed CAP del SMN. No se interpreta como ausencia de riesgo.");
     setText("home-alert-text","Avisos oficiales temporalmente no disponibles");
     setText("home-alert-detail","No se debe interpretar como ausencia de riesgo.");
     const risk=document.getElementById("home-alert-status");
     if(risk){risk.classList.remove("risk-neutral");risk.classList.remove("risk-danger");}
-    if(host)host.innerHTML='<div class="panel empty-state">No se pudieron cargar los avisos oficiales. Intentá actualizar más tarde.</div>';
+    if(host)host.innerHTML='<div class="panel empty-state">No se pudieron cargar los avisos oficiales del SMN. Intentá actualizar más tarde.</div>';
     setText("alerts-updated","Sin actualización");
   }
 }
@@ -330,7 +329,6 @@ document.getElementById("refresh-alerts")?.addEventListener("click",smnLoadAlert
 document.querySelectorAll('[data-page="alerts"]').forEach(el=>el.addEventListener("click",()=>smnLoadAlerts()));
 smnLoadAlerts();
 smnRefreshHandle=setInterval(()=>{if(document.visibilityState==="visible")smnLoadAlerts();},5*60*1000);
-
 
 /* Prototipo de radar RainViewer: solo histórico reciente, sin nowcast */
 let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com";
@@ -391,12 +389,11 @@ document.getElementById("radar-toggle-alerts")?.addEventListener("click",()=>{
   const button=document.getElementById("radar-toggle-alerts");
   if(smnRadarLayer){smnRadarLayer.remove();smnRadarLayer=null;button.classList.remove("active");return;}
   const capAlerts=Array.isArray(smnLastPayload?.cap?.alerts)?smnLastPayload.cap.alerts:[];
-  const capFeatures=capAlerts.flatMap(alert=>(alert.areas||[])
-    .filter(area=>area.geometry)
+  // Dibujar únicamente las áreas de avisos que incluyen el punto consultado.
+  const relevantAlerts=capAlerts.filter(alert=>alert.affectsLocation);
+  const features=relevantAlerts.flatMap(alert=>(alert.areas||[])
+    .filter(area=>area.affected&&area.geometry)
     .map(area=>({type:"Feature",properties:{title:alert.headline||alert.event||"Alerta SMN",zone:area.description||""},geometry:area.geometry})));
-  const acpItems=window.climagoLastSmnAlerts||[];
-  const acpFeatures=acpItems.filter(a=>a.geometry).map(a=>({type:"Feature",properties:{title:a.title||"Aviso SMN"},geometry:a.geometry}));
-  const features=[...capFeatures,...acpFeatures];
   if(!features.length){setText("map-weather-detail","Los avisos CAP recibidos todavía no incluyen geometrías para dibujar en el mapa.");return;}
   smnRadarLayer=L.geoJSON({type:"FeatureCollection",features},{style:()=>({color:"#ffb45c",weight:2,fillColor:"#ff784f",fillOpacity:.16})}).addTo(weatherMap);
   button.classList.add("active");
