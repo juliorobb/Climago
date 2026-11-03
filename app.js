@@ -244,6 +244,7 @@ function smnRender(payload) {
   const rows = (payload.results || []).flatMap(r => Array.isArray(r.items) ? r.items : []).filter(a => a.active);
   const relevant = rows.filter(a => a.affectsLocation);
   window.climagoLastSmnAlerts = rows;
+  window.climagoLastSmnAlerts = rows;
   const host = document.getElementById("official-alert-list");
   const summary = document.getElementById("alerts-summary");
   if (!host) return;
@@ -304,7 +305,7 @@ smnRefreshHandle = setInterval(() => { if (document.visibilityState === "visible
 
 
 /* Prototipo de radar RainViewer: solo histórico reciente, sin nowcast */
-let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null;
+let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com";
 async function initRainViewerRadar(){
   if(!weatherMap||!window.L)return;
   rainRadarMapRef=weatherMap;
@@ -316,11 +317,11 @@ async function initRainViewerRadar(){
     const data=await response.json();
     const frames=data.radar?.past||[];
     if(!frames.length)throw new Error("No hay imágenes históricas disponibles.");
-    rainRadarFrames=frames;
+    rainRadarFrames=frames;rainRadarHost=data.host||rainRadarHost;
     const slider=document.getElementById("radar-frame-slider");
     slider.max=String(frames.length-1);slider.value=String(frames.length-1);slider.disabled=false;
     rainRadarIndex=frames.length-1;
-    showRainViewerFrame(rainRadarIndex,data.host);
+    showRainViewerFrame(rainRadarIndex,rainRadarHost);
     if(status)status.textContent="Radar de precipitación · RainViewer";
     setText("map-weather-detail","Imágenes de radar de los últimos 120 minutos. Actualización aproximada cada 10 minutos. Fuente: RainViewer.");
     setText("radar-frame-label","Imágenes recientes · "+frames.length+" pasos");
@@ -334,7 +335,7 @@ function showRainViewerFrame(index,host){
   if(!rainRadarFrames.length||!rainRadarMapRef)return;
   rainRadarIndex=Math.max(0,Math.min(index,rainRadarFrames.length-1));
   const frame=rainRadarFrames[rainRadarIndex];
-  const base=host||"https://tilecache.rainviewer.com";
+  const base=host||rainRadarHost;
   const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
   if(rainRadarLayer)rainRadarLayer.remove();
   rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.68,transparent:true,maxNativeZoom:7,maxZoom:19,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
