@@ -160,6 +160,7 @@ let lastWeatherRefresh=0;
 async function loadWeather(lat,lon,name){
   const requestId=++weatherRequestId;
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
+  if(typeof smnLoadAlerts==="function") smnLoadAlerts();
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
@@ -274,7 +275,7 @@ function smnRender(payload) {
 async function smnLoadAlerts() {
   if (smnBusy) return;
   smnBusy = true;
-  const coords = getSelectedCoordinates();
+  const coords = activeCoords && Number.isFinite(activeCoords.lat) && Number.isFinite(activeCoords.lon) ? activeCoords : getSelectedCoordinates();
   const host = document.getElementById("official-alert-list");
   try {
     const url = new URL(SMN_DIAGNOSTIC_URL);
