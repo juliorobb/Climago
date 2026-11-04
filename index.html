@@ -48,10 +48,12 @@
 
       <section class="page" id="page-radar">
         <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Mapa interactivo</span></div>
-        <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
-        <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
-        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">La capa de radar meteorológico se incorporará con una fuente adecuada.</span></div>
-        <p class="map-attribution-note">Mapa © OpenStreetMap · El mapa y la ubicación funcionan; todavía no se muestran ecos de radar ni trayectoria de tormentas.</p>
+        <div class="map-toolbar"><span>Radar oficial · Servicio Meteorológico Nacional</span><a class="secondary-button" href="https://ws2.smn.gob.ar/radar" target="_blank" rel="noopener">Abrir completo ↗</a></div>
+        <div class="smn-radar-shell panel">
+          <iframe id="smn-radar-frame" title="Radar meteorológico oficial del SMN" src="https://ws2.smn.gob.ar/radar" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen"></iframe>
+        </div>
+        <div class="map-status panel"><b>Visor oficial del radar SMN</b><span>Seleccioná Mosaico Centro o Córdoba dentro del visor. Usá la opción de 6 o 12 imágenes para consultar la evolución.</span></div>
+        <p class="map-attribution-note">Fuente: Servicio Meteorológico Nacional · Las imágenes y controles pertenecen al visor oficial.</p>
       </section>
 
       <section class="page" id="page-forecast">
