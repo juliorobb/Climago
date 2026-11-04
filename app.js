@@ -370,7 +370,7 @@ function showRainViewerFrame(index,host){
   const base=host||rainRadarHost;
   const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
   if(rainRadarLayer)rainRadarLayer.remove();
-  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.72,transparent:true,maxNativeZoom:7,maxZoom:7,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
+  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.72,transparent:true,maxNativeZoom:7,maxZoom:19,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
   rainRadarLayer.addTo(rainRadarMapRef);
   const date=new Date(frame.time*1000);
   setText("radar-frame-time",date.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})+" · "+date.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}));
