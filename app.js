@@ -205,14 +205,14 @@ function renderDaily(daily){const host=document.querySelector(".forecast-list");
 function initWeatherMap(){
   if(!window.L){setText("map-weather-status","No se pudo cargar el componente del mapa. Revisá tu conexión.");return;}
   const coords=getSelectedCoordinates();activeCoords=coords;
-  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true}).setView([coords.lat,coords.lon],9);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(weatherMap);}
-  setTimeout(()=>weatherMap.invalidateSize(),80);weatherMap.setView([coords.lat,coords.lon],9);setMapMarker(coords.lat,coords.lon,coords.name);loadWeather(coords.lat,coords.lon,coords.name);
+  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true,minZoom:3,maxZoom:7,zoomSnap:1,zoomDelta:1}).setView([coords.lat,coords.lon],6);weatherMap.getContainer().classList.add("weather-radar-canvas");}
+  setTimeout(()=>weatherMap.invalidateSize(),80);weatherMap.setView([coords.lat,coords.lon],6);setMapMarker(coords.lat,coords.lon,coords.name);loadWeather(coords.lat,coords.lon,coords.name);
 }
 function setMapMarker(lat,lon,label){if(!weatherMap)return;if(mapMarker)mapMarker.remove();mapMarker=L.marker([lat,lon]).addTo(weatherMap).bindPopup(escapeHtml(label));}
 document.getElementById("radar-locate")?.addEventListener("click",()=>{
   const button=document.getElementById("radar-locate");if(!navigator.geolocation){setText("map-weather-status","Este dispositivo no permite acceder al GPS.");return;}
   button.disabled=true;button.textContent="Buscando…";
-  navigator.geolocation.getCurrentPosition(pos=>{const {latitude:lat,longitude:lon}=pos.coords;button.disabled=false;button.textContent="⌖ Mi ubicación";activeCoords={lat,lon,name:"Mi ubicación actual"};weatherMap?.setView([lat,lon],11);setMapMarker(lat,lon,"Mi ubicación actual");loadWeather(lat,lon,"Mi ubicación actual");},err=>{button.disabled=false;button.textContent="⌖ Mi ubicación";setText("map-weather-status",err.code===1?"Permiso de ubicación denegado. Habilitalo en los ajustes del teléfono.":"No se pudo obtener la ubicación. Intentá nuevamente.");},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  navigator.geolocation.getCurrentPosition(pos=>{const {latitude:lat,longitude:lon}=pos.coords;button.disabled=false;button.textContent="⌖ Mi ubicación";activeCoords={lat,lon,name:"Mi ubicación actual"};weatherMap?.setView([lat,lon],6);setMapMarker(lat,lon,"Mi ubicación actual");loadWeather(lat,lon,"Mi ubicación actual");},err=>{button.disabled=false;button.textContent="⌖ Mi ubicación";setText("map-weather-status",err.code===1?"Permiso de ubicación denegado. Habilitalo en los ajustes del teléfono.":"No se pudo obtener la ubicación. Intentá nuevamente.");},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
 });
 async function initializeWeatherLocation(){
   const saved=readLocations().find(place=>place.id===primaryId(readLocations())&&Number.isFinite(place.lat)&&Number.isFinite(place.lon));
