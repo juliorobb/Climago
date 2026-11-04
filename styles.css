@@ -74,3 +74,7 @@
 .weather-main,.weather-meta,.data-source{position:relative;z-index:1}
 .weather-main{ text-shadow:0 1px 8px #001b2b55}
 @media(max-width:380px){.weather-character{width:76px;height:82px}.weather-character img{width:90px;height:90px}}
+
+/* Visor oficial SMN: prueba aislada del radar en la rama de test. */
+.smn-radar-shell{height:min(68vh,680px);min-height:480px;overflow:hidden;border-radius:18px;background:#071a2b;position:relative}
+.smn-radar-shell iframe{display:block;width:100%;height:100%;min-height:480px;border:0;background:#071a2b}
