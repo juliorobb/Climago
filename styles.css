@@ -84,3 +84,25 @@
 .weather-map .leaflet-control-attribution{background:#071b2dcc!important;color:#9db2c4!important;}
 .weather-map .leaflet-control-attribution a{color:#22d3ee!important;}
 .weather-map .leaflet-marker-icon{filter:drop-shadow(0 0 7px #22d3ee);}
+
+
+/* Radar simple: leyenda y controles táctiles */
+.radar-legend{padding:10px 12px;margin:9px 0 10px;background:#0a2236;border:1px solid #1d4058;border-radius:14px}
+.radar-legend-title{font-size:11px;font-weight:700;color:#dceaf4;margin-bottom:8px}
+.radar-legend-scale{display:flex;height:9px;overflow:hidden;border-radius:99px;gap:2px}
+.radar-color{flex:1}
+.radar-color.weak{background:#55c8f5}
+.radar-color.light{background:#238ee8}
+.radar-color.moderate{background:#f2df35}
+.radar-color.strong{background:#ff8b24}
+.radar-color.severe{background:#e83d36}
+.radar-legend-labels{display:flex;justify-content:space-between;margin-top:5px;color:#9eb3c4;font-size:9px}
+.radar-layer-bar{margin-top:2px}
+.radar-timeline{padding:11px 12px;margin:9px 0 10px;background:#0a2236;border:1px solid #1d4058;border-radius:15px}
+.radar-timeline-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.radar-timeline-head b{font-size:12px;color:#e6f1f8}
+.radar-timeline-head span{font-size:10px;color:#a9bdcc;white-space:nowrap}
+#radar-frame-slider{display:block;width:100%;height:24px;margin:0;accent-color:#38bdf8;cursor:pointer}
+.radar-timeline-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;color:#9eb3c4;font-size:9px}
+#radar-play{border:0;border-radius:20px;background:#b8e8ff;color:#082338;font-weight:700;padding:8px 13px;font-size:11px}
+#radar-play:disabled{opacity:.45}
