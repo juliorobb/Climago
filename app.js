@@ -205,7 +205,7 @@ function renderDaily(daily){const host=document.querySelector(".forecast-list");
 function initWeatherMap(){
   if(!window.L){setText("map-weather-status","No se pudo cargar el componente del mapa. Revisá tu conexión.");return;}
   const coords=getSelectedCoordinates();activeCoords=coords;
-  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true,minZoom:3,maxZoom:7,zoomSnap:1,zoomDelta:1}).setView([coords.lat,coords.lon],6);weatherMap.getContainer().classList.add("weather-radar-canvas");}
+  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true,minZoom:3,maxZoom:7,zoomSnap:1,zoomDelta:1}).setView([coords.lat,coords.lon],6);weatherMap.getContainer().classList.add("weather-radar-canvas");L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{minZoom:3,maxZoom:7,attribution:"&copy; OpenStreetMap contributors",subdomains:"abc"}).addTo(weatherMap);}
   setTimeout(()=>weatherMap.invalidateSize(),80);weatherMap.setView([coords.lat,coords.lon],6);setMapMarker(coords.lat,coords.lon,coords.name);loadWeather(coords.lat,coords.lon,coords.name);
 }
 function setMapMarker(lat,lon,label){if(!weatherMap)return;if(mapMarker)mapMarker.remove();mapMarker=L.marker([lat,lon]).addTo(weatherMap).bindPopup(escapeHtml(label));}
