@@ -333,8 +333,8 @@ document.querySelectorAll('[data-page="alerts"]').forEach(el=>el.addEventListene
 smnLoadAlerts();
 smnRefreshHandle=setInterval(()=>{if(document.visibilityState==="visible")smnLoadAlerts();},5*60*1000);
 
-/* Prototipo de radar RainViewer: solo histórico reciente, sin nowcast */
-let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com";
+/* Radar RainViewer: historial real y estado basado en la carga de mosaicos */
+let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com",rainRadarLoadStats={loaded:0,errors:0};
 async function initRainViewerRadar(){
   if(!weatherMap||!window.L)return;
   rainRadarMapRef=weatherMap;
@@ -351,26 +351,38 @@ async function initRainViewerRadar(){
     slider.max=String(frames.length-1);slider.value=String(frames.length-1);slider.disabled=false;
     rainRadarIndex=frames.length-1;
     showRainViewerFrame(rainRadarIndex,rainRadarHost);
-    if(status)status.textContent="Radar de precipitación disponible · RainViewer";
     const play=document.getElementById("radar-play");if(play)play.disabled=false;
-    setText("map-weather-detail","Imágenes de radar de las últimas 2 horas, en intervalos de 10 minutos. Fuente: RainViewer. Zoom máximo de datos: 7.");
+    setText("map-weather-detail","Radar RainViewer · últimas 2 horas · pasos de 10 minutos. Esperando imágenes del mapa…");
     setText("radar-frame-label","Imágenes recientes · "+frames.length+" pasos");
   }catch(error){
     const play=document.getElementById("radar-play");if(play)play.disabled=true;
     if(status)status.textContent="Radar no disponible en este momento";
     document.getElementById("radar-toggle-rain")?.classList.remove("active");
-    setText("map-weather-detail","No se pudo obtener la secuencia de RainViewer ("+(error?.message||"error de conexión")+"). El mapa base sigue disponible.");
+    setText("map-weather-detail","No se pudo obtener la secuencia de RainViewer ("+(error?.message||"error de conexión")+").");
     setText("radar-frame-time","Sin datos");
   }
 }
 function showRainViewerFrame(index,host){
   if(!rainRadarFrames.length||!rainRadarMapRef)return;
   rainRadarIndex=Math.max(0,Math.min(index,rainRadarFrames.length-1));
-  const frame=rainRadarFrames[rainRadarIndex];
-  const base=host||rainRadarHost;
+  const frame=rainRadarFrames[rainRadarIndex],base=host||rainRadarHost;
   const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
   if(rainRadarLayer)rainRadarLayer.remove();
-  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.72,transparent:true,maxNativeZoom:7,maxZoom:19,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
+  rainRadarLoadStats={loaded:0,errors:0};
+  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.88,transparent:true,maxNativeZoom:7,maxZoom:7,updateWhenIdle:true,keepBuffer:1,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
+  rainRadarLayer.on("tileload",()=>{
+    rainRadarLoadStats.loaded++;
+    if(document.getElementById("radar-frame-slider")?.value!==String(rainRadarIndex))return;
+    const status=document.getElementById("map-weather-status");
+    if(status)status.textContent="Imágenes de radar recibidas · RainViewer";
+    setText("map-weather-detail","Se recibieron "+rainRadarLoadStats.loaded+" mosaicos de radar. Si no aparecen ecos de color en esta zona y horario, la imagen no registra precipitación detectable.");
+  });
+  rainRadarLayer.on("tileerror",()=>{
+    rainRadarLoadStats.errors++;
+    const status=document.getElementById("map-weather-status");
+    if(status&&rainRadarLoadStats.loaded===0)status.textContent="No se pudieron cargar las imágenes del radar";
+    if(rainRadarLoadStats.loaded===0)setText("map-weather-detail","Error al descargar mosaicos de RainViewer. Revisar conexión, disponibilidad y dirección de las imágenes.");
+  });
   rainRadarLayer.addTo(rainRadarMapRef);
   const date=new Date(frame.time*1000);
   setText("radar-frame-time",date.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})+" · "+date.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}));
@@ -382,31 +394,10 @@ document.getElementById("radar-play")?.addEventListener("click",()=>{
   if(rainRadarTimer){clearInterval(rainRadarTimer);rainRadarTimer=null;button.textContent="▶ Reproducir";return;}
   if(!rainRadarFrames.length)return;
   button.textContent="Ⅱ Pausar";
-  rainRadarTimer=setInterval(()=>{const next=(rainRadarIndex+1)%rainRadarFrames.length;showRainViewerFrame(next);},700);
+  rainRadarTimer=setInterval(()=>{const next=(rainRadarIndex+1)%rainRadarFrames.length;showRainViewerFrame(next);},900);
 });
 document.getElementById("radar-toggle-rain")?.addEventListener("click",()=>{
   const on=!!rainRadarLayer;
   if(on){rainRadarLayer.remove();rainRadarLayer=null;document.getElementById("radar-toggle-rain").classList.remove("active");}
   else{document.getElementById("radar-toggle-rain").classList.add("active");initRainViewerRadar();}
-});
-document.getElementById("radar-toggle-alerts")?.addEventListener("click",()=>{
-  const button=document.getElementById("radar-toggle-alerts");
-  if(smnRadarLayer){smnRadarLayer.remove();smnRadarLayer=null;button.classList.remove("active");return;}
-  const capAlerts=Array.isArray(smnLastPayload?.cap?.alerts)?smnLastPayload.cap.alerts:[];
-  // Dibujar únicamente las áreas de avisos que incluyen el punto consultado.
-  const relevantAlerts=capAlerts.filter(alert=>alert.affectsLocation);
-  const features=relevantAlerts.flatMap(alert=>(alert.areas||[])
-    .filter(area=>area.affected&&area.geometry)
-    .map(area=>({type:"Feature",properties:{title:alert.headline||alert.event||"Alerta SMN",zone:area.description||""},geometry:area.geometry})));
-  if(!features.length){
-    const cap=smnLastPayload?.cap||{};
-    const diag=cap.diagnostics||{};
-    const detail=cap.dataStatus==="rate_limited"
-      ? "El SMN está limitando las descargas (HTTP 429). No hay geometrías oficiales disponibles para dibujar; esto no significa que no existan alertas."
-      : "Los avisos recibidos no incluyen geometrías que afecten el punto consultado. No se dibujaron áreas para evitar indicar zonas incorrectas.";
-    setText("map-weather-detail",detail+" Documentos descargados: "+(diag.documentsDownloaded||0)+".");
-    return;
-  }
-  smnRadarLayer=L.geoJSON({type:"FeatureCollection",features},{style:()=>({color:"#ffb45c",weight:2,fillColor:"#ff784f",fillOpacity:.16})}).addTo(weatherMap);
-  button.classList.add("active");
 });
