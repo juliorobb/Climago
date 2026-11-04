@@ -16,129 +16,118 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install scientific libraries
-        run: python -m pip install --upgrade pip boto3 netCDF4 numpy matplotlib
+        run: python -m pip install --upgrade pip boto3 netCDF4 numpy matplotlib scipy pillow
 
-      - name: Find and inspect one public SMN forecast file
+      - name: Download, inspect and create Leaflet overlay from SMN WRF
         run: |
           python - <<'PY'
-          import datetime as dt
-          import json
-          import os
-          import tempfile
-          import boto3
-          import numpy as np
-          import matplotlib
+          import datetime as dt, json, os, tempfile
+          import boto3, numpy as np, matplotlib
           matplotlib.use("Agg")
           import matplotlib.pyplot as plt
+          from matplotlib.colors import Normalize
           from botocore import UNSIGNED
           from botocore.config import Config
           from netCDF4 import Dataset
+          from scipy.spatial import cKDTree
+          from PIL import Image
 
-          bucket = "smn-ar-wrf"
-          s3 = boto3.client(
-              "s3",
-              region_name="us-west-2",
-              config=Config(signature_version=UNSIGNED)
-          )
-
-          now = dt.datetime.now(dt.timezone.utc)
-          candidates = []
-          for day_offset in range(3):
-              day = (now - dt.timedelta(days=day_offset)).date()
-              for cycle in ("18", "12", "06", "00"):
-                  prefix = (
-                      f"DATA/WRF/DET/{day:%Y/%m/%d}/{cycle}/"
-                  )
-                  try:
-                      pager = s3.get_paginator("list_objects_v2")
-                      for page in pager.paginate(Bucket=bucket, Prefix=prefix):
-                          for obj in page.get("Contents", []):
-                              key = obj["Key"]
-                              if (
-                                  key.endswith(".nc")
-                                  and "/WRFDETAR_01H_" in key
-                                  and key.endswith(f"_{cycle}_001.nc")
-                              ):
-                                  candidates.append((obj["LastModified"], key, obj["Size"]))
-                  except Exception as exc:
-                      print(f"Listing {prefix} failed: {exc}")
-
-          if not candidates:
-              raise SystemExit("No se encontró un archivo horario reciente en el bucket público del SMN.")
-
+          bucket="smn-ar-wrf"
+          s3=boto3.client("s3",region_name="us-west-2",config=Config(signature_version=UNSIGNED))
+          now=dt.datetime.now(dt.timezone.utc)
+          candidates=[]
+          for offset in range(3):
+            day=(now-dt.timedelta(days=offset)).date()
+            for cycle in ("18","12","06","00"):
+              prefix=f"DATA/WRF/DET/{day:%Y/%m/%d}/{cycle}/"
+              try:
+                for page in s3.get_paginator("list_objects_v2").paginate(Bucket=bucket,Prefix=prefix):
+                  for obj in page.get("Contents",[]):
+                    k=obj["Key"]
+                    if k.endswith(".nc") and "/WRFDETAR_01H_" in k and k.endswith(f"_{cycle}_001.nc"):
+                      candidates.append((obj["LastModified"],k,obj["Size"]))
+              except Exception as e: print("Listing warning:",prefix,str(e))
+          if not candidates: raise SystemExit("No se encontró un archivo WRF horario reciente del SMN.")
           candidates.sort(reverse=True)
-          modified, key, size = candidates[0]
-          print(f"Selected: s3://{bucket}/{key}")
-          print(f"Last modified: {modified.isoformat()}")
-          print(f"Size bytes: {size}")
+          modified,key,size=candidates[0]
+          print("Selected:",key,"modified:",modified.isoformat(),"bytes:",size)
+          if size>150_000_000: raise SystemExit("Archivo demasiado grande para esta prueba.")
+          local=os.path.join(tempfile.gettempdir(),"smn-wrf.nc")
+          s3.download_file(bucket,key,local)
 
-          if size > 150_000_000:
-              raise SystemExit(f"El archivo supera el límite prudente de prueba: {size} bytes")
+          with Dataset(local) as ds:
+            var=ds.variables["PP"]
+            pp=np.ma.asarray(var[:]).squeeze()
+            lat=np.asarray(ds.variables["lat"][:]).squeeze()
+            lon=np.asarray(ds.variables["lon"][:]).squeeze()
+            if pp.ndim!=2 or lat.shape!=pp.shape or lon.shape!=pp.shape:
+              raise SystemExit(f"Dimensiones inesperadas: PP={pp.shape}, lat={lat.shape}, lon={lon.shape}")
+            vals=pp.filled(np.nan)
+            valid=np.isfinite(vals)&np.isfinite(lat)&np.isfinite(lon)
+            if not valid.any(): raise SystemExit("PP no contiene datos válidos.")
+            # Punto de grilla más cercano a Córdoba capital.
+            clat,clon=-31.4167,-64.1833
+            flat=np.flatnonzero(valid)
+            dist=((lon[valid]-clon)*np.cos(np.deg2rad(lat[valid])))**2+(lat[valid]-clat)**2
+            iy,ix=np.unravel_index(flat[int(np.argmin(dist))],pp.shape)
 
-          local_path = os.path.join(tempfile.gettempdir(), "smn-wrf-sample.nc")
-          s3.download_file(bucket, key, local_path)
+            # Reproyección por vecino más cercano a una malla regular lat/lon para Leaflet.
+            south,north,west,east=-56.0,-21.0,-76.0,-53.0
+            region=valid&(lat>=south)&(lat<=north)&(lon>=west)&(lon<=east)
+            if region.sum()<1000: raise SystemExit("No hay suficientes puntos WRF en el recorte de Argentina.")
+            slat,slon,sval=lat[region],lon[region],vals[region]
+            ny,nx=700,460
+            glat=np.linspace(north,south,ny); glon=np.linspace(west,east,nx)
+            mlon,mlat=np.meshgrid(glon,glat)
+            source=np.column_stack((slon*np.cos(np.deg2rad(slat)),slat))
+            target=np.column_stack((mlon.ravel()*np.cos(np.deg2rad(mlat.ravel())),mlat.ravel()))
+            _,nearest=cKDTree(source).query(target,k=1,workers=-1)
+            raster=sval[nearest].reshape(ny,nx)
+            cmap=plt.get_cmap("turbo")
+            vmax=max(float(np.nanpercentile(sval,99.5)),1.0)
+            rgba=(cmap(Normalize(0,vmax)(np.clip(raster,0,None)))*255).astype(np.uint8)
+            rgba[...,3]=np.where(np.isfinite(raster)&(raster>=0.1),220,0).astype(np.uint8)
+            Image.fromarray(rgba,"RGBA").save("wrf-smn-precip-leaflet.png")
 
-          with Dataset(local_path) as ds:
-              print("Dimensions:", {k: len(v) for k, v in ds.dimensions.items()})
-              print("Variables:", list(ds.variables.keys()))
-              required = ("PP", "lat", "lon")
-              missing = [name for name in required if name not in ds.variables]
-              if missing:
-                  raise SystemExit(f"Faltan variables necesarias: {missing}")
-
-              pp = np.ma.asarray(ds.variables["PP"][:]).squeeze()
-              lat = np.asarray(ds.variables["lat"][:]).squeeze()
-              lon = np.asarray(ds.variables["lon"][:]).squeeze()
-
-              if pp.ndim != 2 or lat.shape != pp.shape or lon.shape != pp.shape:
-                  raise SystemExit(
-                      f"Dimensiones inesperadas: PP={pp.shape}, lat={lat.shape}, lon={lon.shape}"
-                  )
-
-              valid = np.ma.masked_invalid(pp)
-              if valid.count() == 0:
-                  raise SystemExit("La variable PP no contiene valores válidos.")
-
-              stats = {
-                  "source": "SMN WRF-SMN public AWS Open Data bucket",
-                  "s3_key": key,
-                  "last_modified_utc": modified.isoformat(),
-                  "shape": list(pp.shape),
-                  "valid_cells": int(valid.count()),
-                  "precip_min_mm": float(valid.min()),
-                  "precip_max_mm": float(valid.max()),
-                  "lat_min": float(np.nanmin(lat)),
-                  "lat_max": float(np.nanmax(lat)),
-                  "lon_min": float(np.nanmin(lon)),
-                  "lon_max": float(np.nanmax(lon)),
-                  "units": getattr(ds.variables["PP"], "units", "not declared"),
+            stats={
+              "source":"SMN WRF-SMN public AWS Open Data bucket",
+              "s3_key":key,"last_modified_utc":modified.isoformat(),
+              "grid_shape":list(pp.shape),"valid_cells":int(valid.sum()),
+              "precip_min_mm":float(np.nanmin(vals[valid])),
+              "precip_max_mm":float(np.nanmax(vals[valid])),
+              "units":getattr(var,"units","not declared"),
+              "variable_attributes":{a:str(getattr(var,a)) for a in var.ncattrs()},
+              "cordoba_capital_nearest_grid_cell":{
+                "lat":float(lat[iy,ix]),"lon":float(lon[iy,ix]),
+                "precipitation_mm":float(vals[iy,ix]),
+                "row":int(iy),"column":int(ix)
+              },
+              "leaflet_image_overlay":{
+                "file":"wrf-smn-precip-leaflet.png",
+                "bounds_south_west":[south,west],
+                "bounds_north_east":[north,east],
+                "pixels":[nx,ny],
+                "transparent_below_mm":0.1,
+                "resampling":"nearest neighbor from SMN curvilinear lat/lon grid"
               }
-              print("DATA_CHECK:", json.dumps(stats, ensure_ascii=False))
+            }
+            print("DATA_CHECK:",json.dumps(stats,ensure_ascii=False))
+            with open("wrf-smn-proof.json","w",encoding="utf-8") as f:
+              json.dump(stats,f,ensure_ascii=False,indent=2)
 
-              fig, ax = plt.subplots(figsize=(10, 8))
-              mesh = ax.pcolormesh(
-                  lon, lat, valid,
-                  shading="auto", cmap="turbo",
-                  vmin=0, vmax=max(float(valid.max()), 1.0)
-              )
-              ax.set_title("SMN WRF-SMN · Precipitación pronosticada (PP)")
-              ax.set_xlabel("Longitud")
-              ax.set_ylabel("Latitud")
-              fig.colorbar(mesh, ax=ax, label="Precipitación (mm)")
-              fig.tight_layout()
-              fig.savefig("wrf-smn-precip-proof.png", dpi=140)
-              plt.close(fig)
-
-              with open("wrf-smn-proof.json", "w", encoding="utf-8") as f:
-                  json.dump(stats, f, ensure_ascii=False, indent=2)
-
-          print("SUCCESS: archivo NetCDF real descargado, leído y convertido en una imagen de prueba.")
+            fig,ax=plt.subplots(figsize=(9,9))
+            ax.imshow(rgba,extent=[west,east,south,north],origin="upper")
+            ax.scatter([clon],[clat],marker="+",color="white",s=100)
+            ax.set_xlim(west,east); ax.set_ylim(south,north)
+            ax.set_title("SMN WRF · Precipitación pronosticada · Argentina")
+            ax.set_xlabel("Longitud"); ax.set_ylabel("Latitud")
+            fig.tight_layout(); fig.savefig("wrf-smn-precip-proof.png",dpi=140); plt.close(fig)
+          print("SUCCESS: WRF SMN convertido a PNG transparente con bounds geográficos para Leaflet.")
           PY
 
       - name: Upload proof image and metadata
@@ -147,5 +136,6 @@ jobs:
           name: wrf-smn-proof
           path: |
             wrf-smn-precip-proof.png
+            wrf-smn-precip-leaflet.png
             wrf-smn-proof.json
           if-no-files-found: error
