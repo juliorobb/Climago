@@ -80,7 +80,7 @@
 
 /* Radar meteorológico: sin mapa vial ni cartografía de calles */
 .weather-map.weather-radar-canvas,.weather-map .leaflet-container{background:radial-gradient(ellipse at 52% 46%,#163b55 0%,#0b263d 48%,#061626 100%)!important;}
-.weather-map .leaflet-tile-pane{filter:saturate(1.18) contrast(1.06);}
+.weather-map .leaflet-tile-pane{filter:none;}
 .weather-map .leaflet-control-attribution{background:#071b2dcc!important;color:#9db2c4!important;}
 .weather-map .leaflet-control-attribution a{color:#22d3ee!important;}
 .weather-map .leaflet-marker-icon{filter:drop-shadow(0 0 7px #22d3ee);}
