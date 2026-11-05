@@ -92,6 +92,11 @@
 #smn-alerts-status[data-state="complete"]{border-color:#28604e}
 #smn-alerts-status[data-state="partial"]{border-color:#8d6a28}
 #smn-alerts-status[data-state="error"]{border-color:#a83c4b}
+#smn-alerts-status[data-state="stale"]{border-color:#a83c4b;background:#3a2028}
+.radar-access{display:grid;gap:9px;padding:14px}
+.radar-access>b{font-size:13px;color:#f3f7fb}
+.radar-access>p,.radar-access>small{font-size:11px;line-height:1.5;color:#a9bfce;margin:0}
+.radar-access .radar-link{display:block;text-align:center;text-decoration:none;padding:10px;border-radius:10px;color:#eaf8ff;border:1px solid #32647b;background:#12364c;font-size:12px}
 #page-alerts .setting-row a{color:var(--cyan);font-size:11px;text-decoration:none;white-space:nowrap}
 #page-alerts .setting-row{min-height:48px}
 @media(max-width:380px){.smn-alerts-list{padding:9px}.smn-alert-top{gap:6px}.smn-alert-badge{font-size:8px;padding:4px 5px}}
