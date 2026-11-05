@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "source": "Servicio Meteorológico Nacional · CAP",
+  "generatedAt": null,
+  "status": "pending",
+  "coverage": {
+    "complete": false,
+    "discovered": 0,
+    "selected": 0,
+    "downloaded": 0,
+    "truncated": false,
+    "feedSources": [],
+    "feedErrors": [],
+    "documentErrors": [],
+    "historyHours": 48
+  },
+  "alerts": [],
+  "note": "Pendiente de la primera ejecución del workflow en la rama de recuperación. No es un reporte de ausencia de alertas."
+}

@@ -5,6 +5,7 @@ function showPage(name){
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===name || (["vehicle","locations","prevention","settings"].includes(name)&&b.dataset.page==="more")));
   window.scrollTo({top:0,behavior:"smooth"});
   if(name==="radar") setTimeout(initWeatherMap,120);
+  if(name==="alerts") loadOfficialAlerts();
 }
 document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-page]");
@@ -229,3 +230,131 @@ async function initializeWeatherLocation(){
 }
 initializeWeatherLocation();
 startWeatherRefresh();
+
+
+// Alertas oficiales SMN / CAP.
+// El listado distingue avisos vigentes, programados, vencidos y cancelados.
+// Los datos incompletos nunca se presentan como ausencia de riesgo.
+function formatSmnDate(value){
+  if(!value)return "No informada";
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?String(value):date.toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"});
+}
+function smnElement(tag,className,text){
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(text!==undefined)node.textContent=String(text);
+  return node;
+}
+function createSmnAlertCard(alert){
+  const card=smnElement("article","smn-alert-card");
+  const top=smnElement("div","smn-alert-top");
+  const title=smnElement("b","",alert.headline||alert.event||alert.title||"Aviso meteorológico");
+  const state=String(alert.state||"unknown").toLowerCase();
+  const labels={active:"VIGENTE",scheduled:"PRÓXIMO",expired:"VENCIDO",cancelled:"CANCELADO",unconfirmed:"VIGENCIA A CONFIRMAR",not_currently_listed:"YA NO FIGURA EN EL FEED"};
+  const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
+  badge.dataset.state=state;
+  top.append(title,badge);
+  card.append(top);
+  const severity=[alert.severity,alert.urgency].filter(Boolean).join(" · ");
+  if(severity)card.append(smnElement("p","smn-alert-severity",severity));
+  if(alert.description||alert.instruction){
+    if(alert.description)card.append(smnElement("p","",alert.description));
+    if(alert.instruction)card.append(smnElement("p","smn-alert-instruction","Recomendación: "+alert.instruction));
+  }else if(alert.description===undefined){
+    card.append(smnElement("p","","Consultá las áreas y vigencia en el detalle del aviso."));
+  }
+  const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean):[];
+  const areaText=areas.length?areas.join(" · "):(alert.areaDesc||"Zona no especificada en los datos recibidos");
+  card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
+  const validity=[];
+  if(alert.effective)validity.push("Desde "+formatSmnDate(alert.effective));
+  else if(alert.onset)validity.push("Desde "+formatSmnDate(alert.onset));
+  if(alert.expires)validity.push("Hasta "+formatSmnDate(alert.expires));
+  else validity.push("Vencimiento no informado");
+  card.append(smnElement("small","smn-alert-validity","Vigencia: "+validity.join(" · ")));
+  card.append(smnElement("small","smn-alert-source","Fuente: Servicio Meteorológico Nacional · CAP"));
+  const url=alert.url||alert.documentUrl;
+  if(url){
+    try{
+      const parsed=new URL(url);
+      if(parsed.protocol==="https:"&&parsed.hostname==="ssl.smn.gob.ar"){
+        const link=smnElement("a","","Documento CAP del SMN ↗");
+        link.href=parsed.href;link.target="_blank";link.rel="noopener noreferrer";
+        card.append(link);
+      }
+    }catch{}
+  }
+  return card;
+}
+function renderSmnAlerts(host,alerts,emptyText){
+  host.replaceChildren();
+  if(!alerts.length){host.append(smnElement("div","empty-state",emptyText));return;}
+  for(const alert of alerts)host.append(createSmnAlertCard(alert));
+}
+let smnAlertsRequest=0;
+async function loadOfficialAlerts(){
+  const activeHost=document.getElementById("smn-alerts-active");
+  const historyHost=document.getElementById("smn-alerts-history");
+  const statusTitle=document.getElementById("smn-alerts-status-title");
+  const statusDetail=document.getElementById("smn-alerts-status-detail");
+  const statusPanel=document.getElementById("smn-alerts-status");
+  const updated=document.getElementById("alerts-updated");
+  if(!activeHost||!historyHost)return;
+  const requestId=++smnAlertsRequest;
+  if(statusTitle)statusTitle.textContent="Consultando los últimos avisos oficiales del SMN…";
+  if(statusDetail)statusDetail.textContent="Solicitando el archivo CAP actualizado.";
+  const button=document.getElementById("alerts-refresh");
+  if(button){button.disabled=true;button.textContent="Consultando…";}
+  try{
+    const response=await fetch("./data/smn-alerts.json?refresh="+Date.now(),{
+      method:"GET",cache:"no-store",headers:{"Accept":"application/json"}
+    });
+    if(!response.ok)throw new Error("El archivo de alertas respondió HTTP "+response.status);
+    const contentType=response.headers.get("content-type")||"";
+    if(contentType&&!contentType.toLowerCase().includes("json"))throw new Error("El servidor no devolvió JSON (Content-Type: "+contentType+").");
+    const data=await response.json();
+    if(requestId!==smnAlertsRequest)return;
+    if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
+    const alerts=data.alerts;
+    const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(String(a.state||"").toLowerCase()));
+    const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(String(a.state||"").toLowerCase()));
+    renderSmnAlerts(activeHost,active,"No se identificaron avisos vigentes entre los documentos consultados.");
+    renderSmnAlerts(historyHost,history,"No hay avisos vencidos o cancelados conservados en el historial.");
+    const coverage=data.coverage||{};
+    const complete=coverage.complete===true||data.status==="ok";
+    const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
+    const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
+    const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
+    const stale= data.generatedAt && (Date.now()-new Date(data.generatedAt).getTime()>90*60*1000);
+    if(complete){
+      if(statusTitle)statusTitle.textContent=active.length?"Se encontraron avisos oficiales vigentes":"Sin avisos vigentes en la consulta completa";
+      if(statusDetail)statusDetail.textContent="Se procesaron todos los documentos detectados. Los avisos anteriores se muestran por separado.";
+      if(statusPanel)statusPanel.dataset.state="complete";
+    }else{
+      if(statusTitle)statusTitle.textContent=active.length?"Avisos encontrados · cobertura parcial":"No se pudo confirmar la ausencia de avisos";
+      if(statusDetail)statusDetail.textContent="Consulta parcial: "+downloaded+" documentos procesados de "+(discovered||"cantidad no informada")+" detectados. No interpretes una lista vacía como ausencia de riesgo.";
+      if(statusPanel)statusPanel.dataset.state="partial";
+    }
+    if(stale){
+      if(statusDetail)statusDetail.textContent+=" Los datos recibidos tienen más de 90 minutos.";
+    }
+    if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
+    const activeCount=document.getElementById("smn-active-count");
+    const historyCount=document.getElementById("smn-history-count");
+    if(activeCount)activeCount.textContent=String(active.length);
+    if(historyCount)historyCount.textContent=String(history.length);
+  }catch(error){
+    if(requestId!==smnAlertsRequest)return;
+    if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
+    if(statusDetail)statusDetail.textContent=String(error?.message||error)+" Revisá la conexión; esta falla no significa que no haya alertas.";
+    if(statusPanel)statusPanel.dataset.state="error";
+    renderSmnAlerts(activeHost,[],"No hay datos vigentes verificables disponibles.");
+    renderSmnAlerts(historyHost,[],"No se pudo cargar el historial de avisos.");
+    if(updated)updated.textContent="No se pudo verificar la última actualización. Fuente prevista: Servicio Meteorológico Nacional · CAP.";
+  }finally{
+    if(button){button.disabled=false;button.textContent="↻ Actualizar";}
+  }
+}
+document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
+loadOfficialAlerts();
