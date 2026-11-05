@@ -48,15 +48,15 @@
 
       <section class="page" id="page-radar">
         <div class="page-heading"><div><small>OBSERVACIÓN EN TIEMPO REAL</small><h1>Radar meteorológico</h1></div><span class="pill">Fuente SMN</span></div>
-        <div class="radar-sourcebar"><span>📡 Servicio Meteorológico Nacional · SINARAME</span><span class="muted-note">Observación</span></div>
-        <div class="radar-access panel">
-          <b>Imágenes oficiales de radar</b>
-          <p>Consultá los ecos reales y su evolución en los visores oficiales. Se abren directamente para conservar sus controles y su actualización.</p>
-          <a class="secondary-button radar-link" href="https://ws2.smn.gob.ar/radar" target="_blank" rel="noopener noreferrer">Abrir radar SMN ↗</a>
-          <a class="secondary-button radar-link" href="https://www.argentina.gob.ar/obras-publicas/recursos-hidricos/sistema-nacional-de-radares-meteorologicos-sinarame/imagenes" target="_blank" rel="noopener noreferrer">Abrir radar SINARAME ↗</a>
-          <small>El mapa de ClimaGo muestra ubicación y tiempo local. Los ecos no están superpuestos porque todavía no existe una fuente pública de teselas autorizada y estable para Leaflet.</small>
+        <div class="radar-sourcebar"><span>📡 Servicio Meteorológico Nacional · SINARAME</span><button class="secondary-button map-gps" id="radar-refresh" type="button" onclick="document.getElementById('smn-radar-frame').src='https://ws2.smn.gob.ar/radar/responsiveFrame?refresh='+Date.now()">↻ Actualizar</button></div>
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="padding:12px 14px;background:var(--panel)">
+            <b style="display:block;margin-bottom:4px">Visor oficial de radares del SMN</b>
+            <small>Probá Mosaico Centro o Córdoba dentro del visor.</small>
+          </div>
+          <iframe id="smn-radar-frame" title="Radar meteorológico oficial del SMN" src="https://ws2.smn.gob.ar/radar/responsiveFrame" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen" style="display:block;width:100%;height:min(72vh,680px);min-height:480px;border:0;background:#101820"></iframe>
         </div>
-        <p class="map-attribution-note">Mapa © OpenStreetMap · Radar: SMN / SINARAME. La imagen del radar es observación, no pronóstico ni alerta oficial.</p>
+        <p class="map-attribution-note">Prueba de integración del visor público del SMN. Si no se muestra dentro de ClimaGo, abrilo directamente desde el sitio oficial. El radar es observación, no pronóstico ni alerta.</p>
         <div class="section-heading"><h2>Tu ubicación en el mapa</h2><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
         <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span></div>
         <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
