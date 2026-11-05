@@ -4,7 +4,7 @@ function showPage(name){
   document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===`page-${name}`));
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===name || (["vehicle","locations","prevention","settings"].includes(name)&&b.dataset.page==="more")));
   window.scrollTo({top:0,behavior:"smooth"});
-  if(name==="radar") setTimeout(()=>{initWeatherMap();setTimeout(initRainViewerRadar,500);},120);
+  if(name==="radar") setTimeout(()=>{initWeatherMap().then(()=>setTimeout(initRainViewerRadar,500));},120);
 }
 document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-page]");
@@ -335,7 +335,7 @@ smnRefreshHandle=setInterval(()=>{if(document.visibilityState==="visible")smnLoa
 
 /* Radar RainViewer: historial real y estado basado en la carga de mosaicos */
 let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com",rainRadarLoadStats={loaded:0,errors:0};
-async function initRainViewerRadar(){
+async async function initRainViewerRadar(){
   if(!weatherMap||!window.L)return;
   rainRadarMapRef=weatherMap;
   const status=document.getElementById("map-weather-status");
@@ -367,23 +367,27 @@ function showRainViewerFrame(index,host){
   rainRadarIndex=Math.max(0,Math.min(index,rainRadarFrames.length-1));
   const frame=rainRadarFrames[rainRadarIndex],base=host||rainRadarHost;
   const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
-  if(rainRadarLayer)rainRadarLayer.remove();
   rainRadarLoadStats={loaded:0,errors:0};
-  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.88,transparent:true,maxNativeZoom:7,maxZoom:7,updateWhenIdle:true,keepBuffer:1,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
+  if(!rainRadarLayer){
+    rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.88,transparent:true,maxNativeZoom:7,maxZoom:10,updateWhenIdle:true,keepBuffer:2,updateWhenZooming:false,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
   rainRadarLayer.on("tileload",()=>{
     rainRadarLoadStats.loaded++;
     if(document.getElementById("radar-frame-slider")?.value!==String(rainRadarIndex))return;
     const status=document.getElementById("map-weather-status");
     if(status)status.textContent="Imágenes de radar recibidas · RainViewer";
     setText("map-weather-detail","Se recibieron "+rainRadarLoadStats.loaded+" mosaicos de radar. Si no aparecen ecos de color en esta zona y horario, la imagen no registra precipitación detectable.");
-  });
-  rainRadarLayer.on("tileerror",()=>{
-    rainRadarLoadStats.errors++;
-    const status=document.getElementById("map-weather-status");
-    if(status&&rainRadarLoadStats.loaded===0)status.textContent="No se pudieron cargar las imágenes del radar";
-    if(rainRadarLoadStats.loaded===0)setText("map-weather-detail","Error al descargar mosaicos de RainViewer. Revisar conexión, disponibilidad y dirección de las imágenes.");
-  });
-  rainRadarLayer.addTo(rainRadarMapRef);
+    });
+    rainRadarLayer.on("tileerror",()=>{
+      rainRadarLoadStats.errors++;
+      const status=document.getElementById("map-weather-status");
+      if(status&&rainRadarLoadStats.loaded===0)status.textContent="No se pudieron cargar las imágenes del radar";
+      if(rainRadarLoadStats.loaded===0)setText("map-weather-detail","Error al descargar mosaicos del radar. Revisar conexión y disponibilidad.");
+    });
+    rainRadarLayer.addTo(rainRadarMapRef);
+  }else{
+    rainRadarLayer.setUrl(url);
+    if(!rainRadarMapRef.hasLayer(rainRadarLayer))rainRadarLayer.addTo(rainRadarMapRef);
+  }
   const date=new Date(frame.time*1000);
   setText("radar-frame-time",date.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})+" · "+date.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}));
   const slider=document.getElementById("radar-frame-slider");if(slider)slider.value=String(rainRadarIndex);
@@ -394,7 +398,7 @@ document.getElementById("radar-play")?.addEventListener("click",()=>{
   if(rainRadarTimer){clearInterval(rainRadarTimer);rainRadarTimer=null;button.textContent="▶ Reproducir";return;}
   if(!rainRadarFrames.length)return;
   button.textContent="Ⅱ Pausar";
-  rainRadarTimer=setInterval(()=>{const next=(rainRadarIndex+1)%rainRadarFrames.length;showRainViewerFrame(next);},900);
+  rainRadarTimer=setInterval(()=>{const next=(rainRadarIndex+1)%rainRadarFrames.length;showRainViewerFrame(next);},1200);
 });
 document.getElementById("radar-toggle-rain")?.addEventListener("click",()=>{
   const on=!!rainRadarLayer;
