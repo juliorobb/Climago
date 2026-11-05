@@ -50,8 +50,15 @@
         <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Mapa interactivo</span></div>
         <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
         <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
-        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">La capa de radar meteorológico se incorporará con una fuente adecuada.</span></div>
-        <p class="map-attribution-note">Mapa © OpenStreetMap · El mapa y la ubicación funcionan; todavía no se muestran ecos de radar ni trayectoria de tormentas.</p>
+        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">Condiciones meteorológicas de la ubicación seleccionada.</span></div>
+        <div class="radar-access panel">
+          <b>Imágenes oficiales de radar</b>
+          <p>Consultá los ecos reales y su evolución en los visores oficiales. Se abren directamente para conservar sus controles y su actualización.</p>
+          <a class="secondary-button radar-link" href="https://ws2.smn.gob.ar/radar" target="_blank" rel="noopener noreferrer">Abrir radar SMN ↗</a>
+          <a class="secondary-button radar-link" href="https://www.argentina.gob.ar/obras-publicas/recursos-hidricos/sistema-nacional-de-radares-meteorologicos-sinarame/imagenes" target="_blank" rel="noopener noreferrer">Abrir radar SINARAME ↗</a>
+          <small>El mapa de ClimaGo muestra ubicación y tiempo local. Los ecos no están superpuestos porque todavía no existe una fuente pública de teselas autorizada y verificada para Leaflet.</small>
+        </div>
+        <p class="map-attribution-note">Mapa © OpenStreetMap · Radar: Servicio Meteorológico Nacional / SINARAME. La imagen del radar es observación, no pronóstico ni alerta oficial.</p>
       </section>
 
       <section class="page" id="page-forecast">
