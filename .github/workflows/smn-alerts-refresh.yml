@@ -1,52 +1,42 @@
-name: Refresh SMN CAP alerts
+name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [mvp-alertas-radar-2026-11-03]
-    paths: [".github/workflows/smn-alerts-refresh.yml"]
+    branches: [main, mvp-alertas-radar-2026-11-03, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05]
+    paths:
+      - ".github/workflows/smn-alerts-refresh.yml"
+      - "scripts/refresh_smn_alerts.py"
+      - "app.js"
+      - "service-worker.js"
+      - "index.html"
+      - "styles.css"
   workflow_dispatch:
+  # GitHub schedules run from the default branch (main).
   schedule:
-    - cron: "7 * * * *"
+    - cron: "17 * * * *"
 permissions:
   contents: write
 concurrency:
-  group: smn-alerts-refresh
+  group: climago-smn-alerts-feature
   cancel-in-progress: true
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: mvp-alertas-radar-2026-11-03
+          ref: ${{ github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Download and normalize SMN CAP RSS
+      - name: Validate JavaScript and Python before contacting the SMN
         run: |
-          python - <<'PY'
-          import json, urllib.request, xml.etree.ElementTree as ET, os
-          from datetime import datetime, timezone
-          url = "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/rss_acpCAP.xml"
-          req = urllib.request.Request(url, headers={"User-Agent":"ClimaGo/1.0"})
-          with urllib.request.urlopen(req, timeout=30) as response: root = ET.fromstring(response.read())
-          channel = root.find("./channel")
-          items = []
-          for item in (channel.findall("item") if channel is not None else []):
-              get = lambda name: (item.findtext(name) or "").strip()
-              title, link, desc = get("title"), get("link"), get("description")
-              if not title or not link.startswith("https://ssl.smn.gob.ar/feeds/CAP/"): continue
-              items.append({"title":title,"description":desc,"url":link,"sent":get("pubDate"),
-                            "severity":get("category") or "Aviso oficial",
-                            "areas":[desc] if desc else [],
-                            "affectsCordoba":"córdoba" in (title+" "+desc).lower()})
-          items.sort(key=lambda x: (not x["affectsCordoba"], x["sent"]))
-          data={"source":"Servicio Meteorológico Nacional · CAP","feed":url,
-                "generatedAt":datetime.now(timezone.utc).isoformat(),"feedItems":len(items),"alerts":items[:30]}
-          os.makedirs("data",exist_ok=True)
-          with open("data/smn-alerts.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False,indent=2)
-          print("Avisos publicados:",len(items))
-          PY
-      - name: Commit refreshed data
+          node --check app.js
+          node --check service-worker.js
+          python -m py_compile scripts/refresh_smn_alerts.py
+      - name: Download and normalize official CAP alerts
+        run: python scripts/refresh_smn_alerts.py
+      - name: Commit refreshed data only when it changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
