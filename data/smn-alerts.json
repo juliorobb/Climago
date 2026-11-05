@@ -1,19 +1,67 @@
 {
   "schemaVersion": 2,
   "source": "Servicio Meteorológico Nacional · CAP",
-  "generatedAt": null,
-  "status": "pending",
+  "generatedAt": "2026-11-05T05:01:23.938419Z",
+  "status": "unavailable",
   "coverage": {
     "complete": false,
-    "discovered": 0,
-    "selected": 0,
+    "discovered": 100,
+    "selected": 6,
     "downloaded": 0,
-    "truncated": false,
-    "feedSources": [],
-    "feedErrors": [],
-    "documentErrors": [],
+    "truncated": true,
+    "feedSources": [
+      {
+        "name": "alertas",
+        "httpStatus": 200,
+        "contentType": "text/xml",
+        "linksFound": 99,
+        "ok": true
+      },
+      {
+        "name": "corto_plazo",
+        "httpStatus": 200,
+        "contentType": "text/xml",
+        "linksFound": 1,
+        "ok": true
+      },
+      {
+        "name": "indice_CAP_general",
+        "httpStatus": null,
+        "linksFound": 0,
+        "ok": false
+      }
+    ],
+    "feedErrors": [
+      "indice_CAP_general: cannot use a bytes pattern on a string-like object"
+    ],
+    "documentErrors": [
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_104.xml",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_105.xml",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_106.xml",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_107.xml",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_108.xml",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_109.xml",
+        "error": "HTTP 404"
+      }
+    ],
     "historyHours": 48
   },
   "alerts": [],
-  "note": "Pendiente de la primera ejecución del workflow en la rama de recuperación. No es un reporte de ausencia de alertas."
+  "note": "Cobertura parcial o fuente inaccesible. Una lista vacía o incompleta no significa ausencia de riesgo."
 }
