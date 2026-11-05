@@ -1,22 +1,18 @@
 {
   "schemaVersion": 2,
   "source": "Servicio Meteorológico Nacional · CAP",
-  "generatedAt": "2026-11-05T05:01:23.938419Z",
-  "status": "unavailable",
+  "generatedAt": "2026-11-05T05:03:30.958870Z",
+  "status": "partial",
   "coverage": {
     "complete": false,
-    "discovered": 100,
+    "discovered": 72,
     "selected": 6,
-    "downloaded": 0,
+    "downloaded": 6,
     "truncated": true,
+    "nextCursor": 6,
+    "freshWindowHours": 10,
+    "catalogFresh": false,
     "feedSources": [
-      {
-        "name": "alertas",
-        "httpStatus": 200,
-        "contentType": "text/xml",
-        "linksFound": 99,
-        "ok": true
-      },
       {
         "name": "corto_plazo",
         "httpStatus": 200,
@@ -26,42 +22,151 @@
       },
       {
         "name": "indice_CAP_general",
-        "httpStatus": null,
-        "linksFound": 0,
-        "ok": false
+        "httpStatus": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "linksFound": 144,
+        "ok": true
       }
     ],
-    "feedErrors": [
-      "indice_CAP_general: cannot use a bytes pattern on a string-like object"
-    ],
-    "documentErrors": [
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_104.xml",
-        "error": "HTTP 404"
-      },
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_105.xml",
-        "error": "HTTP 404"
-      },
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_106.xml",
-        "error": "HTTP 404"
-      },
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_107.xml",
-        "error": "HTTP 404"
-      },
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_108.xml",
-        "error": "HTTP 404"
-      },
-      {
-        "url": "https://ssl.smn.gob.ar/feeds/CAP/cap_salida/CAP_20260927150200_Tormenta_Llanura_alertas_109.xml",
-        "error": "HTTP 404"
-      }
-    ],
+    "feedErrors": [],
+    "documentErrors": [],
     "historyHours": 48
   },
-  "alerts": [],
+  "alerts": [
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.02.20.00",
+      "sender": "smn@smn.gov.ar",
+      "sent": "2026-11-05T02:20:00-03:00",
+      "messageType": "Alert",
+      "status": "Actual",
+      "event": "TORMENTAS FUERTES",
+      "headline": "AVISO NARANJA POR TORMENTAS FUERTES CON LLUVIAS INTENSAS Y OCASIONAL CAIDA DE GRANIZO",
+      "description": "TORMENTAS FUERTES CON LLUVIAS INTENSAS Y OCASIONAL CAIDA DE GRANIZO",
+      "instruction": "Permanecé en construcciones cerradas como casas, escuelas o edificios públicos. Desconectá los electrodomésticos y cortá el suministro eléctrico si ingresa agua. Alejate de zonas inundables y no ingreses en calles anegadas. Mantenete alejado de artefactos eléctricos y evitá el uso de teléfonos con cable. Si estás al aire libre, buscá refugio inmediato en un edificio, casa o vehículo cerrado. Para minimizar el riesgo de ser alcanzado por un rayo, no permanezcas en playas, ríos, lagunas o piletas.",
+      "severity": "Severe",
+      "urgency": "Immediate",
+      "certainty": "Observed",
+      "effective": "",
+      "onset": "",
+      "expires": "2026-11-05T05:20:00-03:00",
+      "areas": [
+        "FORMOSA: BERMEJO - MATACOS - RAMON LISTA."
+      ],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/2026_11_05_0220_cap_es.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "active"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.28",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-04T20:44:35-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "La zona cordillerana será afectada por vientos del sector oeste con velocidades entre 45 y 70 km/h con ráfagas que pueden superar los 110 km/h. El resto del área será afectada por vientos del sector sur con velocidades entre 40 y 60 km/h con ráfagas que pueden alcanzar los 80 km/h, pudiendo ser superadas de forma puntual.",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-06T03:00:00-03:00",
+      "expires": "2026-11-06T20:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_28.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.27",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-04T20:44:35-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "La zona cordillerana será afectada por vientos del sector oeste con velocidades entre 45 y 70 km/h con ráfagas que pueden superar los 110 km/h. El resto del área será afectada por vientos del sector sur con velocidades entre 40 y 60 km/h con ráfagas que pueden alcanzar los 80 km/h, pudiendo ser superadas de forma puntual.",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-06T21:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_27.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.26",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-04T20:44:35-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "La zona cordillerana será afectada por vientos del sector oeste con velocidades entre 45 y 70 km/h con ráfagas que pueden superar los 110 km/h. El resto del área será afectada por vientos del sector sur con velocidades entre 40 y 60 km/h con ráfagas que pueden alcanzar los 80 km/h, pudiendo ser superadas de forma puntual.",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T09:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_26.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.1",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-04T20:44:36-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "El área será afectada por vientos del sector sur, con velocidades entre 40 y 50 km/h con ráfagas que pueden alcanzar los 80 km/h",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-06T15:00:00-03:00",
+      "expires": "2026-11-07T08:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_1.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.2",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-04T20:44:36-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "El área será afectada por vientos del sector sur, con velocidades entre 40 y 50 km/h con ráfagas que pueden alcanzar los 80 km/h",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-06T15:00:00-03:00",
+      "expires": "2026-11-07T08:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_2.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T05:03:30.958870Z",
+      "state": "scheduled"
+    }
+  ],
   "note": "Cobertura parcial o fuente inaccesible. Una lista vacía o incompleta no significa ausencia de riesgo."
 }
