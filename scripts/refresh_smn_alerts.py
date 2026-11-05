@@ -268,25 +268,38 @@ def main():
     # Keep recently seen notices after they disappear from the source index.
     # The old MVP RSS format is kept only as unverified legacy history, never as a confirmed live warning.
     current_keys = {item["identifier"] for item in parsed_records}
+    parsed_urls = {item["url"] for item in parsed_records}
+    current_catalog_urls = set(unique_urls)
     retained = []
     cutoff = stamp - timedelta(hours=HISTORY_HOURS)
     for old in previous_alerts:
         if not isinstance(old, dict):
             continue
         identifier = old.get("identifier")
+        old_url = old.get("url") or old.get("documentUrl") or ""
         last_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
         if identifier and identifier in current_keys:
+            continue
+        if old_url and old_url in parsed_urls:
             continue
         if last_seen and last_seen < cutoff:
             continue
         if identifier:
             expiry = parse_time(old.get("expires"))
+            effective = parse_time(old.get("effective") or old.get("onset"))
             status = str(old.get("status", "")).lower()
             msg_type = str(old.get("messageType", "")).lower()
             if status == "cancel" or msg_type == "cancel":
                 old["state"] = "cancelled"
             elif expiry and expiry < stamp:
                 old["state"] = "expired"
+            elif old_url in current_catalog_urls:
+                if effective and effective > stamp:
+                    old["state"] = "scheduled"
+                elif expiry:
+                    old["state"] = "active"
+                else:
+                    old["state"] = "unconfirmed"
             elif expiry:
                 old["state"] = "not_currently_listed"
             else:

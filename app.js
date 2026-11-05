@@ -284,6 +284,7 @@ function createSmnAlertCard(alert){
   else validity.push("Vencimiento no informado");
   card.append(smnElement("small","smn-alert-validity","Vigencia: "+validity.join(" · ")));
   card.append(smnElement("small","smn-alert-source","Fuente: Servicio Meteorológico Nacional · CAP"));
+  if(alert.lastSeen)card.append(smnElement("small","smn-alert-checked","Último chequeo: "+formatSmnDate(alert.lastSeen)));
   const url=alert.url||alert.documentUrl;
   if(url){
     try{
