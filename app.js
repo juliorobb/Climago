@@ -240,6 +240,15 @@ function formatSmnDate(value){
   const date=new Date(value);
   return Number.isNaN(date.getTime())?String(value):date.toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"});
 }
+function localizeSmnValue(value,kind){
+  const key=String(value||"").toLowerCase();
+  const translations={
+    severity:{extreme:"Extrema",severe:"Severa",moderate:"Moderada",minor:"Leve",unknown:"Sin clasificar"},
+    urgency:{immediate:"Inmediata",expected:"Prevista",future:"Futura",past:"Pasada",unknown:"No informada"},
+    certainty:{observed:"Observada",likely:"Probable",possible:"Posible",unlikely:"Poco probable",unknown:"No informada"}
+  };
+  return translations[kind]?.[key]||String(value||"");
+}
 function smnElement(tag,className,text){
   const node=document.createElement(tag);
   if(className)node.className=className;
@@ -266,7 +275,11 @@ function createSmnAlertCard(alert){
   badge.dataset.state=state;
   top.append(title,badge);
   card.append(top);
-  const severity=[alert.severity,alert.urgency].filter(Boolean).join(" · ");
+  const severity=[
+    localizeSmnValue(alert.severity,"severity"),
+    localizeSmnValue(alert.urgency,"urgency"),
+    localizeSmnValue(alert.certainty,"certainty")
+  ].filter(Boolean).join(" · ");
   if(severity)card.append(smnElement("p","smn-alert-severity",severity));
   if(alert.description||alert.instruction){
     if(alert.description)card.append(smnElement("p","",alert.description));
