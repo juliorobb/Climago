@@ -317,7 +317,7 @@ def main():
     # Se procesan hasta seis documentos por hora para no provocar bloqueos del SMN.
     # La cobertura se considera completa cuando todo el catálogo vivo fue leído
     # durante la ventana reciente, combinando las pasadas horarias.
-    fresh_cutoff = stamp - timedelta(hours=10)
+    fresh_cutoff = stamp - timedelta(hours=14)
     fresh_urls = {item.get("url") for item in parsed_records if item.get("url")}
     for old in previous_alerts:
         if not isinstance(old, dict):
@@ -344,7 +344,7 @@ def main():
             "downloaded": downloaded,
             "truncated": truncated,
             "nextCursor": next_cursor,
-            "freshWindowHours": 10,
+            "freshWindowHours": 14,
             "catalogFresh": catalog_fresh,
             "feedSources": feed_status,
             "feedErrors": feed_failures,
