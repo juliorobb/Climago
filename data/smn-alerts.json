@@ -1,15 +1,15 @@
 {
   "schemaVersion": 2,
   "source": "Servicio Meteorológico Nacional · CAP",
-  "generatedAt": "2026-11-05T05:07:10.081864Z",
+  "generatedAt": "2026-11-05T17:34:45.729668Z",
   "status": "partial",
   "coverage": {
     "complete": false,
-    "discovered": 72,
+    "discovered": 66,
     "selected": 6,
     "downloaded": 6,
     "truncated": true,
-    "nextCursor": 24,
+    "nextCursor": 30,
     "freshWindowHours": 14,
     "catalogFresh": false,
     "feedSources": [
@@ -17,14 +17,14 @@
         "name": "corto_plazo",
         "httpStatus": 200,
         "contentType": "text/xml",
-        "linksFound": 1,
+        "linksFound": 0,
         "ok": true
       },
       {
         "name": "indice_CAP_general",
         "httpStatus": 200,
         "contentType": "text/html; charset=UTF-8",
-        "linksFound": 144,
+        "linksFound": 132,
         "ok": true
       }
     ],
@@ -33,6 +33,138 @@
     "historyHours": 48
   },
   "alerts": [
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.37.5",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:37-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Tormentas",
+      "headline": "Tormentas",
+      "description": "El área será afectada por tormentas aisladas de variada intensidad, algunas localmente fuertes. Las mismas podrán estar acompañadas por abundantes precipitaciones en cortos periodos, ocasional granizo, ráfagas intensas y actividad eléctrica frecuente. Se esperan valores de precipitación acumulada entre 20 y 40 mm, que pueden ser superados en forma puntual.",
+      "instruction": "1- Evitá salir. 2- No saques la basura y limpiá desagües y sumideros. 3- Desconectá los electrodomésticos y cortá el suministro eléctrico si ingresa agua 4- Cerrá y alejate de puertas y ventanas. 5- Retirá o asegurá objetos que puedan ser arrastrados por el viento. 6- Si estás al aire libre, buscá refugio inmediato en un edificio, casa o vehículo cerrado.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T03:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085422_Tormenta_Llanura_alertas_alertas_5.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.37.4",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:37-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Tormentas",
+      "headline": "Tormentas",
+      "description": "El área será afectada por tormentas aisladas de variada intensidad, algunas localmente fuertes. Las mismas podrán estar acompañadas por abundantes precipitaciones en cortos periodos, ocasional granizo, ráfagas intensas y actividad eléctrica frecuente. Se esperan valores de precipitación acumulada entre 20 y 40 mm, que pueden ser superados en forma puntual.",
+      "instruction": "1- Evitá salir. 2- No saques la basura y limpiá desagües y sumideros. 3- Desconectá los electrodomésticos y cortá el suministro eléctrico si ingresa agua 4- Cerrá y alejate de puertas y ventanas. 5- Retirá o asegurá objetos que puedan ser arrastrados por el viento. 6- Si estás al aire libre, buscá refugio inmediato en un edificio, casa o vehículo cerrado.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T03:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085422_Tormenta_Llanura_alertas_alertas_4.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.37.1",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:37-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Tormentas",
+      "headline": "Tormentas",
+      "description": "El área será afectada por tormentas aisladas de variada intensidad, algunas localmente fuertes. Las mismas podrán estar acompañadas por abundantes precipitaciones en cortos periodos, ocasional granizo, ráfagas intensas y actividad eléctrica frecuente. Se esperan valores de precipitación acumulada entre 20 y 40 mm, que pueden ser superados en forma puntual.",
+      "instruction": "1- Evitá salir. 2- No saques la basura y limpiá desagües y sumideros. 3- Desconectá los electrodomésticos y cortá el suministro eléctrico si ingresa agua 4- Cerrá y alejate de puertas y ventanas. 5- Retirá o asegurá objetos que puedan ser arrastrados por el viento. 6- Si estás al aire libre, buscá refugio inmediato en un edificio, casa o vehículo cerrado.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-05T21:00:00-03:00",
+      "expires": "2026-11-06T02:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085422_Tormenta_Llanura_alertas_alertas_1.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.39.21",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:39-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "El área será afectada por vientos del sector sur, con velocidades entre 40 y 50 km/h con ráfagas que pueden alcanzar los 80 km/h",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T09:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085351_Viento_Llanura_alertas_alertas_21.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.39.20",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:39-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "El área será afectada por vientos del sector sur, con velocidades entre 40 y 50 km/h con ráfagas que pueden alcanzar los 80 km/h",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T09:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085351_Viento_Llanura_alertas_alertas_20.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.08.53.39.22",
+      "sender": "smn@smn.gob.ar",
+      "sent": "2026-11-05T08:53:39-03:00",
+      "messageType": "Update",
+      "status": "Actual",
+      "event": "Viento",
+      "headline": "Viento",
+      "description": "El área será afectada por vientos del sector sur, con velocidades entre 40 y 50 km/h con ráfagas que pueden alcanzar los 80 km/h",
+      "instruction": "1- Evitá salir. 2- Retirá o asegurá objetos que puedan ser arrastrados por el viento, como macetas, sillas o toldos. 3- Cerrá y alejate de puertas y ventanas. 4- No te refugies debajo de marquesinas, carteles publicitarios, árboles o postes. 5- Tené precaución al conducir.",
+      "severity": "Moderate",
+      "urgency": "Future",
+      "certainty": "Likely",
+      "effective": "",
+      "onset": "2026-11-07T09:00:00-03:00",
+      "expires": "2026-11-07T14:59:59-03:00",
+      "areas": [],
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261105085351_Viento_Llanura_alertas_alertas_22.xml",
+      "source": "Servicio Meteorológico Nacional · CAP",
+      "lastSeen": "2026-11-05T17:34:45.729668Z",
+      "state": "scheduled"
+    },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.05.02.20.00",
       "sender": "smn@smn.gov.ar",
@@ -55,7 +187,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/2026_11_05_0220_cap_es.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "active"
+      "state": "expired"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.25",
@@ -77,7 +209,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_25.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.23",
@@ -99,7 +231,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_23.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.19",
@@ -121,7 +253,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_19.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.18",
@@ -143,7 +275,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_18.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.28",
@@ -165,7 +297,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_28.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.27",
@@ -187,7 +319,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_27.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.26",
@@ -209,7 +341,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_26.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.17",
@@ -231,7 +363,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_17.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.20",
@@ -253,7 +385,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_20.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.21",
@@ -275,7 +407,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_21.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.22",
@@ -297,7 +429,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_22.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.35.24",
@@ -319,7 +451,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204444_Viento_Cordillera_alertas_alertas_24.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.4",
@@ -341,7 +473,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_4.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.3",
@@ -363,7 +495,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_3.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:04:47.978258Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.1",
@@ -385,7 +517,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_1.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.2",
@@ -407,7 +539,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_2.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:03:30.958870Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.5",
@@ -429,7 +561,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_5.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:05:51.242165Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.7",
@@ -451,7 +583,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_7.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.18",
@@ -473,7 +605,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_18.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.17",
@@ -495,7 +627,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_17.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.16",
@@ -517,7 +649,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_16.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.19",
@@ -539,7 +671,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_19.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     },
     {
       "identifier": "urn:oid:2.49.0.1.32.0.2026.11.04.20.44.36.20",
@@ -561,7 +693,7 @@
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261104204445_Viento_Llanura_alertas_alertas_20.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
       "lastSeen": "2026-11-05T05:07:10.081864Z",
-      "state": "scheduled"
+      "state": "not_currently_listed"
     }
   ],
   "note": "Cobertura parcial o fuente inaccesible. Una lista vacía o incompleta no significa ausencia de riesgo."
