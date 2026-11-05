@@ -1,5 +1,8 @@
 name: Refresh SMN CAP alerts
 on:
+  push:
+    branches: [mvp-alertas-radar-2026-11-03]
+    paths: [".github/workflows/smn-alerts-refresh.yml"]
   workflow_dispatch:
   schedule:
     - cron: "7 * * * *"
