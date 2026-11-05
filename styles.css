@@ -74,3 +74,12 @@
 .weather-main,.weather-meta,.data-source{position:relative;z-index:1}
 .weather-main{ text-shadow:0 1px 8px #001b2b55}
 @media(max-width:380px){.weather-character{width:76px;height:82px}.weather-character img{width:90px;height:90px}}
+
+/* Visores oficiales SMN */
+.radar-sourcebar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;font-size:10px;color:var(--muted)}
+.official-frame-wrap{height:430px;overflow:hidden;border-radius:16px;background:#071a2b}
+.official-frame-wrap iframe{width:100%;height:100%;border:0;background:#fff}
+.official-alerts-frame{height:560px}
+#page-alerts .setting-row a{color:var(--cyan);font-size:11px;text-decoration:none;white-space:nowrap}
+#page-alerts .setting-row{min-height:48px}
+@media(max-width:380px){.official-frame-wrap{height:390px}.official-alerts-frame{height:520px}.radar-sourcebar{font-size:9px}}

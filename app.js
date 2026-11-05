@@ -229,3 +229,17 @@ async function initializeWeatherLocation(){
 }
 initializeWeatherLocation();
 startWeatherRefresh();
+
+/* Controles de recarga de visores oficiales SMN */
+function reloadOfficialFrame(id){
+  const frame=document.getElementById(id);
+  if(!frame)return;
+  const base=frame.src.split("?")[0];
+  frame.src=base+"?climago_refresh="+Date.now();
+}
+document.getElementById("radar-refresh")?.addEventListener("click",()=>{
+  reloadOfficialFrame("smn-radar-frame");
+});
+document.getElementById("alerts-refresh")?.addEventListener("click",()=>{
+  reloadOfficialFrame("smn-alerts-frame");
+});
