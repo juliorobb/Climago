@@ -243,3 +243,16 @@ document.getElementById("radar-refresh")?.addEventListener("click",()=>{
 document.getElementById("alerts-refresh")?.addEventListener("click",()=>{
   reloadOfficialFrame("smn-alerts-frame");
 });
+
+async function loadOfficialAlerts(){
+ const host=document.getElementById("smn-alerts-list"),updated=document.getElementById("alerts-updated");if(!host)return;
+ host.innerHTML='<div class="empty-state">Actualizando avisos del SMN…</div>';
+ try{
+  const r=await fetch("./data/smn-alerts.json?ts="+Date.now(),{cache:"no-store"});if(!r.ok)throw Error("HTTP "+r.status);
+  const data=await r.json(),alerts=Array.isArray(data.alerts)?data.alerts:[];
+  host.innerHTML=alerts.length?alerts.slice(0,20).map(a=>'<article class="smn-alert-card"><div class="smn-alert-top"><b>'+escapeHtml(a.title||"Aviso meteorológico")+'</b><span>'+escapeHtml(a.severity||"Aviso")+'</span></div><p>'+escapeHtml(a.description||"Consultá el detalle en el documento oficial.")+'</p><small>'+escapeHtml((a.areas||[]).join(" · ")||"Consultar zonas en el aviso")+'</small><a href="'+encodeURI(a.url||"https://www.smn.gob.ar/alertas")+'" target="_blank" rel="noopener">Ver aviso oficial ↗</a></article>').join(""):'<div class="empty-state">El feed consultado no informa avisos activos en este momento. Revisá el portal oficial para confirmar alertas y advertencias.</div>';
+  if(updated)updated.textContent="Fuente: SMN · Feed CAP. Última consulta: "+(data.generatedAt?new Date(data.generatedAt).toLocaleString("es-AR"):"sin fecha")+". Confirmá siempre la vigencia en el portal oficial.";
+ }catch(e){host.innerHTML='<div class="empty-state">No se pudo actualizar el listado automático. Consultá directamente el portal oficial del SMN.</div>';if(updated)updated.textContent="No se pudo verificar la actualización automática. Usá el portal oficial del SMN.";}
+}
+document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
+loadOfficialAlerts();
