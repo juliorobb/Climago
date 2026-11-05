@@ -1,0 +1,30 @@
+{
+  "source": "Servicio Meteorológico Nacional · CAP",
+  "feed": "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/rss_acpCAP.xml",
+  "generatedAt": "2026-11-05T04:25:47.176310+00:00",
+  "feedItems": 2,
+  "alerts": [
+    {
+      "title": "TORMENTAS FUERTES CON LLUVIAS INTENSAS Y OCASIONAL CAIDA DE GRANIZO",
+      "description": "Afectando parcialmente los siguientes Partidos y Departamentos: FORMOSA: Bermejo - Matacos - Ramon Lista.",
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/2026_11_05_0220_cap_es.xml",
+      "sent": "",
+      "severity": "Met",
+      "areas": [
+        "Afectando parcialmente los siguientes Partidos y Departamentos: FORMOSA: Bermejo - Matacos - Ramon Lista."
+      ],
+      "affectsCordoba": false
+    },
+    {
+      "title": "TORMENTAS FUERTES CON LLUVIAS INTENSAS Y OCASIONAL CAIDA DE GRANIZO",
+      "description": "Afectando parcialmente los siguientes Partidos y Departamentos: MISIONES: El Dorado - Gral Manuel Belgrano - Iguazu - Montecarlo - San Pedro.",
+      "url": "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/2026_11_05_0150_cap_es.xml",
+      "sent": "",
+      "severity": "Met",
+      "areas": [
+        "Afectando parcialmente los siguientes Partidos y Departamentos: MISIONES: El Dorado - Gral Manuel Belgrano - Iguazu - Montecarlo - San Pedro."
+      ],
+      "affectsCordoba": false
+    }
+  ]
+}
