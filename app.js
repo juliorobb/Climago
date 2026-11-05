@@ -246,11 +246,21 @@ function smnElement(tag,className,text){
   if(text!==undefined)node.textContent=String(text);
   return node;
 }
+function getSmnAlertState(alert){
+  const current=String(alert.state||"unconfirmed").toLowerCase();
+  if(current==="cancelled"||String(alert.status||"").toLowerCase()==="cancel"||String(alert.messageType||"").toLowerCase()==="cancel")return "cancelled";
+  const expiry=alert.expires?new Date(alert.expires):null;
+  if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=Date.now())return "expired";
+  const effective=alert.effective||alert.onset;
+  const start=effective?new Date(effective):null;
+  if(start&&!Number.isNaN(start.getTime())&&start.getTime()>Date.now())return "scheduled";
+  return current;
+}
 function createSmnAlertCard(alert){
   const card=smnElement("article","smn-alert-card");
   const top=smnElement("div","smn-alert-top");
   const title=smnElement("b","",alert.headline||alert.event||alert.title||"Aviso meteorológico");
-  const state=String(alert.state||"unknown").toLowerCase();
+  const state=getSmnAlertState(alert);
   const labels={active:"VIGENTE",scheduled:"PRÓXIMO",expired:"VENCIDO",cancelled:"CANCELADO",unconfirmed:"VIGENCIA A CONFIRMAR",not_currently_listed:"YA NO FIGURA EN EL FEED"};
   const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
   badge.dataset.state=state;
@@ -312,13 +322,14 @@ async function loadOfficialAlerts(){
     });
     if(!response.ok)throw new Error("El archivo de alertas respondió HTTP "+response.status);
     const contentType=response.headers.get("content-type")||"";
+    const staleCache=response.headers.get("X-ClimaGo-Data-Status")==="stale-cache";
     if(contentType&&!contentType.toLowerCase().includes("json"))throw new Error("El servidor no devolvió JSON (Content-Type: "+contentType+").");
     const data=await response.json();
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const alerts=data.alerts;
-    const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(String(a.state||"").toLowerCase()));
-    const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(String(a.state||"").toLowerCase()));
+    const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
+    const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
     renderSmnAlerts(activeHost,active,"No se identificaron avisos vigentes entre los documentos consultados.");
     renderSmnAlerts(historyHost,history,"No hay avisos vencidos o cancelados conservados en el historial.");
     const coverage=data.coverage||{};
@@ -329,7 +340,7 @@ async function loadOfficialAlerts(){
     const stale= data.generatedAt && (Date.now()-new Date(data.generatedAt).getTime()>90*60*1000);
     if(complete){
       if(statusTitle)statusTitle.textContent=active.length?"Se encontraron avisos oficiales vigentes":"Sin avisos vigentes en la consulta completa";
-      if(statusDetail)statusDetail.textContent="Se procesaron todos los documentos detectados. Los avisos anteriores se muestran por separado.";
+      if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||10)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados.";
       if(statusPanel)statusPanel.dataset.state="complete";
     }else{
       if(statusTitle)statusTitle.textContent=active.length?"Avisos encontrados · cobertura parcial":"No se pudo confirmar la ausencia de avisos";
@@ -338,6 +349,9 @@ async function loadOfficialAlerts(){
     }
     if(stale){
       if(statusDetail)statusDetail.textContent+=" Los datos recibidos tienen más de 90 minutos.";
+    }
+    if(staleCache){
+      if(statusDetail)statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono porque no fue posible consultar el servidor.";
     }
     if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
     const activeCount=document.getElementById("smn-active-count");

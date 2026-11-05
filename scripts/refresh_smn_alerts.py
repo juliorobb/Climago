@@ -13,8 +13,9 @@ from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 
 ROOT = "https://ssl.smn.gob.ar"
+# Feed ACP para avisos a muy corto plazo. Las alertas generales se toman
+# del índice CAP vivo; el RSS general puede conservar enlaces archivados.
 FEEDS = [
-    ("alertas", ROOT + "/feeds/CAP/rss_alertaCAP_nuevo.xml"),
     ("corto_plazo", ROOT + "/feeds/CAP/avisocortoplazo/rss_acpCAP.xml"),
 ]
 INDEX_URL = ROOT + "/CAP/AR.php"
@@ -121,7 +122,7 @@ def index_links(payload):
     parser = AnchorParser()
     parser.feed(payload.decode("utf-8", "replace"))
     candidates = list(parser.hrefs)
-    candidates.extend(re.findall(rb"""https?://[^\s\"'<>]+?\.xml(?:\?[^\s\"'<>]*)?""", payload.decode("utf-8", "replace"), re.I))
+    candidates.extend(re.findall(r"""https?://[^\s"'<>]+?\.xml(?:\?[^\s"'<>]*)?""", payload.decode("utf-8", "replace"), re.I))
     out = []
     for raw in candidates:
         url = valid_cap_url(str(raw), INDEX_URL)
@@ -200,14 +201,15 @@ def main():
     previous = load_previous()
     previous_alerts = previous.get("alerts", []) if isinstance(previous.get("alerts"), list) else []
     feed_status = []
-    discovered = []
+    rss_discovered = []
+    index_urls = []
     feed_failures = []
 
     for feed_name, feed_url in FEEDS:
         try:
             status, content_type, body = request_text(feed_url, "application/rss+xml, application/xml, text/xml, */*")
             links = rss_links(body, feed_url)
-            discovered.extend(links)
+            rss_discovered.extend(links)
             feed_status.append({
                 "name": feed_name, "httpStatus": status, "contentType": content_type,
                 "linksFound": len(links), "ok": True,
@@ -222,7 +224,6 @@ def main():
     try:
         status, content_type, body = request_text(INDEX_URL, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
         index_urls = index_links(body)
-        discovered.extend(index_urls)
         feed_status.append({
             "name": "indice_CAP_general", "httpStatus": status, "contentType": content_type,
             "linksFound": len(index_urls), "ok": True,
@@ -234,8 +235,20 @@ def main():
         feed_failures.append(f"indice_CAP_general: {error}")
         feed_status.append({"name": "indice_CAP_general", "httpStatus": None, "linksFound": 0, "ok": False})
 
-    unique_urls = list(dict.fromkeys(discovered))
-    selected_urls = unique_urls[:MAX_DOCUMENTS]
+    # Priorizar el índice vivo del SMN: el RSS general puede incluir rutas archivadas.
+    unique_urls = list(dict.fromkeys(index_urls + rss_discovered))
+    previous_coverage = previous.get("coverage", {}) if isinstance(previous.get("coverage"), dict) else {}
+    try:
+        cursor = int(previous_coverage.get("nextCursor", 0) or 0)
+    except (TypeError, ValueError):
+        cursor = 0
+    start_index = (cursor % len(unique_urls)) if unique_urls else 0
+    selected_count = min(MAX_DOCUMENTS, len(unique_urls))
+    selected_urls = [
+        unique_urls[(start_index + offset) % len(unique_urls)]
+        for offset in range(selected_count)
+    ] if unique_urls else []
+    next_cursor = (start_index + selected_count) % len(unique_urls) if unique_urls else 0
     truncated = len(unique_urls) > len(selected_urls)
     parsed_records = []
     failures = []
@@ -301,12 +314,23 @@ def main():
     all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
 
     downloaded = len(parsed_records)
+    # Se procesan hasta seis documentos por hora para no provocar bloqueos del SMN.
+    # La cobertura se considera completa cuando todo el catálogo vivo fue leído
+    # durante la ventana reciente, combinando las pasadas horarias.
+    fresh_cutoff = stamp - timedelta(hours=10)
+    fresh_urls = {item.get("url") for item in parsed_records if item.get("url")}
+    for old in previous_alerts:
+        if not isinstance(old, dict):
+            continue
+        old_url = old.get("url") or old.get("documentUrl")
+        old_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
+        if old_url in unique_urls and old_seen and old_seen >= fresh_cutoff:
+            fresh_urls.add(old_url)
+    catalog_fresh = bool(unique_urls) and all(url in fresh_urls for url in unique_urls)
     complete = (
-        not feed_failures and bool(unique_urls) and not truncated
+        not feed_failures and catalog_fresh
         and downloaded == len(selected_urls) and not failures
     )
-    if any(item.get("error", "").startswith("HTTP 429") for item in failures):
-        complete = False
     state = "ok" if complete else ("partial" if downloaded else "unavailable")
     output = {
         "schemaVersion": 2,
@@ -319,6 +343,9 @@ def main():
             "selected": len(selected_urls),
             "downloaded": downloaded,
             "truncated": truncated,
+            "nextCursor": next_cursor,
+            "freshWindowHours": 10,
+            "catalogFresh": catalog_fresh,
             "feedSources": feed_status,
             "feedErrors": feed_failures,
             "documentErrors": failures[:10],

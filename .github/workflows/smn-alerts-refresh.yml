@@ -26,6 +26,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Validate JavaScript and Python before contacting the SMN
+        run: |
+          node --check app.js
+          python -m py_compile scripts/refresh_smn_alerts.py
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
       - name: Commit refreshed data only when it changes
