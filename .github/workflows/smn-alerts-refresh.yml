@@ -5,6 +5,10 @@ on:
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
+      - "app.js"
+      - "service-worker.js"
+      - "index.html"
+      - "styles.css"
   workflow_dispatch:
   # GitHub scheduled workflows run only from the default branch.
   # This hourly schedule becomes active after an approved merge to main.
@@ -29,6 +33,7 @@ jobs:
       - name: Validate JavaScript and Python before contacting the SMN
         run: |
           node --check app.js
+          node --check service-worker.js
           python -m py_compile scripts/refresh_smn_alerts.py
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
