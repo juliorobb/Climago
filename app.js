@@ -4,7 +4,7 @@ function showPage(name){
   document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===`page-${name}`));
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===name || (["vehicle","locations","prevention","settings"].includes(name)&&b.dataset.page==="more")));
   window.scrollTo({top:0,behavior:"smooth"});
-  if(name==="radar") setTimeout(()=>{initWeatherMap();setTimeout(initRainViewerRadar,500);},120);
+  if(name==="radar") setTimeout(initWeatherMap,120);
 }
 document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-page]");
@@ -160,7 +160,6 @@ let lastWeatherRefresh=0;
 async function loadWeather(lat,lon,name){
   const requestId=++weatherRequestId;
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
-  if(typeof smnLoadAlerts==="function") smnLoadAlerts();
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
@@ -205,14 +204,14 @@ function renderDaily(daily){const host=document.querySelector(".forecast-list");
 function initWeatherMap(){
   if(!window.L){setText("map-weather-status","No se pudo cargar el componente del mapa. Revisá tu conexión.");return;}
   const coords=getSelectedCoordinates();activeCoords=coords;
-  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true,minZoom:3,maxZoom:7,zoomSnap:1,zoomDelta:1}).setView([coords.lat,coords.lon],6);weatherMap.getContainer().classList.add("weather-radar-canvas");}
-  setTimeout(()=>weatherMap.invalidateSize(),80);weatherMap.setView([coords.lat,coords.lon],6);setMapMarker(coords.lat,coords.lon,coords.name);loadWeather(coords.lat,coords.lon,coords.name);
+  if(!weatherMap){weatherMap=L.map("weather-map",{zoomControl:true}).setView([coords.lat,coords.lon],9);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(weatherMap);}
+  setTimeout(()=>weatherMap.invalidateSize(),80);weatherMap.setView([coords.lat,coords.lon],9);setMapMarker(coords.lat,coords.lon,coords.name);loadWeather(coords.lat,coords.lon,coords.name);
 }
 function setMapMarker(lat,lon,label){if(!weatherMap)return;if(mapMarker)mapMarker.remove();mapMarker=L.marker([lat,lon]).addTo(weatherMap).bindPopup(escapeHtml(label));}
 document.getElementById("radar-locate")?.addEventListener("click",()=>{
   const button=document.getElementById("radar-locate");if(!navigator.geolocation){setText("map-weather-status","Este dispositivo no permite acceder al GPS.");return;}
   button.disabled=true;button.textContent="Buscando…";
-  navigator.geolocation.getCurrentPosition(pos=>{const {latitude:lat,longitude:lon}=pos.coords;button.disabled=false;button.textContent="⌖ Mi ubicación";activeCoords={lat,lon,name:"Mi ubicación actual"};weatherMap?.setView([lat,lon],6);setMapMarker(lat,lon,"Mi ubicación actual");loadWeather(lat,lon,"Mi ubicación actual");},err=>{button.disabled=false;button.textContent="⌖ Mi ubicación";setText("map-weather-status",err.code===1?"Permiso de ubicación denegado. Habilitalo en los ajustes del teléfono.":"No se pudo obtener la ubicación. Intentá nuevamente.");},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  navigator.geolocation.getCurrentPosition(pos=>{const {latitude:lat,longitude:lon}=pos.coords;button.disabled=false;button.textContent="⌖ Mi ubicación";activeCoords={lat,lon,name:"Mi ubicación actual"};weatherMap?.setView([lat,lon],11);setMapMarker(lat,lon,"Mi ubicación actual");loadWeather(lat,lon,"Mi ubicación actual");},err=>{button.disabled=false;button.textContent="⌖ Mi ubicación";setText("map-weather-status",err.code===1?"Permiso de ubicación denegado. Habilitalo en los ajustes del teléfono.":"No se pudo obtener la ubicación. Intentá nuevamente.");},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
 });
 async function initializeWeatherLocation(){
   const saved=readLocations().find(place=>place.id===primaryId(readLocations())&&Number.isFinite(place.lat)&&Number.isFinite(place.lon));
@@ -231,173 +230,16 @@ async function initializeWeatherLocation(){
 initializeWeatherLocation();
 startWeatherRefresh();
 
-
-/* ClimaGo MVP: alertas generales CAP + avisos ACP del SMN */
-const SMN_DIAGNOSTIC_URL = "https://climago-smn-diagnostico.juliorobbles01.workers.dev/";
-let smnRefreshHandle = null;
-let smnRequestId = 0;
-let smnLastPayload = null;
-function smnZoneLabel(zones) {
-  if (Array.isArray(zones)) return zones.map(z => typeof z === "string" ? z : (z && (z.areaDesc || z.name)) || "").filter(Boolean).join(" · ");
-  return String(zones || "Zona indicada por el SMN");
+/* Controles de recarga de visores oficiales SMN */
+function reloadOfficialFrame(id){
+  const frame=document.getElementById(id);
+  if(!frame)return;
+  const base=frame.src.split("?")[0];
+  frame.src=base+"?climago_refresh="+Date.now();
 }
-function smnFormatTime(value) {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-}
-function smnRender(payload) {
-  const cap = payload.cap || {};
-  const capRows = Array.isArray(cap.alerts) ? cap.alerts : [];
-  const allRows = capRows.map(a => ({
-    ...a,
-    feedType:"CAP",
-    title:a.headline || a.event || "Alerta meteorológica",
-    zones:(a.areas||[]).map(x=>x.description).filter(Boolean),
-    affectsLocation:!!a.affectsLocation,
-    date:a.onset||a.effective||a.sent,
-    endDate:a.expires,
-    sourceLabel:"SMN · Alertas oficiales CAP"
-  }));
-  const relevant = allRows.filter(a => a.affectsLocation);
-  smnLastPayload = payload;
-  window.climagoLastSmnAlerts = allRows;
-  const host = document.getElementById("official-alert-list");
-  if (!host) return;
-  const capComplete = cap.coverageComplete === true && cap.dataStatus === "ok";
-  const capAvailable = ["ok","partial","rate_limited"].includes(cap.dataStatus);
-  const summary = document.getElementById("alerts-summary");
-  if (summary) summary.classList.toggle("has-alert", relevant.length > 0);
-  const coverageText = capComplete ? "Feed oficial CAP consultado completamente" :
-    cap.dataStatus === "rate_limited" ? "Consulta parcial: el SMN aplicó un límite temporal" :
-    capAvailable ? "Feed oficial CAP consultado parcialmente" : "Feed oficial CAP no disponible";
-  setText("alerts-summary-title", relevant.length ? relevant.length + " aviso(s) para tu ubicación" : capComplete ? "Sin alertas generales vigentes para el punto" : "No se pudo confirmar el estado completo de alertas");
-  setText("alerts-summary-detail", coverageText + ". Se comparan las coordenadas con las áreas publicadas por el SMN.");
-  setText("home-alert-text", relevant.length ? relevant.length + " aviso(s) para tu zona" : capComplete ? "Sin alertas generales vigentes" : "Consulta incompleta: revisá los avisos oficiales");
-  setText("home-alert-detail", capComplete ? "Consulta completa del feed CAP del SMN. Mantenete atento a las actualizaciones." : "La consulta fue parcial o no estuvo disponible. No se debe interpretar como ausencia de riesgo.");
-  const risk = document.getElementById("home-alert-status");
-  if (risk) {
-    risk.classList.toggle("risk-neutral", relevant.length === 0 && capComplete);
-    risk.classList.toggle("risk-danger", relevant.length > 0);
-  }
-  if (!allRows.length) {
-    const diag = cap.diagnostics || {};
-    const message = capComplete ? "El feed CAP del SMN se consultó completo y no informa alertas vigentes para este punto." :
-      cap.dataStatus === "rate_limited" ? "El SMN está limitando temporalmente las descargas (HTTP 429). Se intentaron " + (diag.documentsAttempted || 0) + " documentos y se descargaron " + (diag.documentsDownloaded || 0) + ". No se puede confirmar si hay avisos para esta ubicación." :
-      "No hay avisos disponibles para mostrar. La consulta del feed CAP no fue completa; esto no significa que no exista riesgo meteorológico.";
-    host.innerHTML = '<div class="panel empty-state">'+escapeHtml(message)+'</div>';
-  } else {
-    host.innerHTML = allRows.slice().sort((a,b) => Number(b.affectsLocation)-Number(a.affectsLocation)).map(a => {
-      const title = escapeHtml(a.title || "Aviso meteorológico");
-      const zones = escapeHtml(smnZoneLabel(a.zones));
-      const state = a.affectsLocation ? "AFECTA TU UBICACIÓN" : "OTRA ZONA";
-      const severity = String(a.severity || "").toLowerCase();
-      const cls = ["extreme","severe"].includes(severity) ? "danger" : ["moderate"].includes(severity) ? "warning" : "watch";
-      const start = smnFormatTime(a.date), end = smnFormatTime(a.endDate);
-      const description = a.description ? '<p>'+escapeHtml(a.description)+'</p>' : '';
-      return '<article class="official-alert-card '+cls+(a.affectsLocation?' for-location':'')+'"><div class="official-alert-top"><span>⚠</span><small>'+state+'</small></div><b>'+title+'</b>'+description+'<p>'+zones+'</p><div class="official-alert-time">Vigencia: '+start+' a '+end+'</div><small class="official-alert-source">'+escapeHtml(a.sourceLabel||"SMN")+'</small></article>';
-    }).join("");
-  }
-  const stamp = payload.testedAt || cap.generatedAt || Date.now();
-  setText("alerts-updated", "Actualizado " + new Date(stamp).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));
-}
-async function smnLoadAlerts() {
-  const requestId = ++smnRequestId;
-  const coords = activeCoords && Number.isFinite(activeCoords.lat) && Number.isFinite(activeCoords.lon) ? {...activeCoords} : getSelectedCoordinates();
-  const host = document.getElementById("official-alert-list");
-  setText("alerts-summary-detail","Consultando el feed oficial CAP del SMN para "+(coords.name||"la ubicación seleccionada")+"…");
-  try {
-    const url = new URL(SMN_DIAGNOSTIC_URL);
-    url.searchParams.set("resource","alerts");
-    url.searchParams.set("lat",coords.lat);
-    url.searchParams.set("lon",coords.lon);
-    const response = await fetch(url.toString(),{cache:"no-store"});
-    const cap = await response.json().catch(()=>({dataStatus:"unavailable",coverageComplete:false,alerts:[]}));
-    if(requestId!==smnRequestId)return;
-    if(!response.ok && !["partial","rate_limited"].includes(cap.dataStatus)) throw new Error("SMN HTTP "+response.status);
-    smnRender({cap,testedAt:new Date().toISOString(),location:coords});
-  } catch(error) {
-    if(requestId!==smnRequestId)return;
-    setText("alerts-summary-title","Avisos temporalmente no disponibles");
-    setText("alerts-summary-detail","No se pudo consultar el feed CAP del SMN. No se interpreta como ausencia de riesgo.");
-    setText("home-alert-text","Avisos oficiales temporalmente no disponibles");
-    setText("home-alert-detail","No se debe interpretar como ausencia de riesgo.");
-    const risk=document.getElementById("home-alert-status");
-    if(risk){risk.classList.remove("risk-neutral");risk.classList.remove("risk-danger");}
-    if(host)host.innerHTML='<div class="panel empty-state">No se pudieron cargar los avisos oficiales del SMN. Intentá actualizar más tarde.</div>';
-    setText("alerts-updated","Sin actualización");
-  }
-}
-document.getElementById("refresh-alerts")?.addEventListener("click",smnLoadAlerts);
-document.querySelectorAll('[data-page="alerts"]').forEach(el=>el.addEventListener("click",()=>smnLoadAlerts()));
-smnLoadAlerts();
-smnRefreshHandle=setInterval(()=>{if(document.visibilityState==="visible")smnLoadAlerts();},5*60*1000);
-
-/* Radar RainViewer: historial real y estado basado en la carga de mosaicos */
-let rainRadarFrames=[],rainRadarLayer=null,rainRadarIndex=0,rainRadarMapRef=null,rainRadarTimer=null,smnRadarLayer=null,rainRadarHost="https://tilecache.rainviewer.com",rainRadarLoadStats={loaded:0,errors:0};
-async function initRainViewerRadar(){
-  if(!weatherMap||!window.L)return;
-  rainRadarMapRef=weatherMap;
-  const status=document.getElementById("map-weather-status");
-  try{
-    if(status)status.textContent="Consultando imágenes de radar…";
-    const response=await fetch("https://api.rainviewer.com/public/weather-maps.json",{cache:"no-store"});
-    if(!response.ok)throw new Error("RainViewer HTTP "+response.status);
-    const data=await response.json();
-    const frames=data.radar?.past||[];
-    if(!frames.length)throw new Error("No hay imágenes históricas disponibles.");
-    rainRadarFrames=frames;rainRadarHost=data.host||rainRadarHost;
-    const slider=document.getElementById("radar-frame-slider");
-    slider.max=String(frames.length-1);slider.value=String(frames.length-1);slider.disabled=false;
-    rainRadarIndex=frames.length-1;
-    showRainViewerFrame(rainRadarIndex,rainRadarHost);
-    const play=document.getElementById("radar-play");if(play)play.disabled=false;
-    setText("map-weather-detail","Radar RainViewer · últimas 2 horas · pasos de 10 minutos. Esperando imágenes del mapa…");
-    setText("radar-frame-label","Imágenes recientes · "+frames.length+" pasos");
-  }catch(error){
-    const play=document.getElementById("radar-play");if(play)play.disabled=true;
-    if(status)status.textContent="Radar no disponible en este momento";
-    document.getElementById("radar-toggle-rain")?.classList.remove("active");
-    setText("map-weather-detail","No se pudo obtener la secuencia de RainViewer ("+(error?.message||"error de conexión")+").");
-    setText("radar-frame-time","Sin datos");
-  }
-}
-function showRainViewerFrame(index,host){
-  if(!rainRadarFrames.length||!rainRadarMapRef)return;
-  rainRadarIndex=Math.max(0,Math.min(index,rainRadarFrames.length-1));
-  const frame=rainRadarFrames[rainRadarIndex],base=host||rainRadarHost;
-  const url=base+frame.path+"/256/{z}/{x}/{y}/2/1_1.png";
-  if(rainRadarLayer)rainRadarLayer.remove();
-  rainRadarLoadStats={loaded:0,errors:0};
-  rainRadarLayer=L.tileLayer(url,{tileSize:256,opacity:.88,transparent:true,maxNativeZoom:7,maxZoom:7,updateWhenIdle:true,keepBuffer:1,attribution:'Weather data © <a href="https://www.rainviewer.com/">RainViewer</a>'});
-  rainRadarLayer.on("tileload",()=>{
-    rainRadarLoadStats.loaded++;
-    if(document.getElementById("radar-frame-slider")?.value!==String(rainRadarIndex))return;
-    const status=document.getElementById("map-weather-status");
-    if(status)status.textContent="Imágenes de radar recibidas · RainViewer";
-    setText("map-weather-detail","Se recibieron "+rainRadarLoadStats.loaded+" mosaicos de radar. Si no aparecen ecos de color en esta zona y horario, la imagen no registra precipitación detectable.");
-  });
-  rainRadarLayer.on("tileerror",()=>{
-    rainRadarLoadStats.errors++;
-    const status=document.getElementById("map-weather-status");
-    if(status&&rainRadarLoadStats.loaded===0)status.textContent="No se pudieron cargar las imágenes del radar";
-    if(rainRadarLoadStats.loaded===0)setText("map-weather-detail","Error al descargar mosaicos de RainViewer. Revisar conexión, disponibilidad y dirección de las imágenes.");
-  });
-  rainRadarLayer.addTo(rainRadarMapRef);
-  const date=new Date(frame.time*1000);
-  setText("radar-frame-time",date.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})+" · "+date.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}));
-  const slider=document.getElementById("radar-frame-slider");if(slider)slider.value=String(rainRadarIndex);
-}
-document.getElementById("radar-frame-slider")?.addEventListener("input",e=>showRainViewerFrame(Number(e.target.value)));
-document.getElementById("radar-play")?.addEventListener("click",()=>{
-  const button=document.getElementById("radar-play");
-  if(rainRadarTimer){clearInterval(rainRadarTimer);rainRadarTimer=null;button.textContent="▶ Reproducir";return;}
-  if(!rainRadarFrames.length)return;
-  button.textContent="Ⅱ Pausar";
-  rainRadarTimer=setInterval(()=>{const next=(rainRadarIndex+1)%rainRadarFrames.length;showRainViewerFrame(next);},900);
+document.getElementById("radar-refresh")?.addEventListener("click",()=>{
+  reloadOfficialFrame("smn-radar-frame");
 });
-document.getElementById("radar-toggle-rain")?.addEventListener("click",()=>{
-  const on=!!rainRadarLayer;
-  if(on){rainRadarLayer.remove();rainRadarLayer=null;document.getElementById("radar-toggle-rain").classList.remove("active");}
-  else{document.getElementById("radar-toggle-rain").classList.add("active");initRainViewerRadar();}
+document.getElementById("alerts-refresh")?.addEventListener("click",()=>{
+  reloadOfficialFrame("smn-alerts-frame");
 });
