@@ -49,9 +49,12 @@
       <section class="page" id="page-radar">
         <div class="page-heading"><div><small>OBSERVACIÓN EN TIEMPO REAL</small><h1>Radar meteorológico</h1></div><span class="pill">Fuente SMN</span></div>
         <div class="radar-sourcebar"><span>📡 Servicio Meteorológico Nacional · SINARAME</span><button class="secondary-button map-gps" id="radar-refresh">↻ Actualizar</button></div>
-        <div class="radar-sourcebar"><a class="secondary-button" href="https://radares.hidricosargentina.gob.ar/" target="_blank" rel="noopener">Abrir radar oficial SINARAME ↗</a></div>
-        <div class="official-frame-wrap panel"><iframe id="smn-radar-frame" title="Radar meteorológico oficial del SMN" src="https://radares.hidricosargentina.gob.ar/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
-        <p class="map-attribution-note">Visor oficial del Sistema Nacional de Radares Meteorológicos (SINARAME). Seleccioná el mosaico o radar Córdoba/Alejandro Roca. Si el visor no carga dentro de ClimaGo, abrilo directamente desde el botón. Es observación, no pronóstico ni alerta oficial.</p>
+        <div class="panel setting-row" style="padding:18px;display:block">
+          <b style="display:block;margin-bottom:8px">Radar oficial SINARAME</b>
+          <span style="display:block;margin-bottom:14px">Abrí el visor nacional para seleccionar Mosaico Argentina, Mosaico Centro o los radares Córdoba y Alejandro Roca, con imágenes observadas y controles de secuencia.</span>
+          <a class="secondary-button" href="https://radares.hidricosargentina.gob.ar/" target="_blank" rel="noopener" style="display:inline-flex;text-decoration:none">Abrir radar oficial ↗</a>
+        </div>
+        <p class="map-attribution-note">El radar oficial se abre en el visor del organismo para evitar un panel incrustado que no carga en algunos teléfonos. Es observación, no pronóstico ni alerta oficial.</p>
         <div class="section-heading"><h2>Tu ubicación en el mapa</h2><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
         <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span></div>
         <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
