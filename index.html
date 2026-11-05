@@ -50,8 +50,15 @@
         <div class="page-heading"><div><small>SEGUIMIENTO METEOROLÓGICO</small><h1>Radar</h1></div><span class="pill">Mapa interactivo</span></div>
         <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
         <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
-        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">La capa de radar meteorológico se incorporará con una fuente adecuada.</span></div>
-        <p class="map-attribution-note">Mapa © OpenStreetMap · El mapa y la ubicación funcionan; todavía no se muestran ecos de radar ni trayectoria de tormentas.</p>
+        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">Condiciones meteorológicas de la ubicación seleccionada.</span></div>
+        <div class="radar-access panel">
+          <b>Imágenes oficiales de radar</b>
+          <p>Consultá los ecos reales y su evolución en los visores oficiales. Se abren directamente para conservar sus controles y su actualización.</p>
+          <a class="secondary-button radar-link" href="https://ws2.smn.gob.ar/radar" target="_blank" rel="noopener noreferrer">Abrir radar SMN ↗</a>
+          <a class="secondary-button radar-link" href="https://www.argentina.gob.ar/obras-publicas/recursos-hidricos/sistema-nacional-de-radares-meteorologicos-sinarame/imagenes" target="_blank" rel="noopener noreferrer">Abrir radar SINARAME ↗</a>
+          <small>El mapa de ClimaGo muestra ubicación y tiempo local. Los ecos no están superpuestos porque todavía no existe una fuente pública de teselas autorizada y verificada para Leaflet.</small>
+        </div>
+        <p class="map-attribution-note">Mapa © OpenStreetMap · Radar: Servicio Meteorológico Nacional / SINARAME. La imagen del radar es observación, no pronóstico ni alerta oficial.</p>
       </section>
 
       <section class="page" id="page-forecast">
@@ -64,12 +71,19 @@
       </section>
 
       <section class="page" id="page-alerts">
-        <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas</h1></div></div>
-        <article class="panel alerts-unavailable"><span>△</span><div><b>Avisos oficiales todavía no conectados</b><p>Cuando integremos una fuente oficial, mostraremos aquí el nivel de riesgo, la zona afectada, el horario de vigencia y el organismo emisor.</p></div></article>
-        <article class="alert-card warning"><span>🛡️</span><div><b>Prevención</b><p>Consultá las recomendaciones según el pronóstico y las condiciones de tu zona.</p></div></article>
-        <div class="section-heading"><h2>Configurar avisos</h2><button class="text-button" data-page="settings">Ajustes</button></div>
-        <div class="panel setting-row"><span>🌩️ Tormentas y granizo</span><span class="muted-note">Configurable próximamente</span></div>
-        <div class="panel setting-row"><span>🌡️ Calor y frío</span><span class="muted-note">Configurable próximamente</span></div>
+        <div class="page-heading"><div><small>AVISOS Y PREVENCIÓN</small><h1>Alertas oficiales</h1></div><span class="pill">SMN · CAP</span></div>
+        <div class="radar-sourcebar"><span>Información oficial del Servicio Meteorológico Nacional</span><button class="secondary-button map-gps" id="alerts-refresh" type="button">↻ Actualizar</button></div>
+        <article class="panel alerts-unavailable" id="smn-alerts-status" role="status" aria-live="polite">
+          <span>△</span><div><b id="smn-alerts-status-title">Consultando los últimos avisos oficiales del SMN…</b><p id="smn-alerts-status-detail">La aplicación verificará la respuesta y la cobertura de los documentos CAP disponibles.</p></div>
+        </article>
+        <div class="section-heading"><h2>Vigentes, próximos o a confirmar</h2><span class="muted-note" id="smn-active-count">—</span></div>
+        <div id="smn-alerts-active" class="smn-alerts-list panel"><div class="empty-state">Consultando avisos oficiales…</div></div>
+        <div class="section-heading"><h2>Historial: vencidos, cancelados o retirados</h2><span class="muted-note" id="smn-history-count">—</span></div>
+        <div id="smn-alerts-history" class="smn-alerts-list panel"><div class="empty-state">Todavía no hay avisos anteriores cargados.</div></div>
+        <p class="map-attribution-note" id="alerts-updated">Fuente: Servicio Meteorológico Nacional · CAP. La ausencia de avisos en una consulta parcial no significa ausencia de riesgo.</p>
+        <div class="section-heading"><h2>Fuentes oficiales</h2></div>
+        <div class="panel setting-row"><span>Alertas y advertencias</span><a href="https://www.smn.gob.ar/alertas" target="_blank" rel="noopener">Portal SMN ↗</a></div>
+        <div class="panel setting-row"><span>Avisos a muy corto plazo</span><a href="https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/rss_acpCAP.xml" target="_blank" rel="noopener">Feed CAP ↗</a></div>
       </section>
 
       <section class="page" id="page-myday">
