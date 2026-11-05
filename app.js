@@ -354,7 +354,9 @@ async function loadOfficialAlerts(){
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
-    const stale= data.generatedAt && (Date.now()-new Date(data.generatedAt).getTime()>90*60*1000);
+    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
+    // Una fecha ausente o inválida nunca debe presentarse como información reciente.
+    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
     if(complete){
       if(statusTitle)statusTitle.textContent=currentAlerts?"Se encontraron avisos oficiales vigentes":scheduledAlerts?"Se encontraron avisos oficiales programados":unconfirmedAlerts?"Hay avisos cuya vigencia debe confirmarse":"Sin avisos vigentes en la cobertura consultada";
       if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||14)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados.";
@@ -365,7 +367,9 @@ async function loadOfficialAlerts(){
       if(statusPanel)statusPanel.dataset.state="partial";
     }
     if(stale){
-      if(statusDetail)statusDetail.textContent+=" Los datos recibidos tienen más de 90 minutos.";
+      if(statusTitle)statusTitle.textContent="Datos oficiales desactualizados o sin fecha verificable";
+      if(statusDetail)statusDetail.textContent+=" La última actualización supera los 90 minutos o no tiene una fecha válida. No uses esta información para confirmar que no hay riesgo.";
+      if(statusPanel)statusPanel.dataset.state="stale";
     }
     if(staleCache){
       if(statusDetail)statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono porque no fue posible consultar el servidor.";
