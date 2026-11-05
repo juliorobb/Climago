@@ -1,4 +1,4 @@
-name: Refresh SMN alerts data
+name: Refresh SMN CAP alerts
 on:
   workflow_dispatch:
   schedule:
@@ -15,58 +15,34 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: mvp-alertas-radar-2026-11-03
-          fetch-depth: 1
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: 20
-      - name: Download and normalize official SMN CAP alerts
+          python-version: "3.12"
+      - name: Download and normalize SMN CAP RSS
         run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const FEED = 'https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/rss_acpCAP.xml';
-          const decode = s => s.replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g,'$1')
-            .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-            .replace(/&quot;/g,'"').replace(/&apos;/g,"'")
-            .replace(/&#(\\d+);/g,(_,n)=>String.fromCodePoint(Number(n)));
-          const tag = (s,n) => {
-            const re = new RegExp('<(?:[\\w.-]+:)?'+n+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/(?:[\\w.-]+:)?'+n+'\\s*>','i');
-            const m=s.match(re); return m ? decode(m[1]).replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim() : '';
-          };
-          const blocks = (s,n) => [...s.matchAll(new RegExp('<(?:[\\w.-]+:)?'+n+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/(?:[\\w.-]+:)?'+n+'\\s*>','gi'))].map(x=>x[1]);
-          (async()=>{
-            const fr=await fetch(FEED,{headers:{'User-Agent':'ClimaGo/1.0'}});
-            if(!fr.ok) throw new Error('SMN RSS HTTP '+fr.status);
-            const xml=await fr.text();
-            const items=blocks(xml,'item');
-            const links=[...new Set(items.map(x=>tag(x,'link')).filter(x=>/^https:\\/\\/ssl\\.smn\\.gob\\.ar\\/feeds\\/CAP\\/.+\\.xml$/i.test(x)))].slice(0,50);
-            const alerts=[];
-            for(let i=0;i<links.length;i+=3){
-              const batch=await Promise.all(links.slice(i,i+3).map(async url=>{
-                try{
-                  const r=await fetch(url,{headers:{'User-Agent':'ClimaGo/1.0'}});
-                  if(!r.ok) return null;
-                  const body=await r.text(), info=blocks(body,'info')[0]||body;
-                  const areas=blocks(info,'area').map(a=>tag(a,'areaDesc')).filter(Boolean);
-                  return {
-                    id:tag(body,'identifier'), title:tag(info,'headline')||tag(info,'event')||tag(items.find(x=>tag(x,'link')===url)||'','title'),
-                    description:tag(info,'description'), instruction:tag(info,'instruction'),
-                    severity:tag(info,'severity'), urgency:tag(info,'urgency'), certainty:tag(info,'certainty'),
-                    sent:tag(body,'sent'), effective:tag(info,'effective'), onset:tag(info,'onset'), expires:tag(info,'expires'),
-                    areas, affectsCordoba:areas.some(a=>/c[oó]rdoba/i.test(a)), url
-                  };
-                }catch{return null;}
-              }));
-              alerts.push(...batch.filter(Boolean));
-            }
-            const now=Date.now();
-            const active=alerts.filter(a=>!a.expires || !Number.isFinite(Date.parse(a.expires)) || Date.parse(a.expires)>=now);
-            active.sort((a,b)=>Number(b.affectsCordoba)-Number(a.affectsCordoba)||Date.parse(b.sent||0)-Date.parse(a.sent||0));
-            const data={source:'Servicio Meteorológico Nacional · CAP',feed:FEED,generatedAt:new Date().toISOString(),feedItems:items.length,documentsFetched:alerts.length,alerts:active};
-            fs.mkdirSync('data',{recursive:true});
-            fs.writeFileSync('data/smn-alerts.json',JSON.stringify(data,null,2)+'\\n');
-            console.log(JSON.stringify({feedItems:items.length,documentsFetched:alerts.length,activeAlerts:active.length,cordoba:active.filter(a=>a.affectsCordoba).length}));
-          })().catch(e=>{console.error(e);process.exit(1)});
-          NODE
+          python - <<'PY'
+          import json, urllib.request, xml.etree.ElementTree as ET, os
+          from datetime import datetime, timezone
+          url = "https://ssl.smn.gob.ar/feeds/CAP/avisocortoplazo/rss_acpCAP.xml"
+          req = urllib.request.Request(url, headers={"User-Agent":"ClimaGo/1.0"})
+          with urllib.request.urlopen(req, timeout=30) as response: root = ET.fromstring(response.read())
+          channel = root.find("./channel")
+          items = []
+          for item in (channel.findall("item") if channel is not None else []):
+              get = lambda name: (item.findtext(name) or "").strip()
+              title, link, desc = get("title"), get("link"), get("description")
+              if not title or not link.startswith("https://ssl.smn.gob.ar/feeds/CAP/"): continue
+              items.append({"title":title,"description":desc,"url":link,"sent":get("pubDate"),
+                            "severity":get("category") or "Aviso oficial",
+                            "areas":[desc] if desc else [],
+                            "affectsCordoba":"córdoba" in (title+" "+desc).lower()})
+          items.sort(key=lambda x: (not x["affectsCordoba"], x["sent"]))
+          data={"source":"Servicio Meteorológico Nacional · CAP","feed":url,
+                "generatedAt":datetime.now(timezone.utc).isoformat(),"feedItems":len(items),"alerts":items[:30]}
+          os.makedirs("data",exist_ok=True)
+          with open("data/smn-alerts.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False,indent=2)
+          print("Avisos publicados:",len(items))
+          PY
       - name: Commit refreshed data
         run: |
           git config user.name "github-actions[bot]"
