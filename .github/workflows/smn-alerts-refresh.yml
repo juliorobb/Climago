@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [feature/alertas-smn-estables-v1]
+    branches: [main, feature/alertas-smn-estables-v1]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -10,8 +10,7 @@ on:
       - "index.html"
       - "styles.css"
   workflow_dispatch:
-  # GitHub scheduled workflows run only from the default branch.
-  # This hourly schedule becomes active after an approved merge to main.
+  # GitHub schedules run from the default branch (main).
   schedule:
     - cron: "17 * * * *"
 permissions:
@@ -26,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/alertas-smn-estables-v1
+          ref: ${{ github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
