@@ -23,7 +23,7 @@
     <main id="app-main">
       <section class="page active" id="page-home">
         <div class="location-line"><div class="location-copy"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div><div class="scenery-control"><button class="scenery-toggle" id="scenery-toggle" type="button">▧ Cambiar paisaje ▾</button><div class="scenery-picker home-scenery-picker" id="home-scenery-picker" hidden><button type="button" data-scenery-choice="sierras">Sierras</button><button type="button" data-scenery-choice="ciudad">Ciudad</button><button type="button" data-scenery-choice="mar">Mar</button></div></div></div>
-        <article class="weather-hero panel"><img id="weather-scenery" class="weather-scenery" src="https://upload.wikimedia.org/wikipedia/commons/6/6a/Paisaje_de_Sierras_Chicas_foto_de_camino_el_cuadrado.jpg" alt="" aria-hidden="true">
+        <article class="weather-hero panel"><img id="weather-scenery" class="weather-scenery" src="assets/scenery-sierras.svg" alt="" aria-hidden="true">
           <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
             <div><span>☀</span><b id="home-uv">UV —</b><small>Índice UV</small></div>
@@ -32,7 +32,6 @@
           </div>
           <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
         </article>
-        <p class="photo-credit">Paisaje: Camino del Cuadrado, Córdoba · Foto: Josefina Lucia Avendaño Isla · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a></p>
         <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
           <span class="risk-icon">⚠</span><span class="risk-copy"><small>Estado de alertas</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
         </button>
