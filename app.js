@@ -11,6 +11,10 @@ document.addEventListener("click",e=>{
   if(nav){e.preventDefault();showPage(nav.dataset.page);}
 });
 document.getElementById("location-shortcut")?.addEventListener("click",()=>showPage("radar"));
+document.getElementById("notification-button")?.addEventListener("click",()=>{
+  openDialog("Notificaciones",'<p class="notification-empty">No hay notificaciones nuevas.</p>',()=>{});
+  if(dialogSave)dialogSave.textContent="Cerrar";
+});
 
 const dialog=document.getElementById("simple-dialog"), dialogTitle=document.getElementById("dialog-title"), dialogContent=document.getElementById("dialog-content"), dialogSave=document.getElementById("dialog-save");
 let dialogAction=null;
