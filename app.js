@@ -399,7 +399,7 @@ loadOfficialAlerts();
 const SCENERY_IMAGES={
 sierras:"https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/8da37fde-12d6-4b57-b2bd-4eb74364aeaf/07b62977-3619-4ca9-9efb-ac9f0a9399c4/Use_the_uploaded_reference_image_as_the_exact_visual_guide_f.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNDY1NTMwOGNkZTM0ZjIxNCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5NDAzMjkwOH0.92OyGms8zWnhJd6mCuTgG_xGuW6VUwe7T9KptiMjfq0",
 ciudad:"https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/147d64d8-543a-4f0e-944f-dce87327a4e3/4dda4b9e-7945-4345-9644-bd6a3feb389e/Photorealistic_cinematic_landscape_background_only_for_a_pre.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMDE2MjA5YTQyYmQ4ZDE2MSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsImV4cCI6MTc5NDA1NjYxMn0.UVs4BzH7aLAxn1JmQWsGlT0mqFz1tDigaRtYuS0p9dI",
-mar:"PENDING"
+mar:"https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/0199d936-f40a-48df-98d7-9530e3a8024e/ec5e3390-d007-4ff1-97f1-d9849d1a8284/Photorealistic_cinematic_landscape_background_only_for_a_pre.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzZhMjljYmQ5N2ZiZTE2MCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsImV4cCI6MTc5NDEwNzMyNX0.x0LPI2SyZ1Rp5nrqMN86cysFiy9DXjWW0IsRrF0cLb8"
 };
 function sceneryChoice(){return localStorage.getItem("climagoScenery")||"sierras";}
 function setScenery(value){
