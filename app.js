@@ -391,3 +391,21 @@ async function loadOfficialAlerts(){
 }
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
 loadOfficialAlerts();
+
+function sceneryChoice(){return localStorage.getItem("climagoScenery")||"sierras";}
+function setScenery(value){
+  if(!["sierras","ciudad","mar"].includes(value))return;
+  localStorage.setItem("climagoScenery",value);
+  const hero=document.querySelector(".weather-hero"),image=document.getElementById("weather-scenery");
+  if(hero)hero.dataset.scenery=value;
+  if(image)image.src="assets/scenery-"+value+".svg";
+  document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.classList.toggle("selected",button.dataset.sceneryChoice===value));
+}
+document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.addEventListener("click",()=>setScenery(button.dataset.sceneryChoice)));
+setScenery(sceneryChoice());
+function updateSceneTime(){
+  const hero=document.querySelector(".weather-hero");if(!hero)return;
+  const hour=Number(new Intl.DateTimeFormat("en-US",{hour:"2-digit",hourCycle:"h23"}).format(new Date()));
+  hero.dataset.night=String(hour<6||hour>=19);
+}
+updateSceneTime();setInterval(updateSceneTime,60000);
