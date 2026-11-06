@@ -239,3 +239,12 @@
 #page-home .top-actions .icon-button{width:40px;height:40px;display:grid;place-items:center;padding:0}
 #page-home .top-actions .notification-button svg{display:block;width:23px;height:23px;fill:none;stroke:#43d5f1;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:380px){#page-home .weather-hero{height:370px;min-height:370px;padding:13px 9px 10px}#page-home .weather-hero .weather-meta{gap:5px}#page-home .weather-hero .weather-meta>div{padding:8px 2px}#page-home .weather-hero .data-source{font-size:8px}#page-home .scenery-toggle{padding:9px 9px;font-size:10px}}
+
+/* Fondo completo de paisajes en la tarjeta meteorológica */
+#page-home .weather-hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;background-color:#071b30!important}
+#page-home .weather-hero>.weather-scenery{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center 52%!important;z-index:0!important;opacity:1!important;pointer-events:none!important}
+#page-home .weather-hero:before{z-index:1!important;pointer-events:none!important}
+#page-home .weather-hero:after{z-index:1!important;pointer-events:none!important}
+#page-home .weather-hero>.weather-main,#page-home .weather-hero>.weather-meta,#page-home .weather-hero>.data-source{position:relative!important;z-index:2!important}
+#page-home .home-scenery-picker[hidden]{display:none!important}
+#page-home .scenery-toggle{gap:0!important}
