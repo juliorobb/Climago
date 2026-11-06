@@ -22,8 +22,9 @@
 
     <main id="app-main">
       <section class="page active" id="page-home">
-        <div class="location-line"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div>
-        <article class="weather-hero panel">
+        <div class="location-line"><span class="location-pin" aria-hidden="true">⌖</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina</button><span class="location-hint">Cambiar zona</span></div>
+        <article class="weather-hero panel" data-scenery="sierras">
+          <div class="weather-scene" aria-hidden="true"><span class="scene-sun"></span><span class="scene-cloud scene-cloud-one"></span><span class="scene-cloud scene-cloud-two"></span><span class="scene-hills"></span></div>
           <div class="weather-character" id="weather-character" aria-label="Personaje oficial del clima"><img id="weather-mascot" src="assets/mascot-sun.png" alt="Mascota ClimaGo: sol" /></div>
           <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
@@ -34,14 +35,14 @@
           <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
         </article>
         <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
-          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
+          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Verificando alertas oficiales…</b><small id="home-alert-detail">Consultando los últimos avisos del SMN.</small></span><span class="risk-chevron">›</span>
         </button>
         <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
         <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
         <button class="tip-card panel" id="home-recommendation" data-page="prevention">
           <span class="tip-title">Una recomendación para hoy</span>
           <span class="tip-content"><span class="tip-illustration" id="tip-illustration">☂</span><span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span></span>
-          <span class="tip-action">Ver recomendaciones <span>›</span></span>
+          <span class="tip-action">Ver recomendaciones y organizar mi día <span>›</span></span>
         </button>
 
       </section>
@@ -63,7 +64,7 @@
 
       <section class="page" id="page-forecast">
         <div class="page-heading"><div><small>EL TIEMPO EN TU ZONA</small><h1>Pronóstico</h1></div></div>
-        <div class="segmented"><button class="selected">Hoy</button><button>7 días</button><button>15 días</button></div>
+        <div class="segmented" id="forecast-range"><button class="selected" data-days="1">Hoy</button><button data-days="7">7 días</button><button data-days="14">14 días</button></div>
         <article class="forecast-today panel"><span>Hoy · Córdoba</span><div><span class="big-weather">🌤️</span><strong>28°</strong><span>18° mínima</span></div><p>Mayormente despejado · Datos de demostración</p></article>
         <div class="forecast-list panel">
           <div><b>Mañana</b><span>☀️</span><span>30° / 19°</span></div><div><b>Miércoles</b><span>🌧️</span><span>26° / 18°</span></div><div><b>Jueves</b><span>🌤️</span><span>29° / 18°</span></div><div><b>Viernes</b><span>☀️</span><span>31° / 20°</span></div><div><b>Sábado</b><span>⛈️</span><span>27° / 17°</span></div>
