@@ -164,7 +164,7 @@ async function loadWeather(lat,lon,name){
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,uv_index,precipitation_probability,precipitation,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max&forecast_days=16&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,apparent_temperature,weather_code,uv_index,precipitation_probability,precipitation,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max&forecast_days=16&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
@@ -173,7 +173,7 @@ async function loadWeather(lat,lon,name){
     setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),Number(c.is_day));
     if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
     const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
-    renderHourly(h,c.time);renderDaily(d);
+    renderHourly(h,c.time);renderHourlyDetail(h,c.time);renderDaily(d);
     setText("map-location-label",activeCoords.name);setText("map-weather-status",`${weatherText[code]||"Tiempo variable"} · ${Math.round(c.temperature_2m)}°`);setText("map-weather-detail",`Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${Math.round(c.relative_humidity_2m)}%. Datos de Open-Meteo.`);
     if(weatherMap){setMapMarker(lat,lon,`${activeCoords.name}: ${Math.round(c.temperature_2m)}° · ${weatherText[code]||"Tiempo variable"}`);}
   }catch(error){
@@ -213,6 +213,20 @@ function renderHourly(hourly,currentTime){
     items.push('<div class="hour"><small>'+(i===index?'Ahora':date.toLocaleTimeString('es-AR',{hour:'2-digit',hour12:false})+' h')+'</small><span>'+weatherEmoji(Number(hourly.weather_code[i]))+'</span><b>'+Math.round(hourly.temperature_2m[i])+'°</b>'+rain+'</div>');
   }
   host.innerHTML=items.join('');
+}
+function renderHourlyDetail(hourly,currentTime){
+  const host=document.getElementById('forecast-hourly');if(!host||!hourly)return;
+  let start=hourly.time.findIndex(t=>t>=currentTime);if(start<0)start=0;
+  const rows=[];
+  for(let i=start;i<Math.min(start+24,hourly.time.length);i++){
+    const time=new Date(hourly.time[i]).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hour12:false});
+    const prob=Number(hourly.precipitation_probability?.[i]??0),mm=Number(hourly.precipitation?.[i]??0),wind=Math.round(Number(hourly.wind_speed_10m?.[i]??0));
+    const humidity=Math.round(Number(hourly.relative_humidity_2m?.[i]??0)),uv=Math.round(Number(hourly.uv_index?.[i]??0));
+    const feels=Math.round(Number(hourly.apparent_temperature?.[i]??hourly.temperature_2m[i]));
+    const rain=prob>0?prob+'% · '+mm.toFixed(1)+' mm':'Sin lluvia prevista';
+    rows.push('<details class="forecast-hour-row"><summary><span class="hour-time">'+time+'</span><span class="hour-icon">'+weatherEmoji(Number(hourly.weather_code[i]))+'</span><span class="hour-rain-detail">'+rain+'</span><b class="hour-temp">'+Math.round(hourly.temperature_2m[i])+'°</b><span class="hour-wind">'+wind+' km/h</span></summary><div class="hour-extra"><span>Sensación '+feels+'°</span><span>Humedad '+humidity+'%</span><span>UV '+uv+'</span></div></details>');
+  }
+  host.innerHTML=rows.join('');
 }
 function renderDaily(daily){
   latestDailyForecast=daily;
