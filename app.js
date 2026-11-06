@@ -393,3 +393,23 @@ async function loadOfficialAlerts(){
 }
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
 loadOfficialAlerts();
+
+/* Selector de paisajes de Inicio: usa recursos locales del repositorio. */
+(()=>{
+ const images={sierras:"assets/scenery-sierras.svg",ciudad:"assets/scenery-ciudad.svg",mar:"assets/scenery-mar.svg"};
+ const image=document.getElementById("weather-scenery");
+ const hero=document.querySelector("#page-home .weather-hero");
+ const picker=document.getElementById("home-scenery-picker");
+ const toggle=document.getElementById("scenery-toggle");
+ if(!image||!hero||!picker||!toggle)return;
+ const saved=localStorage.getItem("climagoScenery");
+ function choose(name){
+  if(!images[name])name="sierras";
+  image.src=images[name];hero.dataset.scenery=name;
+  localStorage.setItem("climagoScenery",name);
+  picker.querySelectorAll("[data-scenery-choice]").forEach(b=>b.classList.toggle("selected",b.dataset.sceneryChoice===name));
+ }
+ toggle.addEventListener("click",()=>{picker.hidden=!picker.hidden;toggle.setAttribute("aria-expanded",String(!picker.hidden));});
+ picker.querySelectorAll("[data-scenery-choice]").forEach(b=>b.addEventListener("click",()=>{choose(b.dataset.sceneryChoice);picker.hidden=true;toggle.setAttribute("aria-expanded","false");}));
+ choose(saved||"sierras");
+})();
