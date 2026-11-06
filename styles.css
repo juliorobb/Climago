@@ -257,3 +257,18 @@
 #page-home .weather-hero>.weather-main,#page-home .weather-hero>.weather-meta,#page-home .weather-hero>.data-source{position:relative!important;z-index:2!important}
 #page-home .location-copy>span{display:none!important}
 #page-home .scenery-toggle:before{content:none!important;display:none!important}
+
+/* Inicio: tarjeta compacta con espacio para pronóstico y recomendaciones */
+#page-home .weather-hero{height:clamp(300px,38svh,365px)!important;min-height:300px!important;padding:12px 11px 9px!important;gap:8px!important}
+#page-home .weather-hero>.weather-scenery{object-fit:cover!important;object-position:center 52%!important}
+#page-home .weather-hero .temperature{font-size:clamp(48px,12vw,66px)!important}
+#page-home .weather-hero .condition{font-size:clamp(16px,4vw,19px)!important;margin-top:5px!important}
+#page-home .weather-hero .feels{font-size:11px!important;margin-top:4px!important}
+#page-home .weather-hero>.weather-meta{gap:6px!important}
+#page-home .weather-hero .weather-meta>div{padding:7px 2px!important;gap:3px!important;border-radius:12px!important}
+#page-home .weather-hero .weather-meta span{font-size:17px!important}
+#page-home .weather-hero .weather-meta b{font-size:clamp(10px,2.8vw,13px)!important}
+#page-home .weather-hero .weather-meta small{font-size:8px!important}
+#page-home .weather-hero>.data-source{font-size:8px!important}
+#page-home .location-copy>span{display:none!important}
+#page-home .top-actions .notification-button svg{width:23px!important;height:23px!important;fill:none!important;stroke:#43d5f1!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
