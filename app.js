@@ -397,16 +397,29 @@ function setScenery(value){
   if(!["sierras","ciudad","mar"].includes(value))return;
   localStorage.setItem("climagoScenery",value);
   const hero=document.querySelector("#page-home .weather-hero");
-  if(hero){
-    hero.dataset.scenery=value;
-    hero.style.backgroundImage="linear-gradient(90deg,rgba(3,17,31,.46),rgba(3,17,31,.08)),linear-gradient(0deg,rgba(3,17,31,.86),rgba(3,17,31,.02) 66%),url('assets/scenery-"+value+".svg')";
-    hero.style.backgroundSize="cover";
-    hero.style.backgroundPosition="center";
+  const image=document.getElementById("weather-scenery");
+  if(hero)hero.dataset.scenery=value;
+  if(image){
+    image.src="./assets/scenery-"+value+".svg";
+    image.alt="";
   }
   document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.classList.toggle("selected",button.dataset.sceneryChoice===value));
 }
-document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.addEventListener("click",()=>{setScenery(button.dataset.sceneryChoice);const picker=document.getElementById("home-scenery-picker");if(picker)picker.hidden=true;}));
-document.getElementById("scenery-toggle")?.addEventListener("click",()=>{const picker=document.getElementById("home-scenery-picker");if(picker)picker.hidden=!picker.hidden;});
+document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.addEventListener("click",()=>{
+  setScenery(button.dataset.sceneryChoice);
+  const picker=document.getElementById("home-scenery-picker");
+  const toggle=document.getElementById("scenery-toggle");
+  if(picker)picker.hidden=true;
+  if(toggle)toggle.setAttribute("aria-expanded","false");
+}));
+document.getElementById("scenery-toggle")?.addEventListener("click",()=>{
+  const picker=document.getElementById("home-scenery-picker");
+  const toggle=document.getElementById("scenery-toggle");
+  if(picker){
+    picker.hidden=!picker.hidden;
+    if(toggle)toggle.setAttribute("aria-expanded",String(!picker.hidden));
+  }
+});
 setScenery(sceneryChoice());
 function updateSceneTime(){
   const hero=document.querySelector(".weather-hero");if(!hero)return;
