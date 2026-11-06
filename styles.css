@@ -302,3 +302,43 @@
 #page-home .weather-hero .weather-meta small{font-size:8px!important}
 #page-home .weather-hero>.data-source{font-size:7.5px!important}
 #page-home .location-copy>span{display:none!important}
+
+
+/* Ajuste solicitado: ubicación y selector integrados en el paisaje; composición compacta */
+#page-home{padding-top:4px!important}
+#page-home .weather-hero{height:clamp(330px,41svh,370px)!important;min-height:330px!important;padding:0!important;display:block!important;position:relative!important;overflow:hidden!important;border-radius:22px!important}
+#page-home .weather-hero>.weather-scenery{object-position:center 72%!important}
+#page-home .weather-hero>.location-line{position:absolute!important;z-index:4!important;top:0!important;left:0!important;right:0!important;margin:0!important;padding:14px 14px 13px!important;background:linear-gradient(180deg,rgba(3,15,29,.76),rgba(3,15,29,.12))!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+#page-home #current-location-label{font-size:clamp(13px,3.5vw,16px)!important;text-shadow:0 1px 6px #001!important}
+#page-home .scenery-toggle{background:rgba(4,22,39,.68)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;padding:9px 11px!important;font-size:11px!important}
+#page-home .weather-hero>.weather-main{position:absolute!important;z-index:2!important;top:76px!important;left:18px!important;right:12px!important}
+#page-home .weather-hero .temperature{font-size:clamp(43px,10.5vw,58px)!important;line-height:1!important}
+#page-home .weather-hero .condition{font-size:clamp(14px,3.6vw,17px)!important}
+#page-home .weather-hero .feels{font-size:10px!important}
+#page-home .weather-hero>.weather-meta{position:absolute!important;z-index:3!important;left:12px!important;right:12px!important;bottom:30px!important;margin:0!important;gap:6px!important}
+#page-home .weather-hero .weather-meta>div{padding:6px 2px!important;min-height:57px!important;background:rgba(4,15,30,.66)!important;border-color:rgba(226,75,184,.72)!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important}
+#page-home .weather-hero .weather-meta span{font-size:15px!important}
+#page-home .weather-hero .weather-meta b{font-size:11px!important}
+#page-home .weather-hero .weather-meta small{font-size:8px!important}
+#page-home .weather-hero>.data-source{position:absolute!important;z-index:3!important;bottom:7px!important;right:12px!important;margin:0!important;font-size:7px!important}
+#page-home .risk-card{margin-top:9px!important;min-height:62px!important;padding:9px 11px!important}
+#page-home .risk-icon{font-size:23px!important}
+#page-home .risk-copy{gap:2px!important}
+#page-home .risk-copy b{font-size:12px!important}
+#page-home .risk-copy>small:last-child{font-size:8px!important}
+#page-home .section-heading{margin:12px 1px 7px!important}
+#page-home .section-heading h2{font-size:14px!important}
+#page-home .hourly-strip{gap:6px!important}
+#page-home .hour{padding:6px 3px!important;gap:3px!important}
+#page-home .hour span{font-size:19px!important}
+#page-home .hour b{font-size:11px!important}
+#page-home .hour small{font-size:9px!important}
+#page-home .tip-card{margin-top:9px!important;padding:10px 12px!important;gap:6px!important}
+#page-home .tip-title{font-size:12px!important}
+#page-home .tip-content{gap:9px!important}
+#page-home .tip-illustration{width:40px!important;height:40px!important;flex-basis:40px!important;font-size:23px!important}
+#page-home .tip-copy{gap:3px!important}
+#page-home .tip-copy b{font-size:12px!important}
+#page-home .tip-copy span{font-size:10px!important;line-height:1.3!important}
+#page-home .tip-action{font-size:10px!important;padding-top:4px!important}
+@media(max-height:800px){#page-home .weather-hero{height:320px!important;min-height:320px!important}#page-home .weather-hero>.weather-main{top:68px!important}#page-home .risk-card{min-height:58px!important}#page-home .tip-action{display:none!important}}
