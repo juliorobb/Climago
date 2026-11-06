@@ -13,7 +13,13 @@ self.addEventListener("fetch",event=>{
     }).catch(()=>caches.match(event.request).then(cached=>cached||caches.match("./index.html"))));
     return;
   }
+  const sameOrigin=url.origin===self.location.origin;
   event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{
-    const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));return response;
-  }).catch(()=>caches.match("./index.html"))));
+    if(response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));}
+    return response;
+  }).catch(error=>{
+    // Nunca devolver index.html como respuesta a una imagen externa: eso produce iconos rotos.
+    if(!sameOrigin)throw error;
+    return caches.match("./index.html").then(fallback=>fallback||Promise.reject(error));
+  })));
 });
