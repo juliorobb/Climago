@@ -398,7 +398,7 @@ function setScenery(value){
   localStorage.setItem("climagoScenery",value);
   const hero=document.querySelector(".weather-hero"),image=document.getElementById("weather-scenery");
   if(hero)hero.dataset.scenery=value;
-  if(image)image.src=value==="sierras"?"assets/climago-sierras-night.jpg":("assets/scenery-"+value+".svg");
+  if(image)image.src=value==="sierras"?"assets/scenery-sierras.svg":("assets/scenery-"+value+".svg");
   document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.classList.toggle("selected",button.dataset.sceneryChoice===value));
 }
 document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.addEventListener("click",()=>{setScenery(button.dataset.sceneryChoice);const picker=document.getElementById("home-scenery-picker");if(picker)picker.hidden=true;}));
