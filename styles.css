@@ -208,3 +208,12 @@ input:focus,textarea:focus{border-color:#0799b6}
 .settings-panel{background:#fff}
 .muted-note,.empty-state{color:#718391}
 @media(max-width:380px){.weather-hero{grid-template-columns:72px 1fr;padding:12px}.weather-character{width:70px;height:78px}.weather-character img{width:88px;height:88px}.temperature{font-size:43px}}
+
+/* Pronóstico ampliado y probabilidades de lluvia */
+.forecast-list>div{grid-template-columns:minmax(0,1fr) 34px 86px;column-gap:7px;row-gap:3px}
+.forecast-list .daily-rain{grid-column:1/-1;font-size:10px;color:#1684a1;text-align:left}
+.hour .hour-rain{font-size:9px;color:#1684a1;font-weight:600;white-space:nowrap}
+#forecast-range button{cursor:pointer}
+#page-forecast .forecast-list{max-height:none}
+#page-forecast .forecast-list>div{min-height:54px}
+#home-alert-status .risk-icon{font-weight:800}
