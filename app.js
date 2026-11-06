@@ -398,7 +398,7 @@ function setScenery(value){
   localStorage.setItem("climagoScenery",value);
   const hero=document.querySelector(".weather-hero"),image=document.getElementById("weather-scenery");
   if(hero)hero.dataset.scenery=value;
-  if(image)image.src=value==="sierras"?"https://upload.wikimedia.org/wikipedia/commons/6/6a/Paisaje_de_Sierras_Chicas_foto_de_camino_el_cuadrado.jpg":value==="ciudad"?"https://commons.wikimedia.org/wiki/Special:FilePath/Skyline%20of%20downtown%20Cordoba%20city%2C%20Argentina%202013-02-24.jpg":"https://upload.wikimedia.org/wikipedia/commons/7/76/Playa_en_Mar_del_Plata.jpg";
+  if(image){image.src="assets/scenery-"+value+".svg";image.alt="Paisaje ilustrado "+value;}
   document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.classList.toggle("selected",button.dataset.sceneryChoice===value));
 }
 document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.addEventListener("click",()=>{setScenery(button.dataset.sceneryChoice);const picker=document.getElementById("home-scenery-picker");if(picker)picker.hidden=true;}));
