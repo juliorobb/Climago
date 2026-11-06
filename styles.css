@@ -193,11 +193,19 @@
 
 /* FIX definitivo de capas del paisaje y control del selector */
 #page-home .weather-hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;background:#071b30!important}
-#page-home .weather-hero>.weather-scenery{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center 55%!important;z-index:-1!important;opacity:1!important}
-#page-home .weather-hero:after{z-index:0!important;pointer-events:none!important}
+#page-home .weather-hero>.weather-scenery{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center 55%!important;z-index:0!important;opacity:1!important}
+#page-home .weather-hero:after{z-index:1!important;pointer-events:none!important}
 #page-home .weather-hero>.weather-main,#page-home .weather-hero>.weather-meta,#page-home .weather-hero>.data-source{position:relative!important;z-index:2!important}
 #page-home .scenery-control{position:relative!important;flex:0 0 auto!important}
 #page-home button.scenery-toggle{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;background:#09253beF!important;color:#f4f9ff!important;border:1px solid #25c9ed!important;border-radius:22px!important;padding:10px 12px!important;font:600 11px Inter,system-ui,sans-serif!important;box-shadow:0 0 12px #25c9ed33!important}
 #page-home .location-line{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
 #page-home .location-copy{min-width:0!important}
 #page-home #current-location-label{white-space:nowrap!important;font-size:clamp(12px,3.5vw,16px)!important}
+
+/* Correcciones verificadas solicitadas: campana y fondo a pantalla completa */
+#page-home .weather-hero>.weather-scenery{z-index:0!important;display:block!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important}
+#page-home .weather-hero:after{z-index:1!important}
+#page-home .weather-hero>.weather-main,#page-home .weather-hero>.weather-meta,#page-home .weather-hero>.data-source{z-index:2!important;position:relative!important}
+#page-home .top-actions .notification-button{display:grid!important;place-items:center!important}
+#page-home .top-actions .notification-button svg{display:block!important;width:25px!important;height:25px!important;fill:none!important;stroke:#35c9e8!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+#page-home button.scenery-toggle{background:#09253b!important;color:#f4f9ff!important;border:1px solid #35c9e8!important;border-radius:24px!important;padding:9px 12px!important;font-size:11px!important;font-weight:600!important;appearance:none!important;-webkit-appearance:none!important}
