@@ -345,6 +345,16 @@ function renderSmnAlerts(host,alerts,emptyText){
   for(const alert of alerts)host.append(createSmnAlertCard(alert));
 }
 let smnAlertsRequest=0;
+function updateHomeAlert(state,title,detail){
+  const card=document.getElementById("home-alert-status");
+  if(!card)return;
+  card.classList.remove("risk-neutral","risk-watch","risk-warning","risk-danger");
+  card.classList.add(state==="clear"?"risk-neutral":state==="active"?"risk-warning":"risk-watch");
+  setText("home-alert-text",title);
+  setText("home-alert-detail",detail);
+  const icon=card.querySelector(".risk-icon");
+  if(icon)icon.textContent=state==="clear"?"✓":state==="active"?"!":"…";
+}
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
@@ -379,6 +389,13 @@ async function loadOfficialAlerts(){
     const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
     const scheduledAlerts=alerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
     const unconfirmedAlerts=alerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
+    if(complete&&!stale){
+      if(currentAlerts)updateHomeAlert("active",currentAlerts+" alerta"+(currentAlerts===1?" activa":"s activas"),"Tocá para consultar zonas, vigencia y recomendaciones oficiales.");
+      else if(scheduledAlerts||unconfirmedAlerts)updateHomeAlert("pending","Hay avisos por confirmar","Consultá el detalle de los avisos oficiales.");
+      else updateHomeAlert("clear","Sin alertas activas","Avisos oficiales verificados en la última consulta.");
+    }else{
+      updateHomeAlert("pending","No se pudo confirmar el estado de alertas","La consulta está incompleta o desactualizada. Revisá el detalle.");
+    }
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
@@ -409,6 +426,7 @@ async function loadOfficialAlerts(){
     if(historyCount)historyCount.textContent=String(history.length);
   }catch(error){
     if(requestId!==smnAlertsRequest)return;
+    updateHomeAlert("pending","No se pudieron verificar las alertas","No hay confirmación del estado oficial. Tocá para intentar nuevamente.");
     if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
     if(statusDetail)statusDetail.textContent=String(error?.message||error)+" Revisá la conexión; esta falla no significa que no haya alertas.";
     if(statusPanel)statusPanel.dataset.state="error";
