@@ -100,3 +100,111 @@
 #page-alerts .setting-row a{color:var(--cyan);font-size:11px;text-decoration:none;white-space:nowrap}
 #page-alerts .setting-row{min-height:48px}
 @media(max-width:380px){.smn-alerts-list{padding:9px}.smn-alert-top{gap:6px}.smn-alert-badge{font-size:8px;padding:4px 5px}}
+
+
+/* ClimaGo: identidad clara y ventana meteorológica */
+:root{--bg:#f2f6f8;--panel:#ffffff;--panel2:#f7fafb;--line:#dce6eb;--cyan:#0799b6;--blue:#168bff;--text:#263b49;--muted:#718391;--yellow:#f5b943;--red:#d84c59;--green:#159b70}
+body{background:#eaf0f3;color:var(--text)}
+.app-shell{background:#f5f8fa;box-shadow:0 0 30px #18384a12}
+.topbar{background:#ffffffed;border-bottom:1px solid #dfe8ed}
+.brand{color:#263b49}
+.icon-button{background:#f4f9fb;border-color:#d8e5eb;color:#078eaa}
+main{padding:15px 14px 22px}
+.panel{background:#fff;border:1px solid #e0e8ed;box-shadow:0 3px 12px #18384a0c}
+.location-line{justify-content:flex-start;gap:8px;margin:0 2px 10px;min-height:28px}
+.location-pin{color:#0799b6;font-size:18px;font-weight:700}
+.location-line .text-button{padding:5px 0;color:#405766;font-size:12px}
+.location-hint{margin-left:auto;color:#8a9aa5;font-size:10px}
+.weather-hero{position:relative;isolation:isolate;overflow:hidden;min-height:190px;padding:14px 14px 12px;grid-template-columns:88px 1fr;gap:4px 10px;background:#4e9bc2;border:1px solid #9ccfe2;color:#fff}
+.weather-hero:before,.weather-hero:after{display:none}
+.weather-scene{position:absolute;inset:0;z-index:0;overflow:hidden;background:linear-gradient(180deg,#53b4e8 0%,#b7e5f4 60%,#e8f5ed 100%)}
+.weather-scene:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 82% 17%,#fff9 0 2%,transparent 3%),linear-gradient(180deg,transparent 50%,#ffffff18)}
+.scene-sun{position:absolute;width:62px;height:62px;right:14%;top:12%;border-radius:50%;background:#ffe47a;box-shadow:0 0 28px #fff2a9aa}
+.scene-cloud{position:absolute;width:90px;height:28px;border-radius:40px;background:#fff;opacity:.86;filter:drop-shadow(0 5px 5px #2b658522)}
+.scene-cloud:before,.scene-cloud:after{content:"";position:absolute;bottom:8px;border-radius:50%;background:inherit}
+.scene-cloud:before{width:38px;height:38px;left:13px}.scene-cloud:after{width:48px;height:48px;left:37px}
+.scene-cloud-one{top:25%;left:4%;transform:scale(.7)}
+.scene-cloud-two{top:7%;left:42%;transform:scale(.48);opacity:.6}
+.scene-hills{position:absolute;left:-8%;right:-8%;bottom:-22px;height:88px;background:linear-gradient(165deg,#75bd86,#438b70 65%,#2d725e);border-radius:50% 50% 0 0}
+.scene-hills:before{content:"";position:absolute;left:28%;right:-8%;bottom:20px;height:80px;background:linear-gradient(160deg,#9bc99a,#4f9a77);border-radius:55% 50% 0 0;transform:rotate(-5deg)}
+.weather-hero[data-weather="cloud"] .weather-scene{background:linear-gradient(180deg,#93aebe,#d8e3e8 70%,#e5eceb)}
+.weather-hero[data-weather="cloud"] .scene-sun{opacity:.2}
+.weather-hero[data-weather="cloud"] .scene-cloud{opacity:1;background:#f8fbfc}
+.weather-hero[data-weather="rain"] .weather-scene{background:linear-gradient(180deg,#526f86,#a9c2cf 65%,#c7d8d6)}
+.weather-hero[data-weather="rain"] .scene-sun{display:none}
+.weather-hero[data-weather="rain"] .scene-cloud{background:#657d8e;opacity:1}
+.weather-hero[data-weather="rain"] .scene-cloud:after{box-shadow:8px 23px 0 -17px #dff5ff,28px 29px 0 -17px #dff5ff}
+.weather-hero[data-weather="storm"] .weather-scene{background:linear-gradient(180deg,#34475d,#8499a8 65%,#a8b8b9)}
+.weather-hero[data-weather="storm"] .scene-sun{display:none}
+.weather-hero[data-weather="storm"] .scene-cloud{background:#435264;opacity:1}
+.weather-hero[data-weather="cold"] .weather-scene{background:linear-gradient(180deg,#9ed4ed,#e7f5f8 65%,#d9e8e6)}
+.weather-hero[data-weather="cold"] .scene-sun{background:#fff1b7;opacity:.75}
+.weather-hero[data-weather="wind"] .weather-scene{background:linear-gradient(180deg,#76bfd2,#d2edf0 65%,#dcebe1)}
+.weather-hero[data-weather="heat"] .weather-scene{background:linear-gradient(180deg,#f3b76c,#f8dfad 65%,#d5c78e)}
+.weather-hero[data-weather="heat"] .scene-hills{background:linear-gradient(165deg,#b7ad6c,#8b9259 65%,#6d7b4c)}
+.weather-character,.weather-main,.weather-meta,.data-source{position:relative;z-index:1}
+.weather-character{width:86px;height:86px;border:0;background:transparent;border-radius:0}
+.weather-character img{width:102px;height:102px;object-fit:contain;filter:drop-shadow(0 4px 6px #23475c55)}
+.weather-main{text-shadow:0 1px 3px #173d5366}
+.temperature{font-size:48px;line-height:1}
+.condition{font-size:13px;color:#fff}
+.feels{color:#f3fbff}
+.weather-meta{gap:7px;margin-top:10px}
+.weather-meta>div{background:#ffffffdf;border:1px solid #ffffff;color:#294454;padding:8px 5px;box-shadow:0 2px 7px #315b7020}
+.weather-meta span{color:#0799b6}
+.weather-meta b{color:#294454}
+.weather-meta small{color:#718391}
+.data-source{color:#f5fbff;text-shadow:0 1px 3px #173d5366}
+.risk-card{background:#eef8f3;border-color:#cce9d9;color:#294b3e}
+.risk-copy>small:first-child,.risk-copy>small:last-child{color:#688276}
+.risk-copy b{color:#245a43}
+.risk-neutral{background:#eef8f3;border-color:#cce9d9}
+.risk-watch{background:#fff8e8;border-color:#f0dca8}
+.risk-warning{background:#fff2e8;border-color:#f0c6a8}
+.risk-danger{background:#fff0f1;border-color:#efc2c7}
+.section-heading h2{color:#2e4654}
+.hour{background:#fff;border:1px solid #dce7ed;color:#304958;box-shadow:0 2px 8px #18384a0a}
+.hour small{color:#738694}
+.hour b{color:#263f4e}
+.tip-card{background:linear-gradient(115deg,#fff9e8,#f4f8ff);border:1px solid #e8d9a8;color:#344b58;box-shadow:0 3px 12px #18384a0c}
+.tip-title{color:#987321}
+.tip-illustration{background:#fff0bd;color:#8b681a}
+.tip-copy b{color:#344b58}
+.tip-copy span{color:#617582}
+.tip-action{color:#087f9d;border-top-color:#dce8ed}
+.bottom-nav{background:#fff;border-top:1px solid #dce6eb;box-shadow:0 -4px 16px #1b3a4b0b}
+.nav-item{color:#758794}
+.nav-item.active{color:#e34aa5}
+.page-heading h1{color:#2c4351}
+.pill{color:#087f9d;border-color:#c5e2ea}
+.segmented{background:#eaf1f4;border-color:#dce6eb}
+.segmented button{color:#607482}
+.segmented .selected{background:#e94ca5;color:#fff}
+.forecast-today,.forecast-list{background:#fff;color:#304958}
+.forecast-list>div{border-bottom-color:#e5edf1}
+.forecast-list span:last-child{color:#536a78}
+input,select,textarea{background:#fff;border-color:#d4e0e6;color:#263b49}
+input:focus,textarea:focus{border-color:#0799b6}
+.menu-row{background:#fff;border-color:#e0e8ed;color:#344c5a}
+.menu-row small{color:#718391}
+.secondary-button{background:#edf6f8;border-color:#cce1e8;color:#176b83}
+.primary-button{background:#e94ca5;color:#fff}
+.dialog-card,dialog{background:#fff;color:#263b49}
+.dialog-card label{color:#607482}
+.dialog-close{color:#526a78}
+.alerts-unavailable{background:#fff;border-color:#dce6eb;color:#304958}
+.alerts-unavailable p{color:#718391}
+.smn-alert-card{background:#fff;border-color:#dce6eb}
+.smn-alert-top b{color:#2e4654}
+.smn-alert-card p{color:#536b79}
+.smn-alert-card small{color:#718391}
+.radar-access{background:#fff}
+.radar-access>b{color:#304958}
+.radar-access>p,.radar-access>small{color:#718391}
+.prevention-current{background:#fff8e8;border-color:#ecdfb9;color:#344b58}
+.prevention-current>small{color:#94752c}
+.prevention-current p{color:#617582}
+.prevention-current>div>span{background:#fff0bd}
+.settings-panel{background:#fff}
+.muted-note,.empty-state{color:#718391}
+@media(max-width:380px){.weather-hero{grid-template-columns:72px 1fr;padding:12px}.weather-character{width:70px;height:78px}.weather-character img{width:88px;height:88px}.temperature{font-size:43px}}
