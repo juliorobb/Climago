@@ -272,3 +272,33 @@
 #page-home .weather-hero>.data-source{font-size:8px!important}
 #page-home .location-copy>span{display:none!important}
 #page-home .top-actions .notification-button svg{width:23px!important;height:23px!important;fill:none!important;stroke:#43d5f1!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+
+/* Pulido visual ClimaGo Inicio: foto integrada y métricas translúcidas */
+#page-home .weather-hero{
+ height:clamp(285px,36svh,340px)!important;
+ min-height:285px!important;
+ padding:10px 10px 8px!important;
+ gap:7px!important;
+}
+#page-home .weather-hero:after{
+ background:linear-gradient(90deg,rgba(3,13,27,.48),rgba(3,13,27,.12) 76%),linear-gradient(0deg,rgba(3,13,27,.65),rgba(3,13,27,.10) 55%,rgba(3,13,27,.18))!important;
+}
+#page-home .weather-hero .temperature{font-size:clamp(46px,11.5vw,62px)!important}
+#page-home .weather-hero .condition{font-size:clamp(15px,3.8vw,18px)!important;margin-top:4px!important}
+#page-home .weather-hero .feels{font-size:10px!important;margin-top:3px!important}
+#page-home .weather-hero>.weather-meta{gap:6px!important}
+#page-home .weather-hero .weather-meta>div{
+ background:rgba(4,18,36,.40)!important;
+ backdrop-filter:blur(7px)!important;
+ -webkit-backdrop-filter:blur(7px)!important;
+ border:1px solid rgba(226,75,184,.58)!important;
+ border-radius:12px!important;
+ padding:6px 2px!important;
+ box-shadow:0 1px 10px rgba(7,15,31,.16)!important;
+ gap:2px!important;
+}
+#page-home .weather-hero .weather-meta span{font-size:16px!important}
+#page-home .weather-hero .weather-meta b{font-size:clamp(10px,2.7vw,12px)!important}
+#page-home .weather-hero .weather-meta small{font-size:8px!important}
+#page-home .weather-hero>.data-source{font-size:7.5px!important}
+#page-home .location-copy>span{display:none!important}
