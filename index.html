@@ -7,7 +7,7 @@
   <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=inicio-20261106f">
+  <link rel="stylesheet" href="styles.css?v=inicio-20261106g">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ClimaGo</title>
 </head>
@@ -24,7 +24,7 @@
       <section class="page active" id="page-home">
         <div class="location-line"><div class="location-copy"><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div><div class="scenery-control"><button class="scenery-toggle" id="scenery-toggle" type="button" aria-expanded="false" aria-controls="home-scenery-picker">Cambiar paisaje ▾</button><div class="scenery-picker home-scenery-picker" id="home-scenery-picker" hidden><button type="button" data-scenery-choice="sierras">Sierras</button><button type="button" data-scenery-choice="ciudad">Ciudad</button><button type="button" data-scenery-choice="mar">Mar</button></div></div></div>
         <article class="weather-hero panel" data-scenery="sierras" aria-label="Estado del tiempo y paisaje seleccionado">
-          <img class="weather-scenery" id="weather-scenery" src="./assets/scenery-sierras.svg" alt="" aria-hidden="true">
+          <img class="weather-scenery" id="weather-scenery" src="" alt="" aria-hidden="true" fetchpriority="high">
           <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
             <div><span>☀</span><b id="home-uv">UV —</b><small>Índice UV</small></div>
@@ -157,6 +157,6 @@
     </form>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=inicio-20261106f"></script>
+  <script src="app.js?v=inicio-20261106g"></script>
 </body>
 </html>
