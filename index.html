@@ -17,13 +17,13 @@
       <a class="brand" href="#" data-page="home" aria-label="ClimaGo inicio">
         <span>Clima<span class="cyan">Go</span></span>
       </a>
-      <button class="icon-button" id="location-shortcut" aria-label="Abrir radar">◎</button>
+      <div class="top-actions"><button class="icon-button" id="location-shortcut" aria-label="Abrir radar">◎</button><button class="icon-button" data-page="alerts" aria-label="Notificaciones">♧</button><button class="icon-button" data-page="settings" aria-label="Configuración">⚙</button></div>
     </header>
 
     <main id="app-main">
       <section class="page active" id="page-home">
-        <div class="location-line"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div>
-        <article class="weather-hero panel">
+        <div class="location-line"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button><button class="scenery-toggle" id="scenery-toggle" type="button">⌁ Cambiar paisaje ▾</button></div><div class="scenery-picker home-scenery-picker" id="home-scenery-picker" hidden><button type="button" data-scenery-choice="sierras">Sierras</button><button type="button" data-scenery-choice="ciudad">Ciudad</button><button type="button" data-scenery-choice="mar">Mar</button></div>
+        <article class="weather-hero panel"><img id="weather-scenery" class="weather-scenery" src="assets/climago-sierras-night.jpg" alt="" aria-hidden="true">
           <div class="weather-character" id="weather-character" aria-label="Personaje oficial del clima"><img id="weather-mascot" src="assets/mascot-sun.png" alt="Mascota ClimaGo: sol" /></div>
           <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
@@ -34,12 +34,12 @@
           <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
         </article>
         <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
-          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
+          <span class="risk-icon">⚠</span><span class="risk-copy"><small>Estado de alertas</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
         </button>
         <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
         <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
         <button class="tip-card panel" id="home-recommendation" data-page="prevention">
-          <span class="tip-title">Una recomendación para hoy</span>
+          <span class="tip-title">Recomendación para hoy</span>
           <span class="tip-content"><span class="tip-illustration" id="tip-illustration">☂</span><span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span></span>
           <span class="tip-action">Ver recomendaciones <span>›</span></span>
         </button>
