@@ -224,3 +224,18 @@ input:focus,textarea:focus{border-color:#0799b6}
 .weather-hero[data-night="true"] .scene-cloud{background:#9baebe;opacity:.65}
 .weather-hero[data-night="true"] .scene-hills{background:linear-gradient(165deg,#304e4c,#203e3e 65%,#193239)}
 .weather-hero[data-night="true"] .scene-hills:before{background:linear-gradient(160deg,#526d63,#34594f)}
+
+/* Pronóstico horario simple, con detalles desplegables */
+.forecast-hourly{padding:0 12px;margin-bottom:14px}
+.forecast-hour-row{border-bottom:1px solid #e5edf1}
+.forecast-hour-row:last-child{border-bottom:0}
+.forecast-hour-row summary{list-style:none;display:grid;grid-template-columns:48px 30px minmax(0,1fr) 42px 52px;align-items:center;gap:5px;min-height:58px;cursor:pointer}
+.forecast-hour-row summary::-webkit-details-marker{display:none}
+.hour-time{font-size:11px;font-weight:700;color:#405866}
+.hour-icon{font-size:22px;text-align:center}
+.hour-rain-detail{font-size:10px;color:#1684a1;line-height:1.3}
+.hour-temp{font-size:14px;text-align:right;color:#304958}
+.hour-wind{font-size:10px;text-align:right;color:#718391}
+.hour-extra{display:flex;flex-wrap:wrap;gap:8px 15px;padding:0 0 12px 53px;font-size:10px;color:#718391}
+.forecast-hour-row[open] summary{background:#f8fbfc}
+@media(max-width:360px){.forecast-hour-row summary{grid-template-columns:43px 26px minmax(0,1fr) 38px 45px;gap:3px}.hour-rain-detail,.hour-wind{font-size:9px}}
