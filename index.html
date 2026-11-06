@@ -7,7 +7,7 @@
   <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=inicio-20261106c">
+  <link rel="stylesheet" href="styles.css?v=inicio-20261106d">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ClimaGo</title>
 </head>
@@ -17,13 +17,13 @@
       <a class="brand" href="#" data-page="home" aria-label="ClimaGo inicio">
         <span>Clima<span class="cyan">Go</span></span>
       </a>
-      <div class="top-actions"><button class="icon-button notification-button" data-page="alerts" aria-label="Notificaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button><button class="icon-button" data-page="settings" aria-label="Configuración">⚙</button></div>
+      <div class="top-actions"><button class="icon-button notification-button" data-page="alerts" aria-label="Notificaciones" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-2.5 7.5-2.5 9h17C20.5 15.5 18 15 18 8Z"/><path d="M10 21h4"/></svg></button><button class="icon-button" data-page="settings" aria-label="Configuración">⚙</button></div>
     </header>
 
     <main id="app-main">
       <section class="page active" id="page-home">
         <div class="location-line"><div class="location-copy"><span>UBICACIÓN</span><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div><div class="scenery-control"><button class="scenery-toggle" id="scenery-toggle" type="button">▧ Cambiar paisaje ▾</button><div class="scenery-picker home-scenery-picker" id="home-scenery-picker" hidden><button type="button" data-scenery-choice="sierras">Sierras</button><button type="button" data-scenery-choice="ciudad">Ciudad</button><button type="button" data-scenery-choice="mar">Mar</button></div></div></div>
-        <article class="weather-hero panel"><img id="weather-scenery" class="weather-scenery" src="assets/scenery-sierras.svg" alt="" aria-hidden="true">
+        <article class="weather-hero panel" data-scenery="sierras" aria-label="Estado del tiempo y paisaje seleccionado">
           <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
           <div class="weather-meta">
             <div><span>☀</span><b id="home-uv">UV —</b><small>Índice UV</small></div>
@@ -156,6 +156,6 @@
     </form>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=inicio-20261106c"></script>
+  <script src="app.js?v=inicio-20261106d"></script>
 </body>
 </html>
