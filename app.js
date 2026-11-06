@@ -402,6 +402,7 @@ ciudad:"https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/14
 mar:"https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/0199d936-f40a-48df-98d7-9530e3a8024e/ec5e3390-d007-4ff1-97f1-d9849d1a8284/Photorealistic_cinematic_landscape_background_only_for_a_pre.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzZhMjljYmQ5N2ZiZTE2MCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsImV4cCI6MTc5NDEwNzMyNX0.x0LPI2SyZ1Rp5nrqMN86cysFiy9DXjWW0IsRrF0cLb8"
 };
 function sceneryChoice(){return localStorage.getItem("climagoScenery")||"sierras";}
+// Evita que el service worker trate una respuesta fallida de imagen como HTML.
 function setScenery(value){
   if(!["sierras","ciudad","mar"].includes(value))return;
   localStorage.setItem("climagoScenery",value);
