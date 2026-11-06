@@ -389,6 +389,12 @@ async function loadOfficialAlerts(){
     const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
     const scheduledAlerts=alerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
     const unconfirmedAlerts=alerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
+    const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
+    const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
+    const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
+    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
+    // Una fecha ausente o inválida nunca debe presentarse como información reciente.
+    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
     if(complete&&!stale){
       if(currentAlerts)updateHomeAlert("active",currentAlerts+" alerta"+(currentAlerts===1?" activa":"s activas"),"Tocá para consultar zonas, vigencia y recomendaciones oficiales.");
       else if(scheduledAlerts||unconfirmedAlerts)updateHomeAlert("pending","Hay avisos por confirmar","Consultá el detalle de los avisos oficiales.");
@@ -396,12 +402,6 @@ async function loadOfficialAlerts(){
     }else{
       updateHomeAlert("pending","No se pudo confirmar el estado de alertas","La consulta está incompleta o desactualizada. Revisá el detalle.");
     }
-    const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
-    const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
-    const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
-    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
-    // Una fecha ausente o inválida nunca debe presentarse como información reciente.
-    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
     if(complete){
       if(statusTitle)statusTitle.textContent=currentAlerts?"Se encontraron avisos oficiales vigentes":scheduledAlerts?"Se encontraron avisos oficiales programados":unconfirmedAlerts?"Hay avisos cuya vigencia debe confirmarse":"Sin avisos vigentes en la cobertura consultada";
       if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||14)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados.";
