@@ -401,6 +401,7 @@ function setScenery(value){
   if(hero)hero.dataset.scenery=value;
   if(image){
     image.src="./assets/scenery-"+value+".svg";
+    image.style.display="block";
     image.alt="";
   }
   document.querySelectorAll("[data-scenery-choice]").forEach(button=>button.classList.toggle("selected",button.dataset.sceneryChoice===value));
