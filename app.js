@@ -214,7 +214,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 let latestDailyForecast=null;
-let forecastDays=7;
+let forecastDays=1;
 function renderHourly(hourly,currentTime){
   const host=document.getElementById('home-hourly');if(!host||!hourly)return;
   let index=hourly.time.findIndex(t=>t>=currentTime);if(index<0)index=0;
