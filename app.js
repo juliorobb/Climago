@@ -138,7 +138,7 @@ function getSelectedCoordinates(){
   return {...DEFAULT_COORDS};
 }
 
-function setWeatherVisual(code,temperature,wind){
+function setWeatherVisual(code,temperature,wind,weatherTime){
   const hero=document.querySelector('.weather-hero');
   const img=document.getElementById('weather-mascot');
   if(!hero||!img)return;
@@ -151,6 +151,12 @@ function setWeatherVisual(code,temperature,wind){
   else if(temperature>=35 && [0,1,2].includes(code)){type='heat';label='calor';}
   else if(temperature<=2){type='cold';label='frío';}
   hero.dataset.weather=type;
+  // Open-Meteo devuelve current.time en la zona horaria solicitada (timezone=auto).
+  // Leer la hora local directamente evita que el huso del teléfono cambie el paisaje.
+  const localHour=Number(String(weatherTime||"").slice(11,13));
+  const hour=Number.isFinite(localHour)&&String(weatherTime||"").length>=13?localHour:new Date().getHours();
+  hero.dataset.phase=(hour>=7&&hour<19)?"day":"night";
+  hero.dataset.sky=([95,96,99].includes(code)?"storm":[51,53,55,61,63,65,80,81,82].includes(code)?"rain":[3,45,48,71,73,75,77,85,86].includes(code)?"overcast":code===2?"partly":"clear");
   img.src=`assets/mascot-${type}.png`;
   img.alt=`Mascota ClimaGo: ${label}`;
 }
@@ -169,7 +175,7 @@ async function loadWeather(lat,lon,name){
     if(requestId!==weatherRequestId)return;
     const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code),uvIndex=h.uv_index?.[Math.max(0,h.time.findIndex(t=>t>=c.time))]??d.uv_index_max?.[0]??0;
     lastWeatherRefresh=Date.now();
-    setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m));
+    setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),c.time);
     if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
     const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
     renderHourly(h,c.time);renderDaily(d);
@@ -396,7 +402,7 @@ loadOfficialAlerts();
 
 /* Selector de paisajes de Inicio: usa recursos locales del repositorio. */
 (()=>{
- const images={sierras:"assets/scenery-sierras.svg",ciudad:"assets/scenery-ciudad.svg",mar:"assets/scenery-mar.svg"};
+ const images={sierras:"assets/landscapes/sierras.jpg",ciudad:"assets/landscapes/ciudad.jpg",mar:"assets/landscapes/mar.jpg"};
  const image=document.getElementById("weather-scenery");
  const hero=document.querySelector("#page-home .weather-hero");
  const picker=document.getElementById("home-scenery-picker");
