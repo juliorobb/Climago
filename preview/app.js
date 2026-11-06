@@ -164,7 +164,7 @@ function setWeatherVisual(code,temperature,wind,isDay){
   if(isDay===0&&type==='sun'){type='cloud';label='noche despejada';}
   hero.dataset.weather=type;
   hero.dataset.night=isDay===0?'true':'false';
-  img.src=`assets/mascot-${type}.png`;
+  img.src=`../assets/mascot-${type}.png`;
   img.alt=`Mascota ClimaGo: ${label}`;
 }
 
