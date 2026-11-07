@@ -206,3 +206,32 @@
 .weather-hero[data-sky="overcast"] .moon-phase,
 .weather-hero[data-sky="rain"] .moon-phase,
 .weather-hero[data-sky="storm"] .moon-phase{display:none}
+
+
+/* Ajuste de composición del Inicio: fotografía arriba y datos debajo, sin tapar el paisaje. */
+.weather-hero{
+  min-height:0;
+  padding-bottom:14px;
+  gap:10px;
+  background:#0b2032;
+}
+.weather-scenery{
+  inset:0 0 122px;
+  width:100%;
+  height:calc(100% - 122px);
+  object-fit:cover;
+  object-position:center 70%;
+  opacity:1;
+}
+.weather-atmosphere{inset:0 0 122px}
+.weather-hero:after{inset:0 0 122px}
+.weather-meta{
+  position:relative;
+  z-index:4;
+  margin-top:8px;
+}
+.weather-meta>div{
+  background:rgba(5,18,32,.96);
+  border-color:rgba(190,160,255,.62);
+}
+.data-source{position:relative;z-index:4}
