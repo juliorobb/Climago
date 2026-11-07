@@ -197,3 +197,12 @@
   .weather-main .temperature{font-size:49px}
 }
 @media(prefers-reduced-motion:reduce){.weather-atmosphere:before{animation:none}}
+
+/* Luna nocturna: fase aproximada calculada para la fecha local actual. */
+.weather-atmosphere .moon-phase{position:absolute;top:24px;right:26px;font-size:30px;line-height:1;filter:drop-shadow(0 2px 8px rgba(255,244,205,.45))}
+.weather-hero[data-phase="night"][data-sky="clear"] .moon-phase,
+.weather-hero[data-phase="night"][data-sky="partly"] .moon-phase{display:block}
+.weather-hero:not([data-phase="night"]) .moon-phase,
+.weather-hero[data-sky="overcast"] .moon-phase,
+.weather-hero[data-sky="rain"] .moon-phase,
+.weather-hero[data-sky="storm"] .moon-phase{display:none}
