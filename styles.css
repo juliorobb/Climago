@@ -396,3 +396,6 @@
  .home-landscape>.weather-atmosphere:before{animation:none}
  .home-landscape .rain-streaks,.home-landscape .storm-flash{animation:none}
 }
+
+/* Reactivar el destello de tormenta: la regla heredada lo ocultaba. */
+.home-landscape>.weather-atmosphere .storm-flash{display:block!important;}
