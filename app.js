@@ -397,9 +397,18 @@ async function loadOfficialAlerts(){
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
 loadOfficialAlerts();
 
-/* Selector de paisajes de Inicio: usa recursos locales del repositorio. */
+function updateMoonPhase(){
+  const moon=document.querySelector(".moon-phase");if(!moon)return;
+  const reference=Date.UTC(2000,0,6,18,14),synodic=29.530588853;
+  const age=((Date.now()-reference)/86400000%synodic+synodic)%synodic;
+  const phase=Math.floor((age/synodic)*8+0.5)%8;
+  moon.textContent=["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"][phase];
+}
+updateMoonPhase();
+
+/* Selector de paisajes de Inicio: usa recursos vectoriales locales del repositorio. */
 (()=>{
- const images={sierras:"assets/landscapes/sierras.jpg",ciudad:"assets/landscapes/ciudad.jpg",mar:"assets/landscapes/mar.jpg"};
+ const images={sierras:"assets/scenery-sierras.svg",ciudad:"assets/scenery-ciudad.svg",mar:"assets/scenery-mar.svg"};
  const image=document.getElementById("weather-scenery");
  const hero=document.querySelector("#page-home .weather-hero");
  const picker=document.getElementById("home-scenery-picker");
