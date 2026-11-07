@@ -235,3 +235,123 @@
   border-color:rgba(190,160,255,.62);
 }
 .data-source{position:relative;z-index:4}
+
+
+/* Composición final del Inicio: un solo paisaje continuo hasta la alerta. */
+.home-landscape{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  margin:0 0 14px;
+  border:1px solid #7655a8;
+  border-radius:20px;
+  background:#0a2034;
+  box-shadow:0 8px 22px #0003;
+}
+.home-landscape>.weather-scenery{
+  position:absolute;
+  z-index:0;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 58%;
+  opacity:1;
+}
+.home-landscape>.weather-atmosphere{
+  position:absolute;
+  z-index:1;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(3,16,29,.18),rgba(3,16,29,.48));
+}
+.weather-hero{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:8px;
+  min-height:0;
+  padding:15px 14px 8px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+.weather-hero:after{display:none}
+.weather-main{
+  min-height:0;
+  margin:10px 0 12px;
+  align-self:start;
+}
+.weather-main .temperature{font-size:54px;line-height:1}
+.weather-meta{
+  position:relative;
+  z-index:3;
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:8px 0 0;
+}
+.weather-meta>div{
+  min-width:0;
+  min-height:54px;
+  padding:7px 5px;
+  gap:2px;
+  border:1px solid rgba(190,160,255,.72);
+  border-radius:12px;
+  background:rgba(5,18,32,.78);
+}
+.weather-meta span{font-size:17px}
+.weather-meta b{font-size:11px;white-space:nowrap}
+.weather-meta small{font-size:9px;white-space:nowrap}
+.data-source{
+  position:relative;
+  z-index:3;
+  margin:5px 0 3px;
+  text-align:center;
+}
+.home-landscape>.risk-card{
+  position:relative;
+  z-index:3;
+  width:calc(100% - 24px);
+  margin:8px 12px 13px;
+  padding:11px 12px;
+  background:rgba(7,23,39,.76);
+  border:1px solid rgba(190,160,255,.78);
+  border-radius:14px;
+  box-shadow:none;
+  color:#f4f7fb;
+}
+.home-landscape .risk-copy{gap:3px}
+.home-landscape .risk-copy b{font-size:12px}
+.home-landscape .risk-copy small{font-size:9px}
+.home-landscape:has(.weather-hero[data-phase="night"])>.weather-scenery{filter:brightness(.48) saturate(.82)}
+.home-landscape:has(.weather-hero[data-phase="night"])>.weather-atmosphere{background:linear-gradient(180deg,rgba(5,12,34,.32),rgba(5,13,31,.58))}
+.home-landscape:has(.weather-hero[data-sky="partly"])>.weather-atmosphere:before,
+.home-landscape:has(.weather-hero[data-sky="overcast"])>.weather-atmosphere:before,
+.home-landscape:has(.weather-hero[data-sky="rain"])>.weather-atmosphere:before,
+.home-landscape:has(.weather-hero[data-sky="storm"])>.weather-atmosphere:before{
+  content:"";position:absolute;inset:-12% -20% auto;height:55%;
+  background:radial-gradient(ellipse at 20% 55%,rgba(235,243,250,.34),transparent 34%),radial-gradient(ellipse at 52% 35%,rgba(220,231,241,.3),transparent 38%),radial-gradient(ellipse at 82% 58%,rgba(220,231,241,.28),transparent 35%);
+  filter:blur(18px);opacity:.7;animation:climago-cloud-drift 38s ease-in-out infinite alternate;
+}
+.home-landscape:has(.weather-hero[data-sky="overcast"])>.weather-atmosphere:before,
+.home-landscape:has(.weather-hero[data-sky="rain"])>.weather-atmosphere:before,
+.home-landscape:has(.weather-hero[data-sky="storm"])>.weather-atmosphere:before{opacity:.9;filter:blur(23px)}
+.home-landscape:has(.weather-hero[data-sky="rain"])>.weather-atmosphere,
+.home-landscape:has(.weather-hero[data-sky="storm"])>.weather-atmosphere{background:linear-gradient(180deg,rgba(22,39,58,.42),rgba(8,20,37,.5))}
+.home-landscape:has(.weather-hero[data-sky="rain"]) .rain-streaks,
+.home-landscape:has(.weather-hero[data-sky="storm"]) .rain-streaks{opacity:.62}
+@media(max-width:380px){
+  .weather-hero{padding:13px 11px 7px}
+  .weather-main .temperature{font-size:49px}
+  .weather-meta{gap:6px}
+  .weather-meta>div{padding:6px 3px;min-height:51px}
+  .weather-meta b{font-size:10px}
+  .weather-meta small{font-size:8px}
+}
