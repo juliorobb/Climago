@@ -206,3 +206,48 @@
 .weather-hero[data-sky="overcast"] .moon-phase,
 .weather-hero[data-sky="rain"] .moon-phase,
 .weather-hero[data-sky="storm"] .moon-phase{display:none}
+
+
+/* Corrección visual de Inicio: tarjeta compacta y selector lateral horizontal. */
+.weather-hero{
+  min-height:0;
+  height:auto;
+  grid-template-columns:minmax(0,1fr);
+  align-content:start;
+  gap:5px;
+  padding:13px;
+}
+.weather-hero:before{display:block}
+.weather-main{
+  min-height:0;
+  margin:2px 0;
+  align-self:start;
+}
+.weather-main .temperature{font-size:48px;line-height:1}
+.weather-meta{margin-top:7px}
+.location-line{margin:0 0 5px;gap:6px}
+.scenery-control{position:relative;flex:0 0 auto}
+.scenery-picker{
+  position:absolute;
+  top:calc(100% + 5px);
+  right:0;
+  left:auto;
+  width:max-content;
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px;
+  padding:6px;
+}
+.scenery-picker button{
+  text-align:center;
+  white-space:nowrap;
+  padding:7px 9px;
+}
+.scenery-picker[hidden]{display:none!important}
+@media(max-width:380px){
+  .weather-hero{padding:11px;gap:4px}
+  .weather-main .temperature{font-size:45px}
+  .scenery-toggle{font-size:10px;padding:6px 8px}
+  .scenery-picker{grid-template-columns:repeat(3,auto)}
+}
