@@ -406,9 +406,9 @@ function updateMoonPhase(){
 }
 updateMoonPhase();
 
-/* Selector de paisajes de Inicio: usa recursos vectoriales locales del repositorio. */
+/* Selector de paisajes de Inicio: utiliza las fotografías aprobadas. */
 (()=>{
- const images={sierras:"assets/scenery-sierras.svg",ciudad:"assets/scenery-ciudad.svg",mar:"assets/scenery-mar.svg"};
+ const images={sierras:"assets/landscapes/sierras.jpg",ciudad:"assets/landscapes/ciudad.jpg",mar:"assets/landscapes/mar.jpg"};
  const image=document.getElementById("weather-scenery");
  const hero=document.querySelector("#page-home .weather-hero");
  const picker=document.getElementById("home-scenery-picker");
