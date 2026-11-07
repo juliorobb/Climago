@@ -138,27 +138,24 @@ function getSelectedCoordinates(){
   return {...DEFAULT_COORDS};
 }
 
-function setWeatherVisual(code,temperature,wind,weatherTime){
+function setWeatherVisual(code,temperature,wind,weatherTime,isDay){
   const hero=document.querySelector('.weather-hero');
-  const img=document.getElementById('weather-mascot');
-  if(!hero||!img)return;
-  let type='sun',label='soleado';
-  if([95,96,99].includes(code)){type='storm';label='tormenta';}
-  else if([71,73,75].includes(code)){type='cold';label='nieve';}
-  else if([51,53,55,61,63,65,80,81,82].includes(code)){type='rain';label='lluvia';}
-  else if([3,45,48].includes(code)){type='cloud';label='nublado';}
-  else if(wind>=40){type='wind';label='viento';}
-  else if(temperature>=35 && [0,1,2].includes(code)){type='heat';label='calor';}
-  else if(temperature<=2){type='cold';label='frío';}
+  if(!hero)return;
+  let type='sun';
+  if([95,96,99].includes(code))type='storm';
+  else if([71,73,75].includes(code))type='cold';
+  else if([51,53,55,61,63,65,80,81,82].includes(code))type='rain';
+  else if([3,45,48].includes(code))type='cloud';
+  else if(wind>=40)type='wind';
+  else if(temperature>=35 && [0,1,2].includes(code))type='heat';
+  else if(temperature<=2)type='cold';
   hero.dataset.weather=type;
-  // Open-Meteo devuelve current.time en la zona horaria solicitada (timezone=auto).
-  // Leer la hora local directamente evita que el huso del teléfono cambie el paisaje.
+  // Usar el indicador día/noche del servicio meteorológico, no una hora fija.
   const localHour=Number(String(weatherTime||"").slice(11,13));
   const hour=Number.isFinite(localHour)&&String(weatherTime||"").length>=13?localHour:new Date().getHours();
-  hero.dataset.phase=(hour>=7&&hour<19)?"day":"night";
+  const hasDayFlag=isDay!==undefined&&isDay!==null&&Number.isFinite(Number(isDay));
+  hero.dataset.phase=(hasDayFlag?Number(isDay)===1:(hour>=7&&hour<19))?"day":"night";
   hero.dataset.sky=([95,96,99].includes(code)?"storm":[51,53,55,61,63,65,80,81,82].includes(code)?"rain":[3,45,48,71,73,75,77,85,86].includes(code)?"overcast":code===2?"partly":"clear");
-  img.src=`assets/mascot-${type}.png`;
-  img.alt=`Mascota ClimaGo: ${label}`;
 }
 
 let weatherRequestId=0;
@@ -169,13 +166,13 @@ async function loadWeather(lat,lon,name){
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
     const c=data.current,h=data.hourly,d=data.daily,code=Number(c.weather_code),uvIndex=h.uv_index?.[Math.max(0,h.time.findIndex(t=>t>=c.time))]??d.uv_index_max?.[0]??0;
     lastWeatherRefresh=Date.now();
-    setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),c.time);
+    setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),c.time,c.is_day);
     if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
     const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
     renderHourly(h,c.time);renderDaily(d);
