@@ -126,3 +126,74 @@
 .weather-hero[data-scenery="mar"] .weather-scenery{object-position:center 64%}
 .weather-meta>div{background:rgba(5,18,32,.9);border-color:rgba(190,160,255,.62)}
 @media(max-width:380px){.location-line{gap:4px}.scenery-toggle{font-size:9px;padding:6px 7px}.weather-hero{padding:13px}}
+
+
+/* ClimaGo: fondo paisajístico con efectos atmosféricos, sin mascota ni relámpagos decorativos. */
+.weather-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  align-content:start;
+  gap:9px;
+  min-height:330px;
+  padding:14px;
+  background:#102b43;
+}
+.weather-hero:before{display:none}
+.weather-hero:after{
+  z-index:2;
+  inset:0;
+  left:0;right:0;bottom:0;height:auto;
+  border-radius:0;
+  filter:none;
+  background:linear-gradient(90deg,rgba(3,16,29,.48),rgba(3,16,29,.12)),linear-gradient(180deg,rgba(3,16,29,.12),rgba(3,16,29,.28));
+}
+.weather-character{display:none!important}
+.weather-main{
+  grid-column:1/-1;
+  align-self:center;
+  min-height:104px;
+  margin:5px 0 4px;
+  z-index:3;
+}
+.weather-main .temperature{font-size:54px;line-height:1}
+.weather-main .condition{font-size:15px;margin-top:5px}
+.weather-main .feels{font-size:12px;color:#e0edf5}
+.weather-meta{grid-column:1/-1;z-index:3;margin-top:auto}
+.data-source{grid-column:1/-1;z-index:3}
+.weather-scenery{opacity:1}
+.weather-atmosphere{z-index:1;background:linear-gradient(90deg,rgba(4,17,31,.42),rgba(4,17,31,.08))}
+.weather-atmosphere .storm-flash{display:none!important;animation:none!important}
+.weather-atmosphere .rain-streaks{z-index:3}
+.weather-atmosphere .night-sky{
+  position:absolute;inset:0;opacity:0;pointer-events:none;
+  background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 98%,transparent),radial-gradient(1px 1px at 28% 12%,#fff 98%,transparent),radial-gradient(1px 1px at 48% 20%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 72% 14%,#fff 98%,transparent),radial-gradient(1px 1px at 88% 27%,#fff 98%,transparent),radial-gradient(1px 1px at 61% 34%,#fff 98%,transparent);
+}
+.weather-hero[data-phase="night"] .weather-scenery{filter:brightness(.53) saturate(.86) hue-rotate(5deg)}
+.weather-hero[data-phase="night"] .weather-atmosphere{background:linear-gradient(180deg,rgba(5,12,34,.32),rgba(5,13,31,.5)),linear-gradient(90deg,rgba(5,15,31,.38),rgba(5,15,31,.12))}
+.weather-hero[data-phase="night"][data-sky="clear"] .night-sky,
+.weather-hero[data-phase="night"][data-sky="partly"] .night-sky{opacity:.72}
+.weather-hero[data-phase="night"][data-sky="overcast"] .weather-scenery,
+.weather-hero[data-phase="night"][data-sky="rain"] .weather-scenery,
+.weather-hero[data-phase="night"][data-sky="storm"] .weather-scenery{filter:brightness(.36) saturate(.72)}
+.weather-hero[data-sky="partly"] .weather-atmosphere:before,
+.weather-hero[data-sky="overcast"] .weather-atmosphere:before,
+.weather-hero[data-sky="rain"] .weather-atmosphere:before,
+.weather-hero[data-sky="storm"] .weather-atmosphere:before{
+  content:"";position:absolute;inset:-15% -30% auto;height:64%;
+  background:radial-gradient(ellipse at 20% 55%,rgba(235,243,250,.42),transparent 34%),radial-gradient(ellipse at 52% 35%,rgba(220,231,241,.38),transparent 38%),radial-gradient(ellipse at 82% 58%,rgba(220,231,241,.34),transparent 35%);
+  filter:blur(17px);opacity:.62;animation:climago-cloud-drift 38s ease-in-out infinite alternate;
+}
+.weather-hero[data-sky="overcast"] .weather-atmosphere:before,
+.weather-hero[data-sky="rain"] .weather-atmosphere:before,
+.weather-hero[data-sky="storm"] .weather-atmosphere:before{opacity:.88;filter:blur(22px)}
+.weather-hero[data-sky="rain"] .weather-atmosphere,
+.weather-hero[data-sky="storm"] .weather-atmosphere{background:linear-gradient(180deg,rgba(22,39,58,.44),rgba(8,20,37,.42))}
+.weather-hero[data-sky="rain"] .rain-streaks,
+.weather-hero[data-sky="storm"] .rain-streaks{opacity:.62}
+.weather-hero[data-sky="storm"] .rain-streaks{opacity:.78}
+@keyframes climago-cloud-drift{from{transform:translateX(-2%)}to{transform:translateX(3%)}}
+@media(max-width:380px){
+  .weather-hero{min-height:320px;padding:12px}
+  .weather-main .temperature{font-size:49px}
+}
+@media(prefers-reduced-motion:reduce){.weather-atmosphere:before{animation:none}}
