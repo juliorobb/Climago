@@ -124,14 +124,34 @@ const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
 let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
 const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
 function weatherEmoji(code){if([0,1].includes(code))return "☀️";if([2].includes(code))return "🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return "🌤️";}
-function recommendationFor(code,uv,wind){
-  if([95,96,99].includes(code))return {title:"Tomá precauciones ante tormentas",description:"Resguardate en un lugar seguro y asegurá objetos que puedan volarse. Consultá los avisos oficiales.",icon:"🏠"};
-  if([61,63,65,80,81,82].includes(code))return {title:"Preparate para la lluvia",description:"Organizá tus traslados y llevá protección para la lluvia. Revisá las condiciones de circulación.",icon:"🚗"};
-  if(wind>=40)return {title:"Asegurá los objetos expuestos",description:"Guardá o sujetá macetas, toldos y elementos que puedan desplazarse por el viento.",icon:"🪴"};
-  if(uv>=6)return {title:"Índice UV elevado",description:"Considerá protección solar, buscá sombra en las horas de mayor radiación y mantené una buena hidratación.",icon:"🧴"};
-  if(code<=1 && uv>=3)return {title:"Cuidate del sol",description:"Usá protección solar si vas a estar al aire libre y mantenete hidratado.",icon:"🧴"};
-  if(code===71||code===73||code===75)return {title:"Protegé las plantas del frío",description:"Si tenés plantas sensibles, considerá resguardarlas de las bajas temperaturas.",icon:"🌱"};
-  return {title:"Organizá tus actividades",description:"Consultá el pronóstico antes de salir y elegí el momento más conveniente para tus planes.",icon:"📅"};
+function recommendationFor(current,hourly,currentTime,uv,wind){
+  const rainCodes=[51,53,55,61,63,65,80,81,82],stormCodes=[95,96,99],coldCodes=[71,73,75];
+  const times=hourly?.time||[],codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[];
+  let start=times.findIndex(t=>t>=currentTime);if(start<0)start=0;
+  const end=Math.min(start+7,times.length);
+  const upcoming=[];
+  for(let i=start;i<end;i++)upcoming.push({i,code:Number(codes[i]),temp:Number(temps[i]),rain:Number(rain[i]??0),wind:Number(winds[i]??0),time:times[i]});
+  const future=upcoming.slice(1);
+  const storm=future.find(x=>stormCodes.includes(x.code));
+  if(storm)return {title:"Prestá atención a posibles tormentas",description:"El pronóstico muestra tormentas para las próximas horas. Si vas a salir, revisá los avisos oficiales y buscá resguardo si se acerca una tormenta.",icon:"⛈️",when:storm.time};
+  const wet=future.find(x=>rainCodes.includes(x.code)||x.rain>=50);
+  if(wet)return {title:"Prepará algo para la lluvia",description:"Hay probabilidad de lluvia en las próximas horas. Si vas a salir o volver más tarde, llevá paraguas o impermeable.",icon:"☂️",when:wet.time};
+  const laterTemps=future.filter(x=>Number.isFinite(x.temp));
+  const currentTemp=Number(current?.temperature_2m);
+  const laterMin=laterTemps.length?Math.min(...laterTemps.map(x=>x.temp)):currentTemp;
+  const drop=currentTemp-laterMin;
+  if(Number.isFinite(drop)&&drop>=5){
+    const colder=laterTemps.find(x=>x.temp===laterMin);
+    const hour=colder?new Date(colder.time).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):"más tarde";
+    return {title:"Llevá un abrigo para más tarde",description:`Ahora está en ${Math.round(currentTemp)} °C, pero la temperatura bajará hasta unos ${Math.round(laterMin)} °C cerca de las ${hour}. Si volvés tarde, llevá un abrigo.`,icon:"🧥",when:colder?.time};
+  }
+  const peakUv=upcoming.reduce((best,x)=>({value:Math.max(best.value,Number(hourly?.uv_index?.[x.i]??0)),i:x.i}),{value:Number(uv)||0,i:start});
+  if(peakUv.value>=6)return {title:"Protegéte del sol",description:`El índice UV llegará aproximadamente a ${Math.round(peakUv.value)}. Si vas a estar al aire libre, buscá sombra y usá protección solar.`,icon:"🧴",when:times[peakUv.i]};
+  const maxWind=upcoming.reduce((best,x)=>Math.max(best,x.wind),Number(wind)||0);
+  if(maxWind>=40)return {title:"Atención al viento",description:`Se esperan ráfagas o viento de hasta ${Math.round(maxWind)} km/h. Asegurá objetos livianos y tené precaución al circular.`,icon:"🍃"};
+  if(currentTemp>=30)return {title:"Cuidate del calor",description:"La temperatura es elevada. Tomá agua con frecuencia y, si podés, evitá la exposición prolongada al sol en las horas más calurosas.",icon:"💧"};
+  if(currentTemp<=8||future.some(x=>coldCodes.includes(x.code)))return {title:"Prepará abrigo",description:"Se esperan condiciones frías. Si vas a salir durante las próximas horas, llevá abrigo y protegé las plantas sensibles.",icon:"🧣"};
+  return {title:"Buen momento para tus planes",description:"En las próximas horas no aparece una señal meteorológica destacada. Disfrutá tus actividades y volvé a consultar si cambia el tiempo.",icon:"🌤️"};
 }
 function getSelectedCoordinates(){
   try{const list=readLocations(),id=primaryId(list),place=list.find(x=>x.id===id);if(place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon))return {lat:place.lat,lon:place.lon,name:place.name};}catch{}
@@ -166,7 +186,7 @@ async function loadWeather(lat,lon,name){
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,uv_index,precipitation_probability,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
@@ -174,7 +194,7 @@ async function loadWeather(lat,lon,name){
     lastWeatherRefresh=Date.now();
     setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),c.time,c.is_day);
     if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
-    const tip=recommendationFor(code,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
+    const tip=recommendationFor(c,h,c.time,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("tip-illustration",tip.icon);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);setText("prevention-tip-icon",tip.icon);
     renderHourly(h,c.time);renderDaily(d);
     setText("map-location-label",activeCoords.name);setText("map-weather-status",`${weatherText[code]||"Tiempo variable"} · ${Math.round(c.temperature_2m)}°`);setText("map-weather-detail",`Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${Math.round(c.relative_humidity_2m)}%. Datos de Open-Meteo.`);
     if(weatherMap){setMapMarker(lat,lon,`${activeCoords.name}: ${Math.round(c.temperature_2m)}° · ${weatherText[code]||"Tiempo variable"}`);}
