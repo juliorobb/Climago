@@ -540,3 +540,11 @@
 .vehicle-checklist section p,.vehicle-maintenance-note{font-size:11px;color:var(--muted);line-height:1.5;margin:4px 0 0}
 .vehicle-checklist ul{padding-left:19px;margin:12px 0 0}
 .vehicle-checklist li{font-size:11px;line-height:1.55;color:var(--muted);padding:3px 0}
+
+/* v25: recomendación térmica y consulta de horas anteriores */
+#tip-illustration.temperature-drop,#prevention-tip-icon.temperature-drop{background:linear-gradient(180deg,#e45d55 0%,#f7f7f7 48%,#76cbed 100%);color:#17364c;font-weight:900;text-shadow:0 1px 1px #fff;border:1px solid #c7ddec}
+#tip-illustration.temperature-rise,#prevention-tip-icon.temperature-rise{background:linear-gradient(180deg,#f4a34a,#f7e7bd);color:#6b3d17;font-weight:900}
+#tip-illustration.temperature-drop,#tip-illustration.temperature-rise{font-size:30px}
+.prevention-intro{margin:0 2px 13px;line-height:1.55}
+.forecast-past-toggle{display:block;margin:0 0 9px auto;padding:8px 12px;border:1px solid #b7d9e8;border-radius:18px;background:#eef8fc;color:#17627c;font-size:11px;font-weight:700}
+.forecast-past-toggle[hidden]{display:none}

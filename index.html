@@ -42,7 +42,7 @@
         <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
         <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
         <button class="tip-card panel" id="home-recommendation" data-page="prevention">
-          <span class="tip-title">Una recomendación para hoy</span>
+          <span class="tip-title">Lo más importante del pronóstico</span>
           <span class="tip-content"><span class="tip-illustration" id="tip-illustration">☂</span><span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span></span>
           <span class="tip-action">Ver recomendaciones <span>›</span></span>
         </button>
@@ -72,6 +72,7 @@
         <div class="forecast-date-heading"><b>Elegí un día</b><small>Deslizá para ver más fechas →</small></div>
         <div class="forecast-date-strip" id="forecast-date-strip" aria-label="Días del pronóstico"></div>
         <div class="forecast-selected-heading" id="forecast-selected-heading">Pronóstico por hora</div>
+        <button type="button" class="forecast-past-toggle" id="forecast-past-toggle" hidden>↶ Ver horas anteriores</button>
         <div class="forecast-list" id="forecast-list" aria-live="polite"><div class="empty-state">Cargando pronóstico…</div></div>
       </section>
 
@@ -114,39 +115,15 @@
 
       <section class="page" id="page-prevention">
         <div class="page-heading"><div><small>CUIDÁ LO QUE TE IMPORTA</small><h1>Prevención</h1></div></div>
-        <article class="panel prevention-current"><small>RECOMENDACIÓN ACTUAL</small><div><span id="prevention-tip-icon">🧴</span><section><b id="prevention-tip-title">Preparando recomendación…</b><p id="prevention-tip-text">Consejos según las condiciones meteorológicas de tu ubicación.</p></section></div></article>
+        <article class="panel prevention-current"><small>PANORAMA DE LAS PRÓXIMAS HORAS</small><div><span id="prevention-tip-icon">🌤️</span><section><b id="prevention-tip-title">Preparando panorama…</b><p id="prevention-tip-text">Información ampliada según el pronóstico de tu ubicación.</p></section></div></article>
+        <p class="muted-note prevention-intro">Información práctica para cuidar tus cosas y organizarte según las condiciones previstas. Elegí un tema para ver recomendaciones específicas.</p>
         <div class="prevention-grid">
-          <button type="button" class="panel prevention-item prevention-open-button" id="open-vehicle-prevention"><span>🚗</span><b>Vehículo</b><p>Granizo, calor, frío y mantenimiento.</p></button>
-          <article class="panel prevention-item"><span>🏠</span><b>Hogar</b><p>Techos, ventanas y objetos exteriores.</p></article>
-          <article class="panel prevention-item"><span>🌱</span><b>Jardín</b><p>Plantas, riego, heladas y viento.</p></article>
-          <article class="panel prevention-item"><span>👟</span><b>Actividades</b><p>Elegí horarios según las condiciones.</p></article>
+          <button type="button" class="panel prevention-item prevention-open-button" id="open-vehicle-prevention"><span>🚗</span><b>Vehículo</b><p>Condiciones para circular y cuidar el auto.</p></button>
+          <article class="panel prevention-item"><span>🏠</span><b>Hogar</b><p>Lluvia, viento y cambios de temperatura en casa.</p></article>
+          <article class="panel prevention-item"><span>🌱</span><b>Jardín</b><p>Riego, sol, frío y condiciones para las plantas.</p></article>
+          <article class="panel prevention-item"><span>👟</span><b>Actividades</b><p>Consultar las mejores condiciones por horario.</p></article>
         </div>
         <section id="vehicle-prevention-detail" class="vehicle-prevention-detail" hidden>
-          <button type="button" class="secondary-button" id="back-prevention-grid">← Volver a Prevención</button>
-          <div class="vehicle-prevention-heading"><span>🚗</span><div><h2>Cuidá tu vehículo</h2><p>Recomendaciones según el pronóstico de tu zona.</p></div></div>
-          <article class="panel vehicle-weather-card"><small>CONDICIONES PARA TU VEHÍCULO</small><b id="vehicle-weather-status">Consultando el pronóstico…</b><p id="vehicle-weather-summary">Consejos adaptados al tiempo previsto en tu ubicación.</p></article>
-          <div class="vehicle-advice-grid">
-            <article class="panel vehicle-advice-card"><span>🌡️</span><b>Temperatura</b><p id="vehicle-heat-advice">Consejos según la máxima prevista.</p></article>
-            <article class="panel vehicle-advice-card"><span>❄️</span><b>Frío y heladas</b><p id="vehicle-cold-advice">Consejos según la mínima prevista.</p></article>
-            <article class="panel vehicle-advice-card"><span>🌧️</span><b>Lluvia y visibilidad</b><p id="vehicle-rain-advice">Consejos según la probabilidad de lluvia.</p></article>
-            <article class="panel vehicle-advice-card"><span>💨</span><b>Viento</b><p id="vehicle-wind-advice">Consejos según las ráfagas previstas.</p></article>
-          </div>
-          <article class="panel vehicle-checklist">
-            <div><span>🛞</span><section><b>Antes de salir</b><p>Un chequeo rápido que puede evitarte problemas.</p></section></div>
-            <ul>
-              <li>Mirar visualmente las cuatro cubiertas y la rueda de auxilio.</li>
-              <li>Controlar la presión en frío según indica el fabricante.</li>
-              <li>Comprobar frenos, luces y limpiaparabrisas.</li>
-              <li>En viajes, revisar aceite, refrigerante y documentación.</li>
-            </ul>
-          </article>
-          <article class="panel vehicle-checklist">
-            <div><span>🔧</span><section><b>Mantenimiento que conviene no olvidar</b><p>Seguí el manual del vehículo y los intervalos del fabricante.</p></section></div>
-            <p class="vehicle-maintenance-note">Neumáticos, frenos, batería, niveles de fluidos, filtros y aire acondicionado. En épocas de mucho calor, verificá el sistema de refrigeración con el motor frío. No abras el depósito caliente.</p>
-          </article>
-          <p class="muted-note">Estas recomendaciones son preventivas y no reemplazan una revisión mecánica ni los avisos oficiales de tránsito.</p>
-        </section>
-      </section>
 
       <section class="page" id="page-more">
         <div class="page-heading"><div><small>TUS HERRAMIENTAS</small><h1>Más</h1></div></div>
