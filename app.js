@@ -274,7 +274,7 @@ function renderDaily(daily){
       detail("🍃","Punto de rocío",val("dew_point_2m")==null?"—":Math.round(val("dew_point_2m"))+"°"),
       detail("◉","Presión",pressure==null?"—":Math.round(pressure)+" hPa")
     ].join("");
-    const sun=(sunrise&&hour===sunrise.slice(11,16)?sunCard("Primera luz y salida del sol",sunrise,"🌅"):"")+(sunset&&hour===sunset.slice(11,16)?sunCard("Puesta del sol",sunset,"🌇"):"");
+    const previousTime=hourly.time[i-1]||"";const sun=(sunrise&&time>=sunrise&&previousTime<sunrise?sunCard("Salida del sol",sunrise,"🌅"):"")+(sunset&&time>=sunset&&previousTime<sunset?sunCard("Puesta del sol",sunset,"🌇"):"");
     return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isDay)}</span><strong>${Math.round(Number(val("temperature_2m")))}°</strong><small>${summary} · Sens. ${Math.round(Number(val("apparent_temperature")))}°</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
   }).join("");
   host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
