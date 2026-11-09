@@ -548,3 +548,10 @@
 .prevention-intro{margin:0 2px 13px;line-height:1.55}
 .forecast-past-toggle{display:block;margin:0 0 9px auto;padding:8px 12px;border:1px solid #b7d9e8;border-radius:18px;background:#eef8fc;color:#17627c;font-size:11px;font-weight:700}
 .forecast-past-toggle[hidden]{display:none}
+
+/* v26: termómetro común en Inicio y Prevención, sin caja ni degradado de fondo */
+#tip-illustration.thermometer-icon,#prevention-tip-icon.thermometer-icon{position:relative;display:block;width:42px;height:58px;flex:0 0 42px;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;font-size:0!important;color:transparent!important}
+#tip-illustration.thermometer-icon:before,#prevention-tip-icon.thermometer-icon:before{content:"";position:absolute;left:15px;top:2px;width:10px;height:42px;border:3px solid #eaf5fb;border-radius:10px;background:linear-gradient(to bottom,#e85d5d 0 35%,#fff 48%,#b9e5f5 72%,#73c9ed 100%);box-shadow:0 0 4px #a9d9ee66}
+#tip-illustration.thermometer-icon:after,#prevention-tip-icon.thermometer-icon:after{content:"";position:absolute;left:10px;top:36px;width:20px;height:20px;border:3px solid #eaf5fb;border-radius:50%;background:linear-gradient(145deg,#c8efff,#70c8ed);box-shadow:0 0 4px #a9d9ee66}
+/* Se elimina el tratamiento anterior de flechas y tarjetas con degradado. */
+#tip-illustration.temperature-drop,#tip-illustration.temperature-rise,#prevention-tip-icon.temperature-drop,#prevention-tip-icon.temperature-rise{background:transparent;border:0;text-shadow:none}
