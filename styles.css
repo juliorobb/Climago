@@ -511,4 +511,4 @@
 /* ESP32: luna de trazo visible, sin amarillo ni brillo lavado. */
 .moon-weather-icon{display:inline-block;font-family:Arial,sans-serif;font-size:1.35em;line-height:1;color:#d9edff;font-weight:400;filter:none!important;text-shadow:0 0 5px rgba(190,220,255,.24)!important}
 .weather-atmosphere .moon-phase{font-family:Arial,sans-serif;color:#d9edff;font-size:32px;filter:none!important;text-shadow:0 0 8px rgba(190,220,255,.28)!important}
-#page-forecast .forecast-hour-icon .moon-weather-icon{color:#607b94;font-size:1.45em;text-shadow:none!important}
+#page-forecast .forecast-hour-icon .moon-weather-icon{color:#527da5;font-size:1.45em;text-shadow:none!important;filter:none!important}
