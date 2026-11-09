@@ -555,3 +555,34 @@
 #tip-illustration.thermometer-icon:after,#prevention-tip-icon.thermometer-icon:after{content:"";position:absolute;left:10px;top:36px;width:20px;height:20px;border:3px solid #eaf5fb;border-radius:50%;background:linear-gradient(145deg,#c8efff,#70c8ed);box-shadow:0 0 4px #a9d9ee66}
 /* Se elimina el tratamiento anterior de flechas y tarjetas con degradado. */
 #tip-illustration.temperature-drop,#tip-illustration.temperature-rise,#prevention-tip-icon.temperature-drop,#prevention-tip-icon.temperature-rise{background:transparent;border:0;text-shadow:none}
+
+
+/* v27 · Ajuste de legibilidad y contraste nocturno. No modificar lunas. */
+/* Termómetro más fino y pequeño, conservando rojo-blanco-celeste. */
+#tip-illustration.thermometer-icon,#prevention-tip-icon.thermometer-icon{width:32px;height:46px;flex:0 0 32px}
+#tip-illustration.thermometer-icon:before,#prevention-tip-icon.thermometer-icon:before{left:11px;top:1px;width:7px;height:32px;border-width:2px;border-radius:8px;background:linear-gradient(to bottom,#e85d5d 0 35%,#fff 48%,#b9e5f5 72%,#73c9ed 100%);box-shadow:0 0 3px #a9d9ee55}
+#tip-illustration.thermometer-icon:after,#prevention-tip-icon.thermometer-icon:after{left:7px;top:27px;width:15px;height:15px;border-width:2px;background:linear-gradient(145deg,#c8efff,#70c8ed);box-shadow:0 0 3px #a9d9ee55}
+/* Texto de la recomendación: legible sin agrandar excesivamente el título. */
+.tip-card p{font-size:14px;line-height:1.55;color:#e0eaf1}
+.tip-title{font-size:14px}
+#page-prevention .prevention-current p{font-size:15px;line-height:1.55}
+#page-prevention .prevention-current b{font-size:16px}
+/* Tarjetas del pronóstico: celeste grisáceo suave en lugar de blanco brillante. */
+#page-forecast .forecast-today{background:#dceaf0;color:#263f50;border-color:#c6d9e2}
+#page-forecast .forecast-today>span,#page-forecast .forecast-today p{color:#536f80}
+#page-forecast .forecast-today strong{color:#24465c}
+#page-forecast .forecast-date{background:#dceaf0;color:#405d70;border-color:#c6d9e2}
+#page-forecast .forecast-date small{color:#536f80}
+#page-forecast .forecast-date strong{color:#24465c}
+#page-forecast .forecast-date em{color:#617b8a}
+#page-forecast .forecast-date.selected{background:#c9e5ef;border-color:#36a9c7;color:#17475d}
+#page-forecast .forecast-date.selected small,#page-forecast .forecast-date.selected strong{color:#087d9b}
+#page-forecast .forecast-list{background:#dceaf0;border-color:#c6d9e2}
+#page-forecast .forecast-hour{background:#dceaf0;border-bottom-color:#c6d9e2}
+#page-forecast .forecast-hour-main b{color:#405d70}
+#page-forecast .forecast-hour-main strong{color:#24465c}
+#page-forecast .forecast-hour-main small{color:#536f80}
+#page-forecast .forecast-hour-details span{color:#536f80}
+#page-forecast .forecast-hour-details b{color:#24465c}
+#page-forecast .forecast-sun-times{background:#dceaf0;border-color:#c6d9e2;color:#536f80}
+#page-forecast .forecast-sun-times b{color:#24465c}
