@@ -278,7 +278,7 @@ function renderDaily(daily){
       detail("◉","Presión",pressure==null?"—":Math.round(pressure)+" hPa")
     ].join("");
     const previousTime=hourly.time[i-1]||"";const sun=(sunrise&&time>=sunrise&&previousTime<sunrise?sunCard("Salida del sol",sunrise,"🌅"):"")+(sunset&&time>=sunset&&previousTime<sunset?sunCard("Puesta del sol",sunset,"🌇"):"");
-    return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isNight?0:1)}</span><strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
+    return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isNight&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isNight?0:1)}</span><strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
   }).join("");
   host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
   strip.querySelector(".forecast-date.selected")?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
