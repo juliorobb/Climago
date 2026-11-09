@@ -538,3 +538,17 @@
   filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);
   text-shadow:none;
 }
+
+
+/* Luna nocturna del detalle horario: pequeña, azul y sin filtro de emoji. Inicio no se modifica. */
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
+  display:inline-block!important;
+  width:auto!important;
+  height:auto!important;
+  font-size:.82em!important;
+  line-height:1!important;
+  color:#527fa8!important;
+  filter:none!important;
+  text-shadow:none!important;
+  transform:scaleX(-1);
+}
