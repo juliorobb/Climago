@@ -264,8 +264,8 @@ function renderDaily(daily){
     const detail=(icon,label,value)=>`<span class="forecast-detail-item"><i>${icon}</i><span>${label}<b>${value}</b></span></span>`;
     const rainValue=rain==null?"—":Math.round(rain)+"%";
     const details=[
-      detail("🌡️","Sensación térmica",Math.round(Number(val("apparent_temperature")))+"°"),
-      detail("💧","Humedad",Math.round(Number(val("relative_humidity_2m")))+"%"),
+      detail("🧍‍♂️🌡️","Sensación térmica",Math.round(Number(val("apparent_temperature")))+"°"),
+      detail("🧑‍🦱💧","Humedad",Math.round(Number(val("relative_humidity_2m")))+"%"),
       detail("🌧️","Lluvia",`${rainValue} · ${val("precipitation")==null?"—":Number(val("precipitation")).toFixed(1)+" mm"}`),
       detail("🧭","Viento",`${windDirection(Number(val("wind_direction_10m")))} · ${Math.round(Number(val("wind_speed_10m")))} km/h`),
       detail("🌬️","Ráfagas",gust==null?"—":Math.round(gust)+" km/h"),
@@ -282,6 +282,15 @@ function renderDaily(daily){
   host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
   strip.querySelector(".forecast-date.selected")?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
 }
+document.getElementById("forecast-list")?.addEventListener("click",event=>{
+  const summary=event.target.closest(".forecast-hour-main");
+  if(!summary)return;
+  const current=summary.parentElement;
+  if(current.open)return;
+  document.querySelectorAll("#forecast-list .forecast-hour[open]").forEach(item=>{
+    if(item!==current)item.open=false;
+  });
+});
 document.getElementById("forecast-date-strip")?.addEventListener("click",event=>{
   const button=event.target.closest("[data-forecast-date]");
   if(!button||!forecastData?.daily)return;
