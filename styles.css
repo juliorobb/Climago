@@ -476,10 +476,16 @@
 #page-forecast .forecast-hour-details .forecast-detail-item b{
  display:block;text-align:left;font-size:13px;line-height:1.25;color:#24445a;margin-top:3px;
 }
-#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{filter:none;color:inherit}
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);color:inherit}
 @media(max-width:350px){
  #page-forecast .forecast-hour-details{gap:12px 8px;padding-left:2px;padding-right:2px}
  #page-forecast .forecast-hour-details .forecast-detail-item{grid-template-columns:21px minmax(0,1fr);gap:5px}
  #page-forecast .forecast-hour-details .forecast-detail-item>span{font-size:10px}
  #page-forecast .forecast-hour-details .forecast-detail-item b{font-size:12px}
 }
+
+/* Iconografía de sensación térmica y humedad; luna azulada visible sobre blanco */
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
+ filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);
+}
+#page-forecast .forecast-hour-details .forecast-detail-item>i{font-size:18px;line-height:1.35}
