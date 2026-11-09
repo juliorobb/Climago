@@ -583,3 +583,15 @@
 #page-home .weather-atmosphere .moon-phase svg path{fill:#d8e9fa!important}
 #page-forecast .forecast-hour-icon .moon-weather-icon{color:#397caf!important;opacity:1!important;filter:none!important;text-shadow:none!important}
 #page-forecast .forecast-hour-icon .moon-weather-icon svg path{fill:#397caf!important}
+
+
+/* Ajuste final solicitado: luna de media fase, blanco azulada y luminosa en Inicio. */
+#page-home .weather-atmosphere .moon-phase,
+#page-home #home-hourly .moon-weather-icon,
+#page-home .weather-hero .moon-weather-icon{
+  color:#e8f4ff!important;
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:0 0 6px rgba(205,230,255,.72),0 0 13px rgba(155,205,245,.42)!important;
+}
+#page-home .weather-atmosphere .moon-phase svg path{fill:#e8f4ff!important;}
