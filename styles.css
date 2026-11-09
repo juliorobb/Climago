@@ -497,3 +497,12 @@
   filter:brightness(0) saturate(100%) invert(94%) sepia(9%) saturate(520%) hue-rotate(174deg) brightness(106%) contrast(101%);
   text-shadow:0 0 8px rgba(205,230,255,.38);
 }
+
+
+/* ESP32: luna blanco-azulada en todas las vistas, también en Próximas horas de Inicio. */
+.moon-weather-icon,
+.weather-atmosphere .moon-phase,
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
+  filter:brightness(0) saturate(100%) invert(94%) sepia(9%) saturate(520%) hue-rotate(174deg) brightness(106%) contrast(101%);
+  text-shadow:0 0 8px rgba(205,230,255,.38);
+}
