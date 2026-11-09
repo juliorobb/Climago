@@ -355,3 +355,8 @@
   .weather-meta b{font-size:10px}
   .weather-meta small{font-size:8px}
 }
+
+
+/* Iconos lunares: tono blanco azulado, conservando la fase visible. */
+.moon-phase{filter:grayscale(1) brightness(0) invert(1) drop-shadow(0 2px 8px rgba(210,232,255,.55))!important}
+.moon-weather-icon{display:inline-block;filter:grayscale(1) brightness(0) invert(1) drop-shadow(0 1px 4px rgba(210,232,255,.55));}
