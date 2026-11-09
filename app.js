@@ -239,7 +239,7 @@ function renderDaily(daily){
     today.querySelector("strong").textContent=forecastValue(temp);
     today.querySelector(".big-weather").textContent=weatherEmoji(daily.weather_code[0],1);
     document.getElementById("forecast-today-min").textContent=`${forecastValue(min)} mínima`;
-    document.getElementById("forecast-today-summary").textContent=`Máxima y mínima previstas · ${Math.round(temp)}° / ${Math.round(min)}°`;
+    document.getElementById("forecast-today-summary").textContent=`Máxima y mínima previstas · ${forecastValue(temp)} / ${forecastValue(min)}`;
     document.getElementById("forecast-today-label").textContent=`Hoy · ${activeCoords?.name||"Tu zona"}`;
   }
   if(!selectedForecastDate||!daily.time.includes(selectedForecastDate))selectedForecastDate=daily.time[0];
@@ -247,7 +247,7 @@ function renderDaily(daily){
     const dateObj=new Date(`${date}T12:00:00`);
     const weekday=index===0?"HOY":dateObj.toLocaleDateString("es-AR",{weekday:"short"}).replace(".","").toUpperCase();
     const day=dateObj.toLocaleDateString("es-AR",{day:"numeric",month:"short"}).replace(".","");
-    return `<button type="button" class="forecast-date ${date===selectedForecastDate?"selected":""}" data-forecast-date="${date}" aria-pressed="${date===selectedForecastDate}"><small>${weekday}</small><b>${day}</b><span>${weatherEmoji(daily.weather_code[index],1)}</span><strong>${Math.round(daily.temperature_2m_max[index])}°</strong><em>${Math.round(daily.temperature_2m_min[index])}°</em></button>`;
+    return `<button type="button" class="forecast-date ${date===selectedForecastDate?"selected":""}" data-forecast-date="${date}" aria-pressed="${date===selectedForecastDate}"><small>${weekday}</small><b>${day}</b><span>${weatherEmoji(daily.weather_code[index],1)}</span><strong>${forecastValue(daily.temperature_2m_max[index])}</strong><em>${forecastValue(daily.temperature_2m_min[index])}</em></button>`;
   }).join("");
   const dayIndex=daily.time.indexOf(selectedForecastDate),date=selectedForecastDate;
   const dateLabel=dayIndex===0?"Hoy":new Date(`${date}T12:00:00`).toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
@@ -268,7 +268,7 @@ function renderDaily(daily){
       detail("🧍‍♂️🌡️","Sensación térmica",forecastValue(val("apparent_temperature"))),
       detail("🧑‍🦱💧","Humedad",forecastValue(val("relative_humidity_2m"),"%")),
       detail("🌧️","Lluvia",`${rainValue} · ${val("precipitation")==null?"—":Number(val("precipitation")).toFixed(1)+" mm"}`),
-      detail("🧭","Viento",`${windDirection(Number(val("wind_direction_10m")))} · ${Math.round(Number(val("wind_speed_10m")))} km/h`),
+      detail("🧭","Viento",`${windDirection(val("wind_direction_10m"))} · ${forecastValue(val("wind_speed_10m")," km/h")}`),
       detail("🌬️","Ráfagas",gust==null?"—":Math.round(gust)+" km/h"),
       detail("☀️","Índice UV",uv==null?"—":Number(uv).toFixed(1)),
       detail("🔭","Visibilidad",val("visibility")==null?"—":(Number(val("visibility"))/1000).toFixed(1)+" km"),
