@@ -125,35 +125,35 @@ let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
 const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
 function weatherEmoji(code,isDay=1){if(code==null||!Number.isFinite(Number(code)))return "—";code=Number(code);const night=Number(isDay)===0;const moon='<span class="moon-weather-icon">🌙</span>';if([0,1].includes(code))return night?moon:"☀️";if([2].includes(code))return night?`☁️${moon}`:"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?moon:"🌤️";}
 function recommendationFor(current,hourly,currentTime,uv,wind){
-  const rainCodes=[51,53,55,61,63,65,80,81,82],stormCodes=[95,96,99],coldCodes=[71,73,75];
-  const times=hourly?.time||[],codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[];
+  const rainCodes=[51,53,55,61,63,65,66,67,80,81,82,85,86],stormCodes=[95,96,99];
+  const times=hourly?.time||[],codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[],gusts=hourly?.wind_gusts_10m||[],uvValues=hourly?.uv_index||[];
   let start=times.findIndex(t=>t>=currentTime);if(start<0)start=0;
-  const end=Math.min(start+7,times.length);
-  const upcoming=[];
-  for(let i=start;i<end;i++)upcoming.push({i,code:Number(codes[i]),temp:Number(temps[i]),rain:Number(rain[i]??0),wind:Number(winds[i]??0),time:times[i]});
+  const end=Math.min(start+12,times.length),upcoming=[];
+  for(let i=start;i<end;i++)upcoming.push({i,code:Number(codes[i]),temp:Number(temps[i]),rain:Number(rain[i]??0),wind:Number(winds[i]??0),gust:Number(gusts[i]??0),uv:Number(uvValues[i]??0),time:times[i]});
   const future=upcoming.slice(1);
+  const at=x=>x?.time?new Date(x.time).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):"las próximas horas";
   const storm=future.find(x=>stormCodes.includes(x.code));
-  if(storm)return {title:"Prestá atención a posibles tormentas",description:"El pronóstico muestra tormentas para las próximas horas. Si vas a salir, revisá los avisos oficiales y buscá resguardo si se acerca una tormenta.",icon:"⛈️",when:storm.time};
-  const wet=future.find(x=>rainCodes.includes(x.code)||x.rain>=50);
-  if(wet)return {title:"Prepará algo para la lluvia",description:"Hay probabilidad de lluvia en las próximas horas. Si vas a salir o volver más tarde, llevá paraguas o impermeable.",icon:"☂️",when:wet.time};
-  const laterTemps=future.filter(x=>Number.isFinite(x.temp));
-  const currentTemp=Number(current?.temperature_2m),feelsTemp=Number(current?.apparent_temperature),localHour=Number(String(currentTime||"").slice(11,13)),isNight=Number.isFinite(localHour)&&(localHour>=20||localHour<6);
-  const laterMin=laterTemps.length?Math.min(...laterTemps.map(x=>x.temp)):currentTemp;
-  const drop=currentTemp-laterMin;
-  if(Number.isFinite(drop)&&drop>=5){
-    const colder=laterTemps.find(x=>x.temp===laterMin);
-    const hour=colder?new Date(colder.time).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}):"más tarde";
-    return {title:"Llevá un abrigo para más tarde",description:`Ahora está en ${Math.round(currentTemp)} °C, pero la temperatura bajará hasta unos ${Math.round(laterMin)} °C cerca de las ${hour}. Si volvés tarde, llevá un abrigo.`,icon:"🧥",when:colder?.time};
+  if(storm)return {title:"Se pronostican tormentas",description:`El pronóstico indica tormentas alrededor de las ${at(storm)}. La intensidad y evolución pueden cambiar; consultá los avisos oficiales del SMN.`,icon:"⛈️",when:storm.time};
+  const wet=future.find(x=>rainCodes.includes(x.code)||x.rain>=60);
+  if(wet)return {title:"Lluvia prevista",description:`Aumenta la probabilidad de precipitaciones cerca de las ${at(wet)}. Probabilidad estimada: ${Math.round(wet.rain)}%.`,icon:"🌧️",when:wet.time};
+  const peakUv=upcoming.reduce((best,x)=>x.uv>best.uv?x:best,{uv:Number(uv)||0,i:start,time:times[start]});
+  if(peakUv.uv>=6)return {title:"Índice UV elevado",description:`El índice UV puede alcanzar ${Math.round(peakUv.uv)} cerca de las ${at(peakUv)}. Se recomienda protección solar, sombra y limitar la exposición en las horas de mayor intensidad.`,icon:"🧴",when:peakUv.time};
+  const maxGust=upcoming.reduce((best,x)=>x.gust>best.gust?x:best,{gust:0});
+  const maxWind=upcoming.reduce((best,x)=>x.wind>best.wind?x:best,{wind:Number(wind)||0});
+  if(maxGust.gust>=45||maxWind.wind>=40){
+    const speed=Math.round(Math.max(maxGust.gust,maxWind.wind));
+    return {title:"Viento intenso previsto",description:`Se esperan vientos o ráfagas de hasta ${speed} km/h durante las próximas horas. Atención a objetos sueltos y a las condiciones de circulación.`,icon:"💨",when:maxGust.time||maxWind.time};
   }
-  const peakUv=upcoming.reduce((best,x)=>({value:Math.max(best.value,Number(hourly?.uv_index?.[x.i]??0)),i:x.i}),{value:Number(uv)||0,i:start});
-  if(peakUv.value>=6)return {title:"Protegéte del sol",description:`El índice UV llegará aproximadamente a ${Math.round(peakUv.value)}. Si vas a estar al aire libre, buscá sombra y usá protección solar.`,icon:"🧴",when:times[peakUv.i]};
-  const maxWind=upcoming.reduce((best,x)=>Math.max(best,x.wind),Number(wind)||0);
-  if(maxWind>=40)return {title:"Atención al viento",description:`Se esperan ráfagas o viento de hasta ${Math.round(maxWind)} km/h. Asegurá objetos livianos y tené precaución al circular.`,icon:"🍃"};
-  if(currentTemp>=30)return {title:"Cuidate del calor",description:"La temperatura es elevada. Tomá agua con frecuencia y, si podés, evitá la exposición prolongada al sol en las horas más calurosas.",icon:"💧"};
-  if(currentTemp<=8||future.some(x=>coldCodes.includes(x.code)))return {title:"Prepará abrigo",description:"Se esperan condiciones frías. Si vas a salir durante las próximas horas, llevá abrigo y protegé las plantas sensibles.",icon:"🧣"};
-  if(isNight&&(currentTemp<=18||feelsTemp<=16))return {title:"Si salís esta noche, llevá abrigo",description:`Ahora hay ${Math.round(currentTemp)} °C y la sensación térmica es de ${Math.round(feelsTemp)} °C. Un abrigo liviano te va a ayudar a estar cómodo.`,icon:"🧥"};
-  if(isNight)return {title:"La noche viene tranquila",description:"No se esperan lluvias en las próximas horas. Si vas a salir, el tiempo se mantendría estable.",icon:"🌙"};
-  return {title:"Por ahora, tiempo estable",description:"No se esperan lluvias en las próximas horas. Podés seguir con tus planes y revisar el pronóstico antes de volver.",icon:"🌤️"};
+  const currentTemp=Number(current?.temperature_2m),laterTemps=future.filter(x=>Number.isFinite(x.temp));
+  const laterMin=laterTemps.length?Math.min(...laterTemps.map(x=>x.temp)):currentTemp;
+  const laterMax=laterTemps.length?Math.max(...laterTemps.map(x=>x.temp)):currentTemp;
+  if(Number.isFinite(currentTemp)&&currentTemp-laterMin>=5){
+    const colder=laterTemps.find(x=>x.temp===laterMin);
+    return {title:"Descenso de temperatura",description:`La temperatura bajará de ${Math.round(currentTemp)} °C a unos ${Math.round(laterMin)} °C cerca de las ${at(colder)}.`,icon:"🌡️",when:colder?.time};
+  }
+  if(Number.isFinite(currentTemp)&&currentTemp>=30)return {title:"Temperatura elevada",description:"Se esperan temperaturas de 30 °C o más. Conviene hidratarse y reducir la exposición prolongada al sol, especialmente en las horas más calurosas.",icon:"💧"};
+  if(Number.isFinite(laterMin)&&laterMin<=5)return {title:"Temperaturas muy bajas",description:`La mínima prevista para las próximas horas ronda los ${Math.round(laterMin)} °C. Atención a superficies frías y posibles heladas en sectores expuestos.`,icon:"❄️"};
+  return {title:"Sin cambios meteorológicos destacados",description:"No se identifican fenómenos relevantes en las próximas horas según el pronóstico disponible.",icon:"🌤️"};
 }
 function getSelectedCoordinates(){
   try{const list=readLocations(),id=primaryId(list),place=list.find(x=>x.id===id);if(place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon))return {lat:place.lat,lon:place.lon,name:place.name};}catch{}
