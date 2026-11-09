@@ -518,3 +518,20 @@
 .weather-hero .moon-weather-icon,
 #home-hourly .moon-weather-icon{filter:brightness(0) saturate(100%) invert(91%) sepia(10%) saturate(550%) hue-rotate(177deg) brightness(108%) contrast(102%)!important;color:transparent!important;text-shadow:0 0 7px rgba(205,230,255,.22)!important}
 #page-forecast .moon-weather-icon{filter:brightness(0) saturate(100%) invert(38%) sepia(22%) saturate(1120%) hue-rotate(171deg) brightness(91%) contrast(91%)!important;color:transparent!important;text-shadow:none!important}
+
+
+/* ESP32 - ajuste exclusivo de color de la misma luna llena. */
+#home-hourly .moon-weather-icon,
+.weather-hero .moon-weather-icon,
+.weather-atmosphere .moon-phase,
+#page-home .moon-weather-icon {
+  filter: brightness(0) saturate(100%) invert(91%) sepia(9%) saturate(570%) hue-rotate(176deg) brightness(108%) contrast(102%) !important;
+  color: transparent !important;
+  text-shadow: 0 0 7px rgba(205,230,255,.28) !important;
+}
+#page-forecast .moon-weather-icon,
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon {
+  filter: brightness(0) saturate(100%) invert(37%) sepia(24%) saturate(1260%) hue-rotate(171deg) brightness(91%) contrast(92%) !important;
+  color: transparent !important;
+  text-shadow: none !important;
+}
