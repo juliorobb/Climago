@@ -508,47 +508,11 @@
 }
 
 
-/* ESP32: luna de trazo visible, sin amarillo ni brillo lavado. */
-.moon-weather-icon{display:inline-block;font-family:Arial,sans-serif;font-size:1.35em;line-height:1;color:#d9edff;font-weight:400;filter:none!important;text-shadow:0 0 5px rgba(190,220,255,.24)!important}
-.weather-atmosphere .moon-phase{font-family:Arial,sans-serif;color:#d9edff;font-size:32px;filter:none!important;text-shadow:0 0 8px rgba(190,220,255,.28)!important}
-#page-forecast .forecast-hour-icon .moon-weather-icon{color:#607b94;font-size:1.45em;text-shadow:none!important}
-
-
-/* Único ajuste del pronóstico: media luna más pequeña, fina y orientada hacia la izquierda. Inicio queda intacto. */
-#page-forecast .forecast-hour-icon .moon-weather-icon{
-  display:inline-flex!important;
-  width:.92em!important;
-  height:.92em!important;
-  align-items:center!important;
-  justify-content:center!important;
-  vertical-align:middle!important;
-  transform:scaleX(-1);
-}
-#page-forecast .forecast-hour-icon .moon-weather-icon svg{
-  width:100%!important;
-  height:100%!important;
-}
-
-
-/* Luna pequeña azul para el detalle horario sobre fondo blanco. No altera Inicio ni el tamaño de los demás iconos. */
+/* ÚNICA diferencia respecto de 42002bc: luna pequeña azul en las horas nocturnas del pronóstico. Inicio conserva su luna original. */
 #page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
   display:inline-block;
-  font-size:1em;
+  font-size:.82em;
   line-height:1;
   filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);
   text-shadow:none;
-}
-
-
-/* Luna nocturna del detalle horario: pequeña, azul y sin filtro de emoji. Inicio no se modifica. */
-#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
-  display:inline-block!important;
-  width:auto!important;
-  height:auto!important;
-  font-size:.82em!important;
-  line-height:1!important;
-  color:#527fa8!important;
-  filter:none!important;
-  text-shadow:none!important;
-  transform:scaleX(-1);
 }

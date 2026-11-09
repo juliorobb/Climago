@@ -123,7 +123,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.
 const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
 let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
 const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
-function weatherEmoji(code,isDay=1){if(code==null||!Number.isFinite(Number(code)))return "—";code=Number(code);const night=Number(isDay)===0;const moon='<span class="moon-weather-icon">☾</span>';if([0,1].includes(code))return night?moon:"☀️";if([2].includes(code))return night?`☁️${moon}`:"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?moon:"🌤️";}
+function weatherEmoji(code,isDay=1){if(code==null||!Number.isFinite(Number(code)))return "—";code=Number(code);const night=Number(isDay)===0;const moon='<span class="moon-weather-icon">🌙</span>';if([0,1].includes(code))return night?moon:"☀️";if([2].includes(code))return night?`☁️${moon}`:"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?moon:"🌤️";}
 function recommendationFor(current,hourly,currentTime,uv,wind){
   const rainCodes=[51,53,55,61,63,65,80,81,82],stormCodes=[95,96,99],coldCodes=[71,73,75];
   const times=hourly?.time||[],codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[];
@@ -188,7 +188,7 @@ async function loadWeather(lat,lon,name){
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,uv_index,precipitation_probability,wind_speed_10m,wind_gusts_10m,surface_pressure,visibility,cloud_cover,dew_point_2m,precipitation,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset&forecast_days=15&timezone=auto`;
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,uv_index,precipitation_probability,wind_speed_10m,wind_gusts_10m,surface_pressure,visibility,cloud_cover,dew_point_2m,precipitation,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,sunrise,sunset&forecast_days=16&timezone=auto`;
   try{
     const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("No se pudo consultar el servicio meteorológico");const data=await response.json();
     if(requestId!==weatherRequestId)return;
@@ -259,7 +259,7 @@ function renderDaily(daily){
   const sunCard=(label,value,icon)=>value?`<div class="forecast-sun-times"><span>${icon}</span><span>${label}<b>${new Date(value).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</b></span></div>`:"";
   const rows=hourly.time.slice(Math.max(0,first),stop).map((time,j)=>{
     const i=first+j,hour=time.slice(11,16),val=key=>hourly[key]?.[i];
-    const code=val("weather_code"),isDay=Number(val("is_day")??1);if(val("temperature_2m")==null||code==null)return "";
+    const code=val("weather_code"),isDay=Number(val("is_day")??1);
     const rain=val("precipitation_probability"),uv=val("uv_index"),gust=val("wind_gusts_10m"),pressure=val("surface_pressure");
     const summary=weatherText[code]||"Condiciones variables";
     const detail=(icon,label,value)=>`<span class="forecast-detail-item"><i>${icon}</i><span>${label}<b>${value}</b></span></span>`;
@@ -495,7 +495,7 @@ function updateMoonPhase(){
   const reference=Date.UTC(2000,0,6,18,14),synodic=29.530588853;
   const age=((Date.now()-reference)/86400000%synodic+synodic)%synodic;
   const phase=Math.floor((age/synodic)*8+0.5)%8;
-  moon.textContent="☾";
+  moon.textContent=["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"][phase];
 }
 updateMoonPhase();
 
