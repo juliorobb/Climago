@@ -232,21 +232,49 @@ function windDirection(degrees){if(degrees==null||!Number.isFinite(Number(degree
 function forecastValue(value,suffix="°"){return value==null||value===""||!Number.isFinite(Number(value))?"—":`${Math.round(Number(value))}${suffix}`;}
 
 function renderVehiclePrevention(){
-  const data=forecastData;if(!data?.current||!data?.hourly||!data?.daily)return;
-  const c=data.current,h=data.hourly,d=data.daily;
-  const codes=(h.weather_code||[]).map(Number),rain=(h.precipitation_probability||[]).map(Number),gusts=(h.wind_gusts_10m||[]).map(Number);
-  const stormCodes=[95,96,99],rainCodes=[51,53,55,61,63,65,80,81,82];
-  const hailStatus=document.getElementById("vehicle-hail-status"),hailAdvice=document.getElementById("vehicle-hail-advice");
-  const stormIndex=codes.findIndex((code,i)=>i<12&&stormCodes.includes(code));
-  if(hailStatus&&hailAdvice){
-    if(stormIndex>=0){hailStatus.textContent="Hay tormentas previstas en las próximas horas";hailAdvice.textContent="Una tormenta puede venir acompañada de condiciones severas, pero estos datos no confirman granizo. Revisá los avisos oficiales y, si podés, resguardá el vehículo bajo techo.";}
-    else{hailStatus.textContent="No hay tormentas previstas en las próximas horas";hailAdvice.textContent="Esto no descarta granizo ni reemplaza los avisos oficiales. Si se emite una alerta, buscá un lugar cubierto para resguardar el vehículo.";}
+  const data=forecastData;
+  const status=document.getElementById("vehicle-weather-status");
+  const summary=document.getElementById("vehicle-weather-summary");
+  if(!data?.current||!data?.hourly||!data?.daily){
+    if(status)status.textContent="Pronóstico no disponible";
+    if(summary)summary.textContent="No pudimos actualizar las condiciones. Consultá nuevamente cuando haya conexión.";
+    return;
   }
+  const h=data.hourly,d=data.daily;
+  const currentTime=data.current.time||"";
+  let start=(h.time||[]).findIndex(t=>t>=currentTime);if(start<0)start=0;
+  const end=Math.min(start+12,h.time.length);
+  const codes=(h.weather_code||[]).slice(start,end).map(Number);
+  const rain=(h.precipitation_probability||[]).slice(start,end).map(v=>Number(v)||0);
+  const wind=(h.wind_speed_10m||[]).slice(start,end).map(v=>Number(v)||0);
+  const gusts=(h.wind_gusts_10m||[]).slice(start,end).map(v=>Number(v)||0);
   const maxTemp=Number(d.temperature_2m_max?.[0]),minTemp=Number(d.temperature_2m_min?.[0]);
-  const heat=document.getElementById("vehicle-heat-advice"),cold=document.getElementById("vehicle-cold-advice"),wet=document.getElementById("vehicle-rain-advice");
-  if(heat)heat.textContent=Number.isFinite(maxTemp)&&maxTemp>=30?"La máxima prevista es "+Math.round(maxTemp)+" °C. Evitá dejar el auto al sol cuando sea posible y nunca dejes personas o animales dentro. Revisá el nivel de refrigerante con el motor frío.":"La máxima prevista es "+forecastValue(maxTemp)+". Por ahora no se prevé calor intenso; mantené los controles habituales del vehículo.";
-  if(cold)cold.textContent=Number.isFinite(minTemp)&&minTemp<=5?"La mínima prevista es "+Math.round(minTemp)+" °C. Si tu zona puede tener heladas, prestá atención al arranque, la batería y el estado de los neumáticos.":"La mínima prevista es "+forecastValue(minTemp)+". No se espera frío intenso; mantené la presión de los neumáticos y la batería en condiciones.";
-  if(wet){const wetIndex=codes.findIndex((code,i)=>i<12&&(rainCodes.includes(code)||(rain[i]||0)>=50));const gustMax=Math.max(0,...gusts.slice(0,12).filter(Number.isFinite));wet.textContent=wetIndex>=0||gustMax>=45?"Se esperan condiciones de lluvia o ráfagas. Reducí la velocidad, aumentá la distancia de frenado y revisá neumáticos y limpiaparabrisas.":"No se destacan lluvias fuertes ni ráfagas intensas en las próximas horas. Mantené luces, frenos y limpiaparabrisas en buen estado.";}
+  const maxRain=Math.max(0,...rain),maxGust=Math.max(0,...gusts),maxWind=Math.max(0,...wind);
+  const rainCodes=[51,53,55,61,63,65,66,67,80,81,82,85,86,95,96,99];
+  const hasRain=codes.some(code=>rainCodes.includes(code))||maxRain>=50;
+  const heat=document.getElementById("vehicle-heat-advice");
+  const cold=document.getElementById("vehicle-cold-advice");
+  const wet=document.getElementById("vehicle-rain-advice");
+  const windAdvice=document.getElementById("vehicle-wind-advice");
+  const signals=[];
+  if(Number.isFinite(maxTemp)&&maxTemp>=30)signals.push("calor");
+  if(Number.isFinite(minTemp)&&minTemp<=3)signals.push("frío intenso");
+  if(hasRain)signals.push("lluvia");
+  if(maxGust>=45||maxWind>=35)signals.push("viento fuerte");
+  if(status)status.textContent=signals.length?"Atención a "+signals.join(", "):"Sin condiciones meteorológicas destacadas para el vehículo";
+  if(summary)summary.textContent="Máxima "+forecastValue(maxTemp)+" · mínima "+forecastValue(minTemp)+" · probabilidad máxima de lluvia "+Math.round(maxRain)+"% · ráfagas hasta "+Math.round(maxGust)+" km/h. Próximas 12 horas.";
+  if(heat)heat.textContent=Number.isFinite(maxTemp)&&maxTemp>=30
+    ?"Máxima prevista: "+Math.round(maxTemp)+" °C. Si podés, estacioná a la sombra. Nunca dejes personas o animales dentro. Si sube la temperatura del motor, detenete en un lugar seguro; no abras el depósito de refrigerante caliente."
+    :"Máxima prevista: "+forecastValue(maxTemp)+". No se espera calor intenso. Mantené despejadas las entradas de aire y seguí el plan de mantenimiento del sistema de refrigeración.";
+  if(cold)cold.textContent=Number.isFinite(minTemp)&&minTemp<=3
+    ?"Mínima prevista: "+Math.round(minTemp)+" °C. Puede haber superficies muy frías o heladas en sectores expuestos. Salí con tiempo, evitá maniobras bruscas y revisá batería, neumáticos y refrigerante apto para la temperatura."
+    :"Mínima prevista: "+forecastValue(minTemp)+". No se anticipa frío intenso. Como hábito, prestá atención al arranque, al estado de la batería y a la presión de los neumáticos.";
+  if(wet)wet.textContent=hasRain
+    ?"Hay señal de lluvia en el pronóstico. Revisá limpiaparabrisas y luces, reducí la velocidad, aumentá la distancia y evitá frenadas o maniobras bruscas. Atención al agua acumulada."
+    :"No se destaca lluvia en las próximas 12 horas. Mantené limpios el parabrisas y las ópticas, y revisá periódicamente las escobillas.";
+  if(windAdvice)windAdvice.textContent=maxGust>=45||maxWind>=35
+    ?"Se prevén ráfagas de hasta "+Math.round(maxGust)+" km/h. Sujetá bien la carga, prestá atención al salir de zonas protegidas y al pasar junto a vehículos grandes. Si el viento dificulta el control, buscá un lugar seguro."
+    :"Viento sin ráfagas fuertes destacadas en el período. En ruta, mantené ambas manos al volante y atención al salir de zonas arboladas o al cruzar puentes.";
 }
 document.getElementById("open-vehicle-prevention")?.addEventListener("click",()=>{
   document.querySelector(".prevention-grid").hidden=true;
