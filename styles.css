@@ -535,3 +535,14 @@
   color: transparent !important;
   text-shadow: none !important;
 }
+
+
+/* ESP32-2: luna sólida y claramente visible; solo cambia el color según el fondo. */
+.moon-weather-icon{display:inline-flex!important;align-items:center;justify-content:center;width:1.45em;height:1.45em;vertical-align:middle;filter:none!important;color:inherit!important;text-shadow:none!important}
+.moon-weather-icon svg{display:block;width:100%;height:100%;overflow:visible}
+.moon-weather-icon svg path{fill:currentColor!important;stroke:none!important}
+#page-home #home-hourly .moon-weather-icon,.weather-hero .moon-weather-icon,.weather-atmosphere .moon-phase{color:#e5f1ff!important}
+#page-forecast .moon-weather-icon{color:#477da7!important}
+.weather-atmosphere .moon-phase{font-size:32px;line-height:1;filter:none!important;text-shadow:0 1px 5px rgba(210,232,255,.25)!important}
+.weather-atmosphere .moon-phase svg{width:32px;height:32px;display:block}
+.weather-atmosphere .moon-phase svg path{fill:#e5f1ff!important}
