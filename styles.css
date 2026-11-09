@@ -528,3 +528,13 @@
   width:100%!important;
   height:100%!important;
 }
+
+
+/* Luna pequeña azul para el detalle horario sobre fondo blanco. No altera Inicio ni el tamaño de los demás iconos. */
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
+  display:inline-block;
+  font-size:1em;
+  line-height:1;
+  filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);
+  text-shadow:none;
+}
