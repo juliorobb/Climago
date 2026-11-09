@@ -126,26 +126,26 @@ const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublad
 function weatherEmoji(code,isDay=1){if(code==null||!Number.isFinite(Number(code)))return "—";code=Number(code);const night=Number(isDay)===0;const moon='<span class="moon-weather-icon">🌙</span>';if([0,1].includes(code))return night?moon:"☀️";if([2].includes(code))return night?`☁️${moon}`:"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?moon:"🌤️";}
 function recommendationFor(current,hourly,currentTime,uv,wind){
   const rainCodes=[51,53,55,61,63,65,66,67,80,81,82,85,86],stormCodes=[95,96,99],times=hourly?.time||[];
-  const codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[],gusts=hourly?.wind_gusts_10m||[],uvs=hourly?.uv_index||[];
-  const nowMs=new Date(currentTime).getTime(),endMs=nowMs+12*60*60*1000;
+  const codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[],gusts=hourly?.wind_gusts_10m||[],daylight=hourly?.is_day||[];
+  const nowMs=new Date(currentTime).getTime(),endMs=nowMs+3*60*60*1000;
   let start=times.findIndex(t=>new Date(t).getTime()>=nowMs);if(start<0)start=0;
-  const hours=[];for(let i=start;i<times.length&&new Date(times[i]).getTime()<=endMs;i++)hours.push({i,code:Number(codes[i]),temp:Number(temps[i]),rain:Number(rain[i]??0),wind:Number(winds[i]??0),gust:Number(gusts[i]??0),uv:Number(uvs[i]??0),time:times[i]});
-  const future=hours.slice(1),time=t=>new Date(t).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
-  const when=x=>x?.time?`cerca de las ${time(x.time)}`:"durante las próximas horas";
+  const hours=[];for(let i=start;i<times.length&&new Date(times[i]).getTime()<=endMs;i++)hours.push({i,code:Number(codes[i]),temp:Number(temps[i]),rain:Number(rain[i]??0),wind:Number(winds[i]??0),gust:Number(gusts[i]??0),day:Number(daylight[i]??0),time:times[i]});
+  const future=hours.slice(1),time=x=>new Date(x).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+  const when=x=>x?.time?`cerca de las ${time(x.time)}`:"en las próximas horas";
   const storm=future.find(x=>stormCodes.includes(x.code));
-  if(storm)return {title:"Tormentas en las próximas horas",description:`Se esperan tormentas ${when(storm)}. Seguí los avisos oficiales del SMN.`,icon:"⛈️"};
+  if(storm)return {title:"Tormentas próximas",description:`Se esperan tormentas ${when(storm)}. Mantenete atento a los avisos oficiales del SMN.`,icon:"⛈️"};
   const wet=future.find(x=>rainCodes.includes(x.code)||x.rain>=50);
-  if(wet)return {title:"Lluvia en las próximas horas",description:`Puede llover ${when(wet)}. Probabilidad estimada: ${Math.round(wet.rain)}%. Si salís, tené en cuenta el paraguas.`,icon:"🌧️"};
+  if(wet){
+    const daylightRain=wet.day===1||future.some(x=>x.day===1&&new Date(x.time).getTime()<=new Date(wet.time).getTime());
+    const advice=daylightRain?" Si vas a salir, llevá paraguas.":"";
+    return {title:"Lluvia próxima",description:`Puede llover ${when(wet)}. Probabilidad estimada: ${Math.round(wet.rain)}%.${advice}`,icon:"🌧️"};
+  }
   const maxWind=hours.reduce((b,x)=>Math.max(b,x.wind,x.gust),0),windHour=hours.find(x=>Math.max(x.wind,x.gust)===maxWind);
-  if(maxWind>=45)return {title:"Ráfagas fuertes previstas",description:`Se esperan ráfagas de hasta ${Math.round(maxWind)} km/h ${when(windHour)}. Asegurá objetos sueltos y prestá atención al circular.`,icon:"💨"};
+  if(maxWind>=45)return {title:"Ráfagas fuertes",description:`Se esperan ráfagas de hasta ${Math.round(maxWind)} km/h ${when(windHour)}. Asegurá objetos sueltos y prestá atención al circular.`,icon:"💨"};
   const currentTemp=Number(current?.temperature_2m),valid=future.filter(x=>Number.isFinite(x.temp)),min=valid.length?Math.min(...valid.map(x=>x.temp)):currentTemp,max=valid.length?Math.max(...valid.map(x=>x.temp)):currentTemp;
-  if(Number.isFinite(currentTemp)&&currentTemp-min>=3){const target=valid.find(x=>x.temp===min);return {title:"Va a refrescar",description:`En las próximas horas la temperatura puede bajar de ${Math.round(currentTemp)} °C a unos ${Math.round(min)} °C. Si salís, llevá un abrigo.`,icon:"",iconClass:"thermometer"};}
-  if(Number.isFinite(currentTemp)&&max-currentTemp>=3){return {title:"La temperatura va a subir",description:`En las próximas horas puede llegar a unos ${Math.round(max)} °C. Si aumenta el calor, hidratate y buscá sombra.`,icon:"",iconClass:"thermometer"};}
-  const peakUv=hours.reduce((b,x)=>x.uv>b.uv?x:b,{uv:Number(uv)||0});
-  if(peakUv.uv>=6)return {title:"Índice UV elevado",description:`El índice UV puede llegar a ${Math.round(peakUv.uv)} durante las próximas horas. Usá protección solar y buscá sombra.`,icon:"🧴"};
-  if(max>=30)return {title:"Calor en las próximas horas",description:`Se esperan temperaturas cercanas a ${Math.round(max)} °C. Hidratate y evitá la exposición prolongada al sol.`,icon:"💧"};
-  if(min<=5)return {title:"Frío en las próximas horas",description:`La temperatura puede bajar hasta unos ${Math.round(min)} °C. Si salís, llevá abrigo.`,icon:"❄️"};
-  return {title:"Sin cambios importantes",description:"No se esperan lluvias, tormentas, ráfagas fuertes ni cambios marcados de temperatura durante las próximas 12 horas.",icon:"🌤️"};
+  if(Number.isFinite(currentTemp)&&currentTemp-min>=3){return {title:"Va a refrescar",description:`En las próximas horas la temperatura puede bajar de ${Math.round(currentTemp)} °C a unos ${Math.round(min)} °C. Si salís, llevá un abrigo.`,iconClass:"thermometer"};}
+  if(Number.isFinite(currentTemp)&&max-currentTemp>=3){return {title:"Sube la temperatura",description:`En las próximas horas puede llegar a unos ${Math.round(max)} °C. Si aumenta el calor, hidratate y buscá sombra.`,iconClass:"thermometer"};}
+  return {title:"Sin cambios importantes",description:"No se esperan lluvias, tormentas, ráfagas fuertes ni cambios marcados de temperatura durante las próximas 3 horas.",icon:"🌤️"};
 }
 function getSelectedCoordinates(){
   try{const list=readLocations(),id=primaryId(list),place=list.find(x=>x.id===id);if(place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon))return {lat:place.lat,lon:place.lon,name:place.name};}catch{}
