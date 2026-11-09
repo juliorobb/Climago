@@ -512,3 +512,9 @@
 .moon-weather-icon{display:inline-block;font-family:Arial,sans-serif;font-size:1.35em;line-height:1;color:#d9edff;font-weight:400;filter:none!important;text-shadow:0 0 5px rgba(190,220,255,.24)!important}
 .weather-atmosphere .moon-phase{font-family:Arial,sans-serif;color:#d9edff;font-size:32px;filter:none!important;text-shadow:0 0 8px rgba(190,220,255,.28)!important}
 #page-forecast .forecast-hour-icon .moon-weather-icon{color:#527da5;font-size:1.45em;text-shadow:none!important;filter:none!important}
+
+
+/* ESP32: conservar luna llena de volumen, solo ajustar el tono según el fondo. */
+.weather-hero .moon-weather-icon,
+#home-hourly .moon-weather-icon{filter:brightness(0) saturate(100%) invert(91%) sepia(10%) saturate(550%) hue-rotate(177deg) brightness(108%) contrast(102%)!important;color:transparent!important;text-shadow:0 0 7px rgba(205,230,255,.22)!important}
+#page-forecast .moon-weather-icon{filter:brightness(0) saturate(100%) invert(38%) sepia(22%) saturate(1120%) hue-rotate(171deg) brightness(91%) contrast(91%)!important;color:transparent!important;text-shadow:none!important}
