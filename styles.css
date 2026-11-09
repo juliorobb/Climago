@@ -586,3 +586,7 @@
 #page-forecast .forecast-hour-details b{color:#24465c}
 #page-forecast .forecast-sun-times{background:#dceaf0;border-color:#c6d9e2;color:#536f80}
 #page-forecast .forecast-sun-times b{color:#24465c}
+
+
+/* v28 · Fondo celeste suave exclusivo de la pantalla Pronóstico */
+#page-forecast{background:#8fb8ca;margin:-18px -16px;padding:18px 16px 28px;border-radius:0 0 18px 18px;color:#263f50}
