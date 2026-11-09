@@ -441,7 +441,7 @@
 #page-forecast .forecast-hour-main small{font-size:11px;color:#526b7b;line-height:1.35}
 #page-forecast .forecast-hour-icon{font-size:24px}
 #page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{font-size:28px}
-#page-forecast .moon-weather-icon{display:inline-block;filter:grayscale(1) brightness(0) invert(1) drop-shadow(0 1px 4px rgba(210,232,255,.7))}
+#page-forecast .moon-weather-icon{display:inline-block;filter:none; color:inherit; text-shadow:0 1px 3px rgba(30,50,70,.22)}
 #page-forecast .forecast-hour-details{padding:10px 8px 18px 8px;gap:14px 12px}
 #page-forecast .forecast-hour-details>span{display:flex;align-items:flex-start;gap:8px;color:#607887;font-size:11px}
 #page-forecast .forecast-hour-details>span>i{font-style:normal;font-size:17px;min-width:20px}
@@ -454,4 +454,32 @@
  #page-forecast .forecast-hour-main{grid-template-columns:42px 29px 42px minmax(0,1fr) 14px;gap:6px}
  #page-forecast .forecast-hour-main small{font-size:10px}
  #page-forecast .forecast-hour-details{padding-left:2px}
+}
+
+
+/* Detalle horario compacto, legible y alineado como ficha meteorológica */
+#page-forecast .forecast-hour-details{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+ align-items:start;justify-items:stretch;gap:13px 18px;
+ padding:12px 8px 17px;margin:0;
+}
+#page-forecast .forecast-hour-details .forecast-detail-item{
+ display:grid;grid-template-columns:25px minmax(0,1fr);align-items:start;
+ justify-items:start;gap:7px;text-align:left;min-width:0;
+}
+#page-forecast .forecast-hour-details .forecast-detail-item>i{
+ font-style:normal;font-size:19px;line-height:1.25;min-width:0;text-align:center;
+}
+#page-forecast .forecast-hour-details .forecast-detail-item>span{
+ display:block;text-align:left;font-size:11px;line-height:1.25;color:#607887;min-width:0;
+}
+#page-forecast .forecast-hour-details .forecast-detail-item b{
+ display:block;text-align:left;font-size:13px;line-height:1.25;color:#24445a;margin-top:3px;
+}
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{filter:none;color:inherit}
+@media(max-width:350px){
+ #page-forecast .forecast-hour-details{gap:12px 8px;padding-left:2px;padding-right:2px}
+ #page-forecast .forecast-hour-details .forecast-detail-item{grid-template-columns:21px minmax(0,1fr);gap:5px}
+ #page-forecast .forecast-hour-details .forecast-detail-item>span{font-size:10px}
+ #page-forecast .forecast-hour-details .forecast-detail-item b{font-size:12px}
 }
