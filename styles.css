@@ -574,3 +574,12 @@
 .weather-atmosphere .moon-phase{display:flex!important;align-items:center!important;justify-content:center!important;color:#eaf4ff!important;filter:none!important;text-shadow:0 0 7px rgba(210,232,255,.25)!important}
 .weather-atmosphere .moon-phase svg{display:block!important;width:32px!important;height:32px!important}
 .weather-atmosphere .moon-phase svg path{fill:#eaf4ff!important}
+
+
+/* ESP32-4 — tono de referencia y luna nocturna en todas las horas del pronóstico. */
+#page-home #home-hourly .moon-weather-icon,
+#page-home .weather-hero .moon-weather-icon,
+#page-home .weather-atmosphere .moon-phase{color:#d8e9fa!important;opacity:1!important;filter:none!important;text-shadow:0 0 7px rgba(190,220,245,.30)!important}
+#page-home .weather-atmosphere .moon-phase svg path{fill:#d8e9fa!important}
+#page-forecast .forecast-hour-icon .moon-weather-icon{color:#397caf!important;opacity:1!important;filter:none!important;text-shadow:none!important}
+#page-forecast .forecast-hour-icon .moon-weather-icon svg path{fill:#397caf!important}
