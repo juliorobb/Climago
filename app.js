@@ -123,7 +123,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.
 const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
 let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
 const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
-function weatherEmoji(code,isDay=1){const night=Number(isDay)===0;if([0,1].includes(code))return night?"🌙":"☀️";if([2].includes(code))return night?"☁️🌙":"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?"🌙":"🌤️";}
+function weatherEmoji(code,isDay=1){const night=Number(isDay)===0;if([0,1].includes(code))return night?"☾":"☀️";if([2].includes(code))return night?"☁️":"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?"☾":"🌤️";}
 function recommendationFor(current,hourly,currentTime,uv,wind){
   const rainCodes=[51,53,55,61,63,65,80,81,82],stormCodes=[95,96,99],coldCodes=[71,73,75];
   const times=hourly?.time||[],codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[];
@@ -227,41 +227,52 @@ document.addEventListener("visibilitychange",()=>{
 function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 function renderHourly(hourly,currentTime,current){const host=document.getElementById("home-hourly");if(!host||!hourly)return;let index=hourly.time.findIndex(t=>t>=currentTime);if(index<0)index=0;const items=[];const currentIsDay=current?.is_day??hourly.is_day?.[index]??1;items.push(`<div class="hour"><small>Ahora</small><span>${weatherEmoji(Number(current?.weather_code??hourly.weather_code[index]),currentIsDay)}</span><b>${Math.round(Number(current?.temperature_2m??hourly.temperature_2m[index]))}°</b></div>`);for(let i=index+1;i<Math.min(index+4,hourly.time.length);i++){const date=new Date(hourly.time[i]);items.push(`<div class="hour"><small>${date.toLocaleTimeString("es-AR",{hour:"2-digit",hour12:false})+" h"}</small><span>${weatherEmoji(Number(hourly.weather_code[i]),hourly.is_day?.[i]??1)}</span><b>${Math.round(hourly.temperature_2m[i])}°</b></div>`);}host.innerHTML=items.join("");}
 let forecastData=null;
-let forecastRange="7";
+let selectedForecastDate=null;
 function renderDaily(daily){
   const host=document.getElementById("forecast-list");
-  if(!host||!daily||!forecastData?.hourly)return;
+  const strip=document.getElementById("forecast-date-strip");
+  if(!host||!strip||!daily||!forecastData?.hourly)return;
   const hourly=forecastData.hourly;
   const today=document.querySelector(".forecast-today");
   const temp=daily.temperature_2m_max[0],min=daily.temperature_2m_min[0];
   if(today){
     today.querySelector("strong").textContent=`${Math.round(temp)}°`;
-    today.querySelector(".big-weather").textContent=weatherEmoji(Number(daily.weather_code[0]));
+    today.querySelector(".big-weather").textContent=weatherEmoji(Number(daily.weather_code[0]),1);
     document.getElementById("forecast-today-min").textContent=`${Math.round(min)}° mínima`;
-    document.getElementById("forecast-today-summary").textContent=`Máxima y mínima previstas · ${Math.round(temp)}° / ${Math.round(min)}° · Open-Meteo`;
+    document.getElementById("forecast-today-summary").textContent=`Máxima y mínima previstas · ${Math.round(temp)}° / ${Math.round(min)}°`;
     document.getElementById("forecast-today-label").textContent=`Hoy · ${activeCoords?.name||"Tu zona"}`;
   }
-  const count=forecastRange==="today"?1:Number(forecastRange);
-  const dates=daily.time.slice(0,count);
-  host.innerHTML=dates.map((date,index)=>{
-    const label=index===0?"Hoy":new Date(`${date}T12:00:00`).toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"short"});
-    const start=hourly.time.findIndex(t=>t.startsWith(date));
-    const end=hourly.time.findIndex((t,i)=>i>start&&!t.startsWith(date));
-    const stop=end<0?hourly.time.length:end;
-    const rows=hourly.time.slice(start,stop).map((time,j)=>{
-      const i=start+j, hour=time.slice(11,16);
-      const val=(key)=>hourly[key]?.[i];
-      const rain=val("precipitation_probability"),uv=val("uv_index"),gust=val("wind_gusts_10m"),pressure=val("surface_pressure");
-      return `<div class="forecast-hour"><div class="forecast-hour-main"><b>${hour}</b><span>${weatherEmoji(Number(val("weather_code")),Number(val("is_day")??1))}</span><strong>${Math.round(Number(val("temperature_2m")))}°</strong><small>Sens. ${Math.round(Number(val("apparent_temperature")))}°</small></div><div class="forecast-hour-details"><span>💧 Humedad <b>${Math.round(Number(val("relative_humidity_2m")))}%</b></span><span>🌧️ Lluvia <b>${rain==null?"—":Math.round(rain)+"%"}</b></span><span>〰 Viento <b>${Math.round(Number(val("wind_speed_10m")))} km/h</b></span><span>🌬️ Ráfagas <b>${gust==null?"—":Math.round(gust)+" km/h"}</b></span><span>☀ UV <b>${uv==null?"—":Number(uv).toFixed(1)}</b></span><span> presión <b>${pressure==null?"—":Math.round(pressure)+" hPa"}</b></span></div></div>`;
-    }).join("");
-    return `<details class="forecast-day" ${index===0?"open":""}><summary><span class="forecast-day-name">${label}</span><span class="forecast-day-icon">${weatherEmoji(Number(daily.weather_code[index]))}</span><strong>${Math.round(daily.temperature_2m_max[index])}° / ${Math.round(daily.temperature_2m_min[index])}°</strong><span class="forecast-chevron" aria-hidden="true">⌄</span></summary><div class="forecast-day-hours">${rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>'}</div></details>`;
+  if(!selectedForecastDate||!daily.time.includes(selectedForecastDate))selectedForecastDate=daily.time[0];
+  strip.innerHTML=daily.time.map((date,index)=>{
+    const dateObj=new Date(`${date}T12:00:00`);
+    const weekday=index===0?"HOY":dateObj.toLocaleDateString("es-AR",{weekday:"short"}).replace(".","").toUpperCase();
+    const day=dateObj.toLocaleDateString("es-AR",{day:"numeric",month:"short"}).replace(".","");
+    return `<button type="button" class="forecast-date ${date===selectedForecastDate?"selected":""}" data-forecast-date="${date}" aria-pressed="${date===selectedForecastDate}"><small>${weekday}</small><b>${day}</b><span>${weatherEmoji(Number(daily.weather_code[index]),1)}</span><strong>${Math.round(daily.temperature_2m_max[index])}°</strong><em>${Math.round(daily.temperature_2m_min[index])}°</em></button>`;
   }).join("");
+  const index=daily.time.indexOf(selectedForecastDate);
+  const date=selectedForecastDate;
+  const dateLabel=index===0?"Hoy":new Date(`${date}T12:00:00`).toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("forecast-selected-heading").textContent=`${dateLabel} · Detalle por hora`;
+  const start=hourly.time.findIndex(t=>t.startsWith(date));
+  const end=hourly.time.findIndex((t,i)=>i>start&&!t.startsWith(date));
+  const stop=end<0?hourly.time.length:end;
+  const rows=hourly.time.slice(Math.max(0,start),stop).map((time,j)=>{
+    const i=start+j,hour=time.slice(11,16),val=key=>hourly[key]?.[i];
+    const code=Number(val("weather_code")),isDay=Number(val("is_day")??1);
+    const rain=val("precipitation_probability"),uv=val("uv_index"),gust=val("wind_gusts_10m"),pressure=val("surface_pressure");
+    const summary=weatherText[code]||"Condiciones variables";
+    return `<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isDay)}</span><strong>${Math.round(Number(val("temperature_2m")))}°</strong><small>${summary} · Sens. ${Math.round(Number(val("apparent_temperature")))}°</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details"><span>🌡️ Sensación térmica <b>${Math.round(Number(val("apparent_temperature")))}°</b></span><span>💧 Humedad <b>${Math.round(Number(val("relative_humidity_2m")))}%</b></span><span>🌧️ Lluvia <b>${rain==null?"—":Math.round(rain)+"%"}</b></span><span>〰 Viento <b>${Math.round(Number(val("wind_speed_10m")))} km/h</b></span><span>🌬️ Ráfagas <b>${gust==null?"—":Math.round(gust)+" km/h"}</b></span><span>☀ Índice UV <b>${uv==null?"—":Number(uv).toFixed(1)}</b></span><span> presión <b>${pressure==null?"—":Math.round(pressure)+" hPa"}</b></span></div></details>`;
+  }).join("");
+  host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
+  const selected=strip.querySelector(".forecast-date.selected");
+  selected?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
 }
-document.querySelectorAll("[data-forecast-range]").forEach(button=>button.addEventListener("click",()=>{
-  forecastRange=button.dataset.forecastRange;
-  document.querySelectorAll("[data-forecast-range]").forEach(item=>{const active=item===button;item.classList.toggle("selected",active);item.setAttribute("aria-pressed",String(active));});
-  renderDaily(forecastData?.daily);
-}));
+document.getElementById("forecast-date-strip")?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-forecast-date]");
+  if(!button||!forecastData?.daily)return;
+  selectedForecastDate=button.dataset.forecastDate;
+  renderDaily(forecastData.daily);
+});
 function initWeatherMap(){
   if(!window.L){setText("map-weather-status","No se pudo cargar el componente del mapa. Revisá tu conexión.");return;}
   const coords=getSelectedCoordinates();activeCoords=coords;
