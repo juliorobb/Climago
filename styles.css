@@ -546,3 +546,11 @@
 .weather-atmosphere .moon-phase{font-size:32px;line-height:1;filter:none!important;text-shadow:0 1px 5px rgba(210,232,255,.25)!important}
 .weather-atmosphere .moon-phase svg{width:32px;height:32px;display:block}
 .weather-atmosphere .moon-phase svg path{fill:#e5f1ff!important}
+
+
+/* ESP32-3: luna sólida y legible. Inicio: blanco azulado; pronóstico: azul sobre tarjeta blanca. */
+.moon-weather-icon{display:inline-flex!important;width:1.5em!important;height:1.5em!important;align-items:center!important;justify-content:center!important;opacity:1!important;filter:none!important;color:inherit!important;text-shadow:none!important}
+.moon-weather-icon svg{width:100%!important;height:100%!important;display:block!important}
+.moon-weather-icon svg path{fill:currentColor!important;stroke:none!important}
+#page-home .moon-weather-icon,#home-hourly .moon-weather-icon,.weather-hero .moon-weather-icon{color:#eaf4ff!important;opacity:1!important}
+#page-forecast .moon-weather-icon{color:#477fae!important;opacity:1!important}
