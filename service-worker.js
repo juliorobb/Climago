@@ -1,4 +1,4 @@
-const CACHE_NAME="climago-shell-v14";
+const CACHE_NAME="climago-shell-v15";
 const DATA_CACHE="climago-data-v1";
 const APP_SHELL=["./","./index.html","./styles.css","./app.js","./manifest.json","./assets/icon.svg","./assets/landscapes/sierras.jpg","./assets/landscapes/ciudad.jpg","./assets/landscapes/mar.jpg","./assets/mascot-sun.png","./assets/mascot-cloud.png","./assets/mascot-rain.png","./assets/mascot-storm.png","./assets/mascot-cold.png","./assets/mascot-wind.png","./assets/mascot-heat.png"];
 const ALERTS_PATH="/data/smn-alerts.json";
