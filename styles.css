@@ -563,3 +563,14 @@
 #page-home #home-hourly .moon-weather-icon,.weather-hero .moon-weather-icon{color:#eaf4ff!important;opacity:1!important}
 #page-forecast .moon-weather-icon{color:#477fae!important;opacity:1!important}
 .forecast-hour-icon .moon-weather-icon{width:1.45em!important;height:1.45em!important}
+
+
+/* ESP32-4 — conservar la media luna clásica; solo cambia el color según el fondo. */
+.moon-weather-icon{display:inline-flex!important;width:1.42em!important;height:1.42em!important;align-items:center!important;justify-content:center!important;opacity:1!important;filter:none!important;color:inherit!important;vertical-align:middle!important;text-shadow:none!important}
+.moon-weather-icon svg{display:block!important;width:100%!important;height:100%!important;overflow:visible!important}
+.moon-weather-icon svg path{fill:currentColor!important;stroke:none!important}
+#page-home .moon-weather-icon,#home-hourly .moon-weather-icon,.weather-hero .moon-weather-icon{color:#eaf4ff!important;opacity:1!important}
+#page-forecast .moon-weather-icon{color:#397caf!important;opacity:1!important}
+.weather-atmosphere .moon-phase{display:flex!important;align-items:center!important;justify-content:center!important;color:#eaf4ff!important;filter:none!important;text-shadow:0 0 7px rgba(210,232,255,.25)!important}
+.weather-atmosphere .moon-phase svg{display:block!important;width:32px!important;height:32px!important}
+.weather-atmosphere .moon-phase svg path{fill:#eaf4ff!important}
