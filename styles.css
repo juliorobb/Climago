@@ -489,3 +489,11 @@
  filter:brightness(0) saturate(100%) invert(43%) sepia(17%) saturate(1070%) hue-rotate(159deg) brightness(94%) contrast(91%);
 }
 #page-forecast .forecast-hour-details .forecast-detail-item>i{font-size:18px;line-height:1.35}
+
+
+/* Luna ClimaGo: blanco azulado, visible tanto en Inicio como en el pronóstico. */
+.weather-atmosphere .moon-phase,
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{
+  filter:brightness(0) saturate(100%) invert(94%) sepia(9%) saturate(520%) hue-rotate(174deg) brightness(106%) contrast(101%);
+  text-shadow:0 0 8px rgba(205,230,255,.38);
+}
