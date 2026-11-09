@@ -428,3 +428,30 @@
  #page-forecast .forecast-hour-main small{font-size:9px}
  #page-forecast .forecast-hour-details{padding-left:4px}
 }
+
+
+/* Ajustes finales de legibilidad del pronóstico; no modificar la navegación por días */
+#page-forecast .page-heading small,
+#page-forecast .page-heading h1,
+#page-forecast .forecast-date-heading,
+#page-forecast .forecast-selected-heading{color:#e8f3fa!important}
+#page-forecast .forecast-date-heading small{color:#a9c0d0!important}
+#page-forecast .forecast-selected-heading{font-size:16px;font-weight:750;margin:12px 2px 12px}
+#page-forecast .forecast-hour-main{grid-template-columns:48px 34px 48px minmax(0,1fr) 16px;gap:8px;min-height:66px}
+#page-forecast .forecast-hour-main small{font-size:11px;color:#526b7b;line-height:1.35}
+#page-forecast .forecast-hour-icon{font-size:24px}
+#page-forecast .forecast-hour-icon.moon-icon .moon-weather-icon{font-size:28px}
+#page-forecast .moon-weather-icon{display:inline-block;filter:grayscale(1) brightness(0) invert(1) drop-shadow(0 1px 4px rgba(210,232,255,.7))}
+#page-forecast .forecast-hour-details{padding:10px 8px 18px 8px;gap:14px 12px}
+#page-forecast .forecast-hour-details>span{display:flex;align-items:flex-start;gap:8px;color:#607887;font-size:11px}
+#page-forecast .forecast-hour-details>span>i{font-style:normal;font-size:17px;min-width:20px}
+#page-forecast .forecast-hour-details>span>span{display:block}
+#page-forecast .forecast-hour-details b{color:#24445a;font-size:13px}
+#page-forecast .forecast-sun-times{display:flex;align-items:center;gap:12px;padding:14px 10px;margin:0;border-top:1px solid #e4ebf0;border-bottom:1px solid #e4ebf0;background:#f5fafc;color:#506d7d}
+#page-forecast .forecast-sun-times>span:first-child{font-size:25px}
+#page-forecast .forecast-sun-times b{display:block;color:#24445a;margin-top:3px;font-size:14px}
+@media(max-width:380px){
+ #page-forecast .forecast-hour-main{grid-template-columns:42px 29px 42px minmax(0,1fr) 14px;gap:6px}
+ #page-forecast .forecast-hour-main small{font-size:10px}
+ #page-forecast .forecast-hour-details{padding-left:2px}
+}
