@@ -230,6 +230,33 @@ let forecastData=null;
 let selectedForecastDate=null;
 function windDirection(degrees){if(degrees==null||!Number.isFinite(Number(degrees)))return "—";return ["N","NE","E","SE","S","SO","O","NO"][Math.round(Number(degrees)/45)%8];}
 function forecastValue(value,suffix="°"){return value==null||value===""||!Number.isFinite(Number(value))?"—":`${Math.round(Number(value))}${suffix}`;}
+
+function renderVehiclePrevention(){
+  const data=forecastData;if(!data?.current||!data?.hourly||!data?.daily)return;
+  const c=data.current,h=data.hourly,d=data.daily;
+  const codes=(h.weather_code||[]).map(Number),rain=(h.precipitation_probability||[]).map(Number),gusts=(h.wind_gusts_10m||[]).map(Number);
+  const stormCodes=[95,96,99],rainCodes=[51,53,55,61,63,65,80,81,82];
+  const hailStatus=document.getElementById("vehicle-hail-status"),hailAdvice=document.getElementById("vehicle-hail-advice");
+  const stormIndex=codes.findIndex((code,i)=>i<12&&stormCodes.includes(code));
+  if(hailStatus&&hailAdvice){
+    if(stormIndex>=0){hailStatus.textContent="Hay tormentas previstas en las próximas horas";hailAdvice.textContent="Una tormenta puede venir acompañada de condiciones severas, pero estos datos no confirman granizo. Revisá los avisos oficiales y, si podés, resguardá el vehículo bajo techo.";}
+    else{hailStatus.textContent="No hay tormentas previstas en las próximas horas";hailAdvice.textContent="Esto no descarta granizo ni reemplaza los avisos oficiales. Si se emite una alerta, buscá un lugar cubierto para resguardar el vehículo.";}
+  }
+  const maxTemp=Number(d.temperature_2m_max?.[0]),minTemp=Number(d.temperature_2m_min?.[0]);
+  const heat=document.getElementById("vehicle-heat-advice"),cold=document.getElementById("vehicle-cold-advice"),wet=document.getElementById("vehicle-rain-advice");
+  if(heat)heat.textContent=Number.isFinite(maxTemp)&&maxTemp>=30?"La máxima prevista es "+Math.round(maxTemp)+" °C. Evitá dejar el auto al sol cuando sea posible y nunca dejes personas o animales dentro. Revisá el nivel de refrigerante con el motor frío.":"La máxima prevista es "+forecastValue(maxTemp)+". Por ahora no se prevé calor intenso; mantené los controles habituales del vehículo.";
+  if(cold)cold.textContent=Number.isFinite(minTemp)&&minTemp<=5?"La mínima prevista es "+Math.round(minTemp)+" °C. Si tu zona puede tener heladas, prestá atención al arranque, la batería y el estado de los neumáticos.":"La mínima prevista es "+forecastValue(minTemp)+". No se espera frío intenso; mantené la presión de los neumáticos y la batería en condiciones.";
+  if(wet){const wetIndex=codes.findIndex((code,i)=>i<12&&(rainCodes.includes(code)||(rain[i]||0)>=50));const gustMax=Math.max(0,...gusts.slice(0,12).filter(Number.isFinite));wet.textContent=wetIndex>=0||gustMax>=45?"Se esperan condiciones de lluvia o ráfagas. Reducí la velocidad, aumentá la distancia de frenado y revisá neumáticos y limpiaparabrisas.":"No se destacan lluvias fuertes ni ráfagas intensas en las próximas horas. Mantené luces, frenos y limpiaparabrisas en buen estado.";}
+}
+document.getElementById("open-vehicle-prevention")?.addEventListener("click",()=>{
+  document.querySelector(".prevention-grid").hidden=true;
+  document.getElementById("vehicle-prevention-detail").hidden=false;
+  renderVehiclePrevention();
+});
+document.getElementById("back-prevention-grid")?.addEventListener("click",()=>{
+  document.getElementById("vehicle-prevention-detail").hidden=true;
+  document.querySelector(".prevention-grid").hidden=false;
+});
 function renderDaily(daily){
   const host=document.getElementById("forecast-list"),strip=document.getElementById("forecast-date-strip");
   if(!host||!strip||!daily||!forecastData?.hourly)return;
