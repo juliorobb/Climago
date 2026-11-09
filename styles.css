@@ -375,3 +375,56 @@
 .forecast-hour-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px;margin:10px 0 0 80px}
 .forecast-hour-details span{font-size:10px;color:#b7c9d8}.forecast-hour-details b{color:#f3f7fb;font-weight:600}
 @media(max-width:380px){.forecast-day summary{gap:5px;padding:13px 9px}.forecast-day-name{font-size:12px}.forecast-day summary strong{font-size:11px}.forecast-hour-details{margin-left:0}}
+
+
+/* ClimaGo · Pronóstico claro y deslizable */
+#page-forecast{color:#263b4b}
+#page-forecast .page-heading small{color:#668095}
+#page-forecast .page-heading h1{color:#18364c}
+#page-forecast .forecast-today{
+  background:#fff;color:#243b4b;border:1px solid #dce6ed;
+  box-shadow:0 3px 12px rgba(25,55,75,.06);padding:16px;margin:0 0 18px;
+}
+#page-forecast .forecast-today>span,#page-forecast .forecast-today p{color:#6c8190}
+#page-forecast .forecast-today strong{color:#173c57}
+#page-forecast .forecast-date-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:5px 2px 9px;color:#24445a}
+#page-forecast .forecast-date-heading small{font-size:10px;color:#78909f}
+.forecast-date-strip{
+  display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
+  padding:2px 1px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.forecast-date-strip::-webkit-scrollbar{display:none}
+.forecast-date{
+  flex:0 0 68px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border:1px solid #dbe5ec;border-radius:13px;background:#fff;color:#526b7c;
+  scroll-snap-align:center;padding:8px 5px;font:inherit;cursor:pointer;
+}
+.forecast-date small{font-size:10px;font-weight:700;color:#718797}
+.forecast-date b{font-size:11px}
+.forecast-date span{font-size:20px;line-height:1.2}
+.forecast-date strong{font-size:13px;color:#203f54}
+.forecast-date em{font-style:normal;font-size:11px;color:#8496a3}
+.forecast-date.selected{background:#e8f7fc;border:2px solid #20a9cb;padding:7px 4px;color:#17475d}
+.forecast-date.selected small,.forecast-date.selected strong{color:#087d9b}
+.forecast-selected-heading{font-size:15px;font-weight:750;color:#24445a;margin:8px 2px 10px;text-transform:capitalize}
+#page-forecast .forecast-list{display:grid;gap:0;background:#fff;border:1px solid #dce6ed;border-radius:15px;padding:0 12px;overflow:hidden;box-shadow:0 3px 12px rgba(25,55,75,.05)}
+#page-forecast .forecast-hour{padding:0;border-bottom:1px solid #e4ebf0;background:#fff}
+#page-forecast .forecast-hour:last-child{border-bottom:0}
+#page-forecast .forecast-hour-main{list-style:none;display:grid;grid-template-columns:45px 30px 42px minmax(0,1fr) 15px;align-items:center;gap:7px;min-height:62px;cursor:pointer}
+#page-forecast .forecast-hour-main::-webkit-details-marker{display:none}
+#page-forecast .forecast-hour-main b{font-size:13px;color:#425b6b}
+#page-forecast .forecast-hour-icon{font-size:21px;text-align:center}
+#page-forecast .forecast-hour-icon.moon-icon{color:#dcecff;font-size:27px}
+#page-forecast .forecast-hour-main strong{font-size:18px;color:#203f54}
+#page-forecast .forecast-hour-main small{font-size:10px;line-height:1.35;color:#657d8d}
+#page-forecast .forecast-hour-chevron{font-size:18px;color:#1889a8;transition:transform .2s}
+#page-forecast .forecast-hour[open] .forecast-hour-chevron{transform:rotate(180deg)}
+#page-forecast .forecast-hour-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px;padding:4px 5px 16px 52px}
+#page-forecast .forecast-hour-details span{font-size:11px;line-height:1.45;color:#637b8b}
+#page-forecast .forecast-hour-details b{display:block;color:#24445a;font-size:12px;margin-top:2px}
+@media(max-width:380px){
+ #page-forecast .forecast-hour-main{grid-template-columns:39px 27px 38px minmax(0,1fr) 13px;gap:5px}
+ #page-forecast .forecast-hour-main small{font-size:9px}
+ #page-forecast .forecast-hour-details{padding-left:4px}
+}
