@@ -7,7 +7,7 @@
   <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=pronostico-expandible-20261108-1">
+  <link rel="stylesheet" href="styles.css?v=pronostico-deslizable-claro-20261109-1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ClimaGo</title>
 </head>
@@ -68,10 +68,10 @@
 
       <section class="page" id="page-forecast">
         <div class="page-heading"><div><small>EL TIEMPO EN TU ZONA</small><h1>Pronóstico</h1></div></div>
-        <div class="segmented forecast-tabs" role="group" aria-label="Período del pronóstico">
-          <button type="button" data-forecast-range="today">Hoy</button><button type="button" data-forecast-range="7" class="selected" aria-pressed="true">7 días</button><button type="button" data-forecast-range="15" aria-pressed="false">15 días</button>
-        </div>
         <article class="forecast-today panel"><span id="forecast-today-label">Hoy · Tu zona</span><div><span class="big-weather">—</span><strong>—°</strong><span id="forecast-today-min">—° mínima</span></div><p id="forecast-today-summary">Consultando pronóstico…</p></article>
+        <div class="forecast-date-heading"><b>Elegí un día</b><small>Deslizá para ver más fechas →</small></div>
+        <div class="forecast-date-strip" id="forecast-date-strip" aria-label="Días del pronóstico"></div>
+        <div class="forecast-selected-heading" id="forecast-selected-heading">Pronóstico por hora</div>
         <div class="forecast-list" id="forecast-list" aria-live="polite"><div class="empty-state">Cargando pronóstico…</div></div>
       </section>
 
@@ -160,6 +160,6 @@
     </form>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=pronostico-expandible-20261108-1"></script>
+  <script src="app.js?v=pronostico-deslizable-claro-20261109-1"></script>
 </body>
 </html>
