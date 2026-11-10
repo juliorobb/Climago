@@ -34,13 +34,32 @@ function renderRecords(){
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 renderRecords();
 
-document.getElementById("add-task").addEventListener("click",()=>{
-  openDialog("Nueva actividad",`<label>Actividad<input id="task-name" placeholder="Ej.: llevar el auto al service"></label><label>Fecha<input id="task-date" type="date"></label><label>Hora<input id="task-time" type="time"></label>`,()=>{
-    const name=val("task-name");if(!name)return;
-    const row=document.createElement("div");row.className="task";row.innerHTML=`<span class="check">•</span><div><b>${escapeHtml(name)}</b><small>${escapeHtml(val("task-date"))} ${escapeHtml(val("task-time"))}</small></div>`;
-    document.getElementById("task-list").appendChild(row);
-  });
-});
+const MYDAY_KEY="climagoMyDayV1";
+function readMyDay(){try{const d=JSON.parse(localStorage.getItem(MYDAY_KEY)||'{"routines":[],"events":[]}');return {routines:Array.isArray(d.routines)?d.routines:[],events:Array.isArray(d.events)?d.events:[]};}catch{return {routines:[],events:[]};}}
+function saveMyDay(data){localStorage.setItem(MYDAY_KEY,JSON.stringify(data));}
+function renderMyDay(){
+ const data=readMyDay(),r=document.getElementById("routine-list"),e=document.getElementById("event-list"),days=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+ r.innerHTML=data.routines.length?data.routines.map(x=>'<article class="myday-entry"><span class="myday-entry-icon">↻</span><div class="myday-entry-copy"><b>'+escapeHtml(x.name)+'</b><small>'+x.days.map(d=>days[d]).join(" · ")+' · '+escapeHtml(x.time)+'</small></div><button class="myday-delete" data-kind="routine" data-id="'+x.id+'" aria-label="Eliminar rutina">×</button></article>').join(""):'<div class="myday-empty">Todavía no agregaste rutinas. Guardá una vez las actividades que se repiten cada semana.</div>';
+ e.innerHTML=data.events.length?data.events.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(x=>'<article class="myday-entry"><span class="myday-entry-icon event-entry-icon">◆</span><div class="myday-entry-copy"><b>'+escapeHtml(x.name)+'</b><small>'+escapeHtml(new Date(x.date+"T12:00:00").toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short"}))+' · '+escapeHtml(x.time)+'</small></div><button class="myday-delete" data-kind="event" data-id="'+x.id+'" aria-label="Eliminar evento">×</button></article>').join(""):'<div class="myday-empty">Cumpleaños, reuniones, turnos y salidas: tus eventos puntuales aparecen acá.</div>';
+}
+function openMyDayForm(kind){
+ const routine=kind==="routine",days=[["Lunes",1],["Martes",2],["Miércoles",3],["Jueves",4],["Viernes",5],["Sábado",6],["Domingo",0]];
+ const fields=routine?'<label>¿Qué actividad se repite?<input id="myday-name" placeholder="Ej.: gimnasio, facultad, trabajo"></label><fieldset class="myday-days"><legend>¿Qué días?</legend>'+days.map(([name,n])=>'<label><input type="checkbox" name="myday-day" value="'+n+'"> '+name+'</label>').join("")+'</fieldset><label>Horario<input id="myday-time" type="time" value="18:00"></label>':'<label>¿Qué evento tenés?<input id="myday-name" placeholder="Ej.: cumpleaños, service, reunión"></label><label>Fecha<input id="myday-date" type="date" min="'+new Date().toISOString().slice(0,10)+'"></label><label>Horario<input id="myday-time" type="time" value="18:00"></label>';
+ openDialog(routine?"Nueva rutina semanal":"Nuevo evento",fields,()=>{
+  const name=val("myday-name"),time=val("myday-time");if(!name||!time){alert("Completá la actividad y el horario.");return;}
+  const data=readMyDay(),id="md-"+Date.now();
+  if(routine){const selected=[...document.querySelectorAll('input[name="myday-day"]:checked')].map(x=>Number(x.value));if(!selected.length){alert("Elegí al menos un día de la semana.");return;}data.routines.push({id,name,time,days:selected});}
+  else{const date=val("myday-date");if(!date){alert("Elegí la fecha del evento.");return;}data.events.push({id,name,time,date});}
+  saveMyDay(data);renderMyDay();
+ });
+}
+document.getElementById("add-routine").addEventListener("click",()=>openMyDayForm("routine"));
+document.getElementById("add-event").addEventListener("click",()=>openMyDayForm("event"));
+function deleteMyDayItem(e,kind){const b=e.target.closest("[data-kind]");if(!b)return;const data=readMyDay();data[kind==="routine"?"routines":"events"]=data[kind==="routine"?"routines":"events"].filter(x=>x.id!==b.dataset.id);saveMyDay(data);renderMyDay();}
+document.getElementById("routine-list").addEventListener("click",e=>deleteMyDayItem(e,"routine"));
+document.getElementById("event-list").addEventListener("click",e=>deleteMyDayItem(e,"event"));
+renderMyDay();
+
 
 const LOCATIONS_KEY="climagoLocations";
 const PRIMARY_KEY="climagoPrimaryLocation";
