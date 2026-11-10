@@ -646,3 +646,19 @@
 @media(max-width:380px){#page-home .home-landmark-wrap{height:145px}#page-home .home-weather-card{padding:11px 10px 8px}#page-home .home-weather-layout{grid-template-columns:minmax(0,1fr) minmax(0,.88fr) minmax(78px,.82fr);gap:5px}#page-home .temperature{font-size:47px}#page-home .home-weather-meta{padding:0 5px}#page-home .home-weather-meta>div{min-height:39px;gap:4px}#page-home .home-weather-meta span{width:19px;flex-basis:19px;font-size:17px}#page-home .home-weather-meta b{font-size:10px}#page-home .home-weather-art{height:96px}#page-home .home-shortcut{min-height:88px}}
 
 #page-home .tip-illustration.water-bottle{font-size:0;background:url("assets/recommendations/water-bottle.svg") center/contain no-repeat}
+
+#page-home .home-weather-art{width:100%;max-width:136px;height:112px;background-color:transparent;background-size:400% 300%;background-repeat:no-repeat;filter:drop-shadow(0 5px 10px rgba(0,0,0,.3))}
+#page-home .home-weather-card{border-color:rgba(205,190,142,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.11),0 4px 18px rgba(0,0,0,.3)}
+#page-home .home-weather-meta{border-color:rgba(210,214,218,.35)}
+#page-home .home-weather-meta span{color:#e9e9e9}#page-home .home-weather-meta .meta-uv{color:#f0ca55}
+#page-home .tip-illustration{background:transparent!important;border-radius:0;color:#f4f5f6}
+#page-home .tip-illustration.water-bottle{background:url("assets/recommendations/water-bottle.svg") center/contain no-repeat!important}
+#page-home .tip-illustration.rain-umbrella{background:url("assets/recommendations/umbrella.svg") center/contain no-repeat!important}
+#page-home .tip-illustration.storm-symbol{background:url("assets/recommendations/storm.svg") center/contain no-repeat!important}
+#page-home .tip-illustration.wind-symbol{background:url("assets/recommendations/wind.svg") center/contain no-repeat!important}
+#page-home .tip-illustration.neutral-symbol,#page-home .tip-illustration.thermometer-icon{background:url("assets/recommendations/check.svg") center/contain no-repeat!important}
+#page-home .shortcut-icon{width:34px;height:34px;display:grid;place-items:center}
+#page-home .shortcut-icon svg{width:31px;height:31px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#page-home .home-shortcut{border-color:rgba(205,210,214,.27);background:linear-gradient(145deg,#303438,#191c20 76%)}
+#page-home .home-shortcut:first-child .shortcut-icon{color:#f2ca48}
+#page-home .agenda-icon,#page-home .challenge-icon{color:#f5f5f5}
