@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071a2b">
+  <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=pronostico-luna-iconos-detalles-20261109-1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <title>ClimaGo</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" data-page="home" aria-label="ClimaGo inicio">
+        <span>Clima<span class="cyan">Go</span></span>
+      </a>
+      <button class="icon-button" id="location-shortcut" aria-label="Abrir radar">◎</button>
+    </header>
+
+    <main id="app-main">
+      <section class="page active" id="page-home">
+        <div class="home-landmark-wrap">
+          <img class="home-landmark" src="assets/landscapes/new-york.svg" alt="" aria-hidden="true">
+          <div class="home-landmark-shade" aria-hidden="true"></div>
+        </div>
+        <article class="home-weather-card panel" aria-label="Clima actual">
+          <div class="home-weather-location">
+            <button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button>
+            <span class="home-source">Open-Meteo</span>
+          </div>
+          <div class="home-weather-layout">
+            <div class="home-weather-main">
+              <div class="temperature" id="home-temperature">—°</div>
+              <div class="condition" id="home-condition">Consultando el tiempo…</div>
+              <div class="feels" id="home-feels">Sensación térmica: —</div>
+            </div>
+            <div class="home-weather-meta">
+              <div><span class="meta-uv">☼</span><b id="home-uv">UV —</b></div>
+              <div><span class="meta-wind">≋</span><b id="home-wind">— km/h</b></div>
+              <div><span class="meta-humidity">◉</span><b id="home-humidity">—%</b></div>
+            </div>
+            <div id="home-weather-art" class="home-weather-art" role="img" aria-label="Ilustración del estado del tiempo" data-weather="clear" data-phase="day"></div>
+          </div>
+          <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
+        </article>
+        <button class="tip-card panel" id="home-recommendation" data-page="prevention">
+          <span class="tip-illustration" id="tip-illustration">☂</span>
+          <span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span>
+          <span class="tip-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="home-forecast-link" type="button" data-page="forecast">Ver pronóstico <span aria-hidden="true">›</span></button>
+        <div class="home-shortcuts" aria-label="Accesos rápidos">
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="routine"><span class="shortcut-icon routine-icon">▱</span><b>Rutinas</b></button>
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="event"><span class="shortcut-icon agenda-icon">▦</span><b>Agenda</b></button>
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="challenge"><span class="shortcut-icon challenge-icon">♧</span><b>Desafíos</b></button>
+        </div>
+      </section>
+
+      <section class="page" id="page-radar">
+        <div class="page-heading"><div><small>OBSERVACIÓN EN TIEMPO REAL</small><h1>Radar meteorológico</h1></div><span class="pill">Fuente SMN</span></div>
+        <div class="radar-sourcebar"><span>📡 Servicio Meteorológico Nacional · SINARAME</span><button class="secondary-button map-gps" id="radar-refresh" type="button" onclick="document.getElementById('smn-radar-frame').src='https://ws2.smn.gob.ar/radar/responsiveFrame?refresh='+Date.now()">↻ Actualizar</button></div>
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="padding:12px 14px;background:var(--panel)">
+            <b style="display:block;margin-bottom:4px">Visor oficial de radares del SMN</b>
+            <small>Probá Mosaico Centro o Córdoba dentro del visor.</small>
+          </div>
+          <iframe id="smn-radar-frame" title="Radar meteorológico oficial del SMN" src="https://ws2.smn.gob.ar/radar/responsiveFrame" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen" style="display:block;width:100%;height:min(72vh,680px);min-height:480px;border:0;background:#101820"></iframe>
+        </div>
+        <p class="map-attribution-note">Prueba de integración del visor público del SMN. Si no se muestra dentro de ClimaGo, abrilo directamente desde el sitio oficial. El radar es observación, no pronóstico ni alerta.</p>
+        <div class="section-heading"><h2>Tu ubicación en el mapa</h2><button class="secondary-button map-gps" id="radar-locate">⌖ Mi ubicación</button></div>
+        <div class="map-toolbar"><span id="map-location-label">Córdoba, Argentina</span></div>
+        <div id="weather-map" class="weather-map panel" role="application" aria-label="Mapa interactivo de ubicación"></div>
+        <div class="map-status panel"><b id="map-weather-status">Mapa listo para consultar</b><span id="map-weather-detail">Ubicación y condiciones meteorológicas.</span></div>
+      </section>
+
+      <section class="page" id="page-forecast">
+        <div class="page-heading"><div><small>EL TIEMPO EN TU ZONA</small><h1>Pronóstico</h1></div></div>
+        <article class="forecast-today panel"><span id="forecast-today-label">Hoy · Tu zona</span><div><span class="big-weather">—</span><strong>—°</strong><span id="forecast-today-min">—° mínima</span></div><p id="forecast-today-summary">Consultando pronóstico…</p></article>
+        <div class="forecast-date-heading"><b>Elegí un día</b><small>Deslizá para ver más fechas →</small></div>
+        <div class="forecast-date-strip" id="forecast-date-strip" aria-label="Días del pronóstico"></div>
+        <div class="forecast-selected-heading" id="forecast-selected-heading">Pronóstico por hora</div>
+        <button type="button" class="forecast-past-toggle" id="forecast-past-toggle" hidden>↶ Ver horas anteriores</button>
+        <div class="forecast-list" id="forecast-list" aria-live="polite"><div class="empty-state">Cargando pronóstico…</div></div>
+      </section>
+
+      <section class="page" id="page-alerts">
+        <div class="page-heading"><div><small>SISTEMA DE ALERTA TEMPRANA</small><h1>Alertas oficiales</h1></div><span class="pill">SMN · Argentina</span></div>
+        <div class="radar-sourcebar"><span>Datos oficiales del Servicio Meteorológico Nacional · CAP</span><button class="secondary-button map-gps" id="alerts-refresh" type="button">↻ Actualizar</button></div>
+        <article class="panel alerts-unavailable" id="smn-alerts-status" role="status" aria-live="polite"><span>△</span><div><b id="smn-alerts-status-title">Consultando avisos oficiales…</b><p id="smn-alerts-status-detail">La aplicación comprobará la fecha y la cobertura de los datos recibidos.</p></div></article>
+        <div class="section-heading"><h2>Avisos vigentes y próximos</h2><span class="muted-note" id="smn-active-count">—</span></div>
+        <div id="smn-alerts-active" class="smn-alerts-list panel"><div class="empty-state">Cargando avisos oficiales…</div></div>
+        <div class="section-heading"><h2>Historial</h2><span class="muted-note" id="smn-history-count">—</span></div>
+        <div id="smn-alerts-history" class="smn-alerts-list panel"><div class="empty-state">Cargando historial…</div></div>
+        <p class="map-attribution-note" id="alerts-updated">Fuente: SMN · CAP. La cobertura puede ser parcial; una lista incompleta nunca confirma ausencia de riesgo.</p>
+      </section>
+
+      <section class="page" id="page-myday">
+        <div class="myday-top"><div><small>TU ESPACIO PERSONAL</small><h1>Mi día</h1><p>Organizá tus planes. ClimaGo te acompaña.</p></div><span class="myday-mark">✦</span></div>
+        <div class="myday-quick-grid">
+          <button class="myday-feature routine-feature" id="add-routine" type="button"><span class="myday-feature-icon">↻</span><b>Rutinas semanales</b><small>Actividades que se repiten</small><span class="myday-feature-arrow">›</span></button>
+          <button class="myday-feature event-feature" id="add-event" type="button"><span class="myday-feature-icon">＋</span><b>Evento puntual</b><small>Una salida o compromiso</small><span class="myday-feature-arrow">›</span></button>
+        </div>
+        <div class="myday-section-head"><h2>Mi semana</h2><span>Planes habituales</span></div>
+        <div id="routine-list" class="myday-list"><div class="myday-empty">Todavía no agregaste rutinas. Podés guardar gimnasio, estudio, trabajo o cualquier actividad semanal.</div></div>
+        <div class="myday-section-head"><h2>Mi agenda</h2><span>Eventos especiales</span></div>
+        <div id="event-list" class="myday-list"><div class="myday-empty">Cumpleaños, reuniones, turnos y salidas: tus eventos puntuales aparecen acá.</div></div>
+        <div class="myday-weather-link"><span>☼</span><div><b>Clima para tus planes</b><small>Las recomendaciones se actualizarán según el pronóstico de cada actividad.</small></div></div>
+      </section>
+
+      <section class="page" id="page-vehicle">
+        <div class="page-heading"><div><small>REGISTROS Y MANTENIMIENTO</small><h1>Mi vehículo</h1></div><span class="pill">Personal</span></div>
+        <article class="vehicle-summary panel"><div class="vehicle-emoji">🚗</div><div><b>Tu vehículo</b><p>Registrá sus datos para llevar el historial de mantenimiento.</p></div></article>
+        <div class="vehicle-actions"><button class="primary-button" id="add-vehicle-record">＋ Nuevo registro</button></div>
+        <div class="section-heading"><h2>Historial</h2></div>
+        <div id="vehicle-records" class="record-list panel"><div class="empty-state">Todavía no hay registros. Podés guardar cambios de aceite, filtros, correa, batería, reparaciones, lavados y sus costos.</div></div>
+        <p class="muted-note">ClimaGo registra tus propios trabajos y gastos. No conecta clientes con mecánicos ni lavaderos.</p>
+      </section>
+
+      <section class="page" id="page-locations">
+        <div class="page-heading"><div><small>PERSONALIZÁ TUS ZONAS</small><h1>Mis lugares</h1></div></div>
+        <label class="search-label">Agregar un lugar manualmente<input id="location-search" placeholder="Ej.: Casa en Córdoba, Villa Allende..." autocomplete="off"></label>
+        <button class="secondary-button" id="use-location">⌖ Guardar mi ubicación actual</button>
+        <div class="location-tags"><button data-tag="Casa">Casa</button><button data-tag="Trabajo">Trabajo</button><button data-tag="Campo">Campo</button><button data-tag="Familia">Familia</button><button data-tag="Auto">Auto</button></div>
+        <div class="section-heading"><h2>Lugares guardados</h2><button class="text-button" id="save-location">＋ Agregar</button></div>
+        <div id="saved-locations" class="saved-locations panel"><div class="empty-state">Todavía no guardaste lugares. Agregá uno por nombre o guardá tu ubicación actual.</div></div>
+        <p class="muted-note">Podés guardar lugares por nombre; ClimaGo intentará encontrar sus coordenadas. También podés guardar tu ubicación actual con permiso del teléfono.</p>
+      </section>
+
+      <section class="page" id="page-prevention">
+        <div class="page-heading"><div><small>CUIDÁ LO QUE TE IMPORTA</small><h1>Prevención</h1></div></div>
+        <article class="panel prevention-current"><small>PANORAMA DE LAS PRÓXIMAS HORAS</small><div><span id="prevention-tip-icon">🌤️</span><section><b id="prevention-tip-title">Preparando panorama…</b><p id="prevention-tip-text">Información ampliada según el pronóstico de tu ubicación.</p></section></div></article>
+        <p class="muted-note prevention-intro">Información práctica para cuidar tus cosas y organizarte según las condiciones previstas. Elegí un tema para ver recomendaciones específicas.</p>
+        <div class="prevention-grid">
+          <button type="button" class="panel prevention-item prevention-open-button" id="open-vehicle-prevention"><span>🚗</span><b>Vehículo</b><p>Condiciones para circular y cuidar el auto.</p></button>
+          <article class="panel prevention-item"><span>🏠</span><b>Hogar</b><p>Lluvia, viento y cambios de temperatura en casa.</p></article>
+          <article class="panel prevention-item"><span>🌱</span><b>Jardín</b><p>Riego, sol, frío y condiciones para las plantas.</p></article>
+          <article class="panel prevention-item"><span>👟</span><b>Actividades</b><p>Consultar las mejores condiciones por horario.</p></article>
+        </div>
+        <section id="vehicle-prevention-detail" class="vehicle-prevention-detail" hidden>
+          <button type="button" class="secondary-button" id="back-prevention-grid">← Volver a Prevención</button>
+          <div class="vehicle-prevention-heading"><span>🚗</span><div><h2>Cuidá tu vehículo</h2><p>Recomendaciones según el pronóstico de tu zona.</p></div></div>
+          <article class="panel vehicle-weather-card"><small>CONDICIONES PARA TU VEHÍCULO</small><b id="vehicle-weather-status">Consultando el pronóstico…</b><p id="vehicle-weather-summary">Consejos adaptados al tiempo previsto en tu ubicación.</p></article>
+          <div class="vehicle-advice-grid">
+            <article class="panel vehicle-advice-card"><span>🌡️</span><b>Temperatura</b><p id="vehicle-heat-advice">Consejos según la máxima prevista.</p></article>
+            <article class="panel vehicle-advice-card"><span>❄️</span><b>Frío y heladas</b><p id="vehicle-cold-advice">Consejos según la mínima prevista.</p></article>
+            <article class="panel vehicle-advice-card"><span>🌧️</span><b>Lluvia y visibilidad</b><p id="vehicle-rain-advice">Consejos según la probabilidad de lluvia.</p></article>
+            <article class="panel vehicle-advice-card"><span>💨</span><b>Viento</b><p id="vehicle-wind-advice">Consejos según las ráfagas previstas.</p></article>
+          </div>
+          <article class="panel vehicle-checklist">
+            <div><span>🛞</span><section><b>Antes de salir</b><p>Un chequeo rápido que puede evitarte problemas.</p></section></div>
+            <ul>
+              <li>Mirar visualmente las cuatro cubiertas y la rueda de auxilio.</li>
+              <li>Controlar la presión en frío según indica el fabricante.</li>
+              <li>Comprobar frenos, luces y limpiaparabrisas.</li>
+              <li>En viajes, revisar aceite, refrigerante y documentación.</li>
+            </ul>
+          </article>
+          <article class="panel vehicle-checklist">
+            <div><span>🔧</span><section><b>Mantenimiento que conviene no olvidar</b><p>Seguí el manual del vehículo y los intervalos del fabricante.</p></section></div>
+            <p class="vehicle-maintenance-note">Neumáticos, frenos, batería, niveles de fluidos, filtros y aire acondicionado. En épocas de mucho calor, verificá el sistema de refrigeración con el motor frío. No abras el depósito caliente.</p>
+          </article>
+          <p class="muted-note">Estas recomendaciones son preventivas y no reemplazan una revisión mecánica ni los avisos oficiales de tránsito.</p>
+        </section>
+      </section>
+
+      <section class="page" id="page-more">
+        <div class="page-heading"><div><small>TUS HERRAMIENTAS</small><h1>Más</h1></div></div>
+        <button class="menu-row" data-page="locations">📍 <span>Mis lugares<small>Casa, trabajo y otras zonas</small></span>›</button>
+        <button class="menu-row" data-page="vehicle">🚗 <span>Mi vehículo<small>Servicios, reparaciones, lavados y gastos</small></span>›</button>
+        <button class="menu-row" data-page="prevention">🛡️ <span>Prevención y consejos<small>Recomendaciones por clima</small></span>›</button>
+        <button class="menu-row" data-page="myday">📅 <span>Agenda y actividades<small>Organizá tu día y tu semana</small></span>›</button>
+        <button class="menu-row" data-page="settings">⚙️ <span>Configuración<small>Voz, sonidos, apariencia y privacidad</small></span>›</button>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="page-heading"><div><small>PERSONALIZÁ CLIMAGO</small><h1>Configuración</h1></div></div>
+        <div class="panel settings-panel">
+          <div class="setting-row"><b>Apariencia</b><span>Oscura (inicial)</span></div>
+          <div class="setting-row"><b>Asistente por voz</b><span>Opcional · Se configurará más adelante</span></div>
+          <div class="setting-row"><b>Sonidos y notificaciones</b><span>Preferencias configurables</span></div>
+          <div class="setting-row"><b>Privacidad y ubicación</b><span>Permisos bajo tu control</span></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <button class="nav-item active" data-page="home"><span>⌂</span><small>Inicio</small></button>
+      <button class="nav-item" data-page="radar"><span>◎</span><small>Radar</small></button>
+      <button class="nav-item" data-page="myday"><span>▦</span><small>Mi día</small></button>
+      <button class="nav-item" data-page="alerts"><span>△</span><small>Alertas</small></button>
+      <button class="nav-item" data-page="more"><span>☰</span><small>Más</small></button>
+    </nav>
+  </div>
+  <dialog id="simple-dialog">
+    <form method="dialog" class="dialog-card">
+      <button class="dialog-close" aria-label="Cerrar">×</button>
+      <h2 id="dialog-title">Nuevo registro</h2>
+      <div id="dialog-content"></div>
+      <button class="primary-button" id="dialog-save" value="save">Guardar</button>
+    </form>
+  </dialog>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js?v=pronostico-deslizable-claro-20261109-1"></script>
+</body>
+</html>
