@@ -644,3 +644,5 @@
 #page-home .home-shortcut b{font-size:12px}
 .bottom-nav{background:rgba(8,10,12,.97);border-top:1px solid #292d30}.nav-item.active,.nav-item.active span{color:#f3cc4a}
 @media(max-width:380px){#page-home .home-landmark-wrap{height:145px}#page-home .home-weather-card{padding:11px 10px 8px}#page-home .home-weather-layout{grid-template-columns:minmax(0,1fr) minmax(0,.88fr) minmax(78px,.82fr);gap:5px}#page-home .temperature{font-size:47px}#page-home .home-weather-meta{padding:0 5px}#page-home .home-weather-meta>div{min-height:39px;gap:4px}#page-home .home-weather-meta span{width:19px;flex-basis:19px;font-size:17px}#page-home .home-weather-meta b{font-size:10px}#page-home .home-weather-art{height:96px}#page-home .home-shortcut{min-height:88px}}
+
+#page-home .tip-illustration.water-bottle{font-size:0;background:url("assets/recommendations/water-bottle.svg") center/contain no-repeat}

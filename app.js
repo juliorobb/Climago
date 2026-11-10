@@ -166,6 +166,7 @@ function recommendationFor(current,hourly,currentTime,uv,wind){
     const advice=daylightRain?" Si vas a salir, llevá paraguas.":"";
     return {title:"Lluvia próxima",description:`Puede llover ${when(wet)}. Probabilidad estimada: ${Math.round(wet.rain)}%.${advice}`,icon:"🌧️"};
   }
+  if(Number.isFinite(uv)&&uv>=8)return {title:"Hidratación y protección solar",description:"El índice UV es muy alto. Tomá agua con frecuencia y buscá sombra en las horas de mayor radiación.",icon:"💧"};
   const maxWind=hours.reduce((b,x)=>Math.max(b,x.wind,x.gust),0),windHour=hours.find(x=>Math.max(x.wind,x.gust)===maxWind);
   if(maxWind>=45)return {title:"Ráfagas fuertes",description:`Se esperan ráfagas de hasta ${Math.round(maxWind)} km/h ${when(windHour)}. Asegurá objetos sueltos y prestá atención al circular.`,icon:"💨"};
   const currentTemp=Number(current?.temperature_2m),valid=future.filter(x=>Number.isFinite(x.temp)),min=valid.length?Math.min(...valid.map(x=>x.temp)):currentTemp,max=valid.length?Math.max(...valid.map(x=>x.temp)):currentTemp;
@@ -206,7 +207,7 @@ async function loadWeather(lat,lon,name){
     lastWeatherRefresh=Date.now();
     setText("home-temperature",`${Math.round(c.temperature_2m)}°`);setText("home-condition",weatherText[code]||"Condiciones variables");setText("home-feels",`Sensación térmica: ${Math.round(c.apparent_temperature)}°`);setText("home-uv",`UV ${Math.round(uvIndex)}`);setText("home-wind",`${Math.round(c.wind_speed_10m)} km/h`);setText("home-humidity",`${Math.round(c.relative_humidity_2m)}%`);setWeatherVisual(code,Number(c.temperature_2m),Number(c.wind_speed_10m),c.time,c.is_day);
     if(source)source.textContent=`Datos meteorológicos · Open-Meteo · ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
-    const tip=recommendationFor(c,h,c.time,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);for(const id of ["tip-illustration","prevention-tip-icon"]){const el=document.getElementById(id);if(el){el.classList.toggle("thermometer-icon",tip.iconClass==="thermometer");el.textContent=tip.iconClass==="thermometer"?"":tip.icon;}}
+    const tip=recommendationFor(c,h,c.time,Number(uvIndex),Number(c.wind_speed_10m));setText("tip-heading",tip.title);setText("tip-description",tip.description);setText("prevention-tip-title",tip.title);setText("prevention-tip-text",tip.description);for(const id of ["tip-illustration","prevention-tip-icon"]){const el=document.getElementById(id);if(el){el.classList.toggle("thermometer-icon",tip.iconClass==="thermometer");el.classList.toggle("water-bottle",id==="tip-illustration"&&tip.icon==="💧");el.textContent=tip.iconClass==="thermometer"||id==="tip-illustration"&&tip.icon==="💧"?"":tip.icon;}}
     renderHourly(h,c.time,c);renderDaily(d);
     setText("map-location-label",activeCoords.name);setText("map-weather-status",`${weatherText[code]||"Tiempo variable"} · ${Math.round(c.temperature_2m)}°`);setText("map-weather-detail",`Viento ${Math.round(c.wind_speed_10m)} km/h · Humedad ${Math.round(c.relative_humidity_2m)}%. Datos de Open-Meteo.`);
     if(weatherMap){setMapMarker(lat,lon,`${activeCoords.name}: ${Math.round(c.temperature_2m)}° · ${weatherText[code]||"Tiempo variable"}`);}
