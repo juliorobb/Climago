@@ -662,3 +662,49 @@
 #page-home .home-shortcut{border-color:rgba(205,210,214,.27);background:linear-gradient(145deg,#303438,#191c20 76%)}
 #page-home .home-shortcut:first-child .shortcut-icon{color:#f2ca48}
 #page-home .agenda-icon,#page-home .challenge-icon{color:#f5f5f5}
+
+
+/* Ajuste visual de Inicio según la referencia aprobada.
+   Solo presentación: no modifica lógica meteorológica ni elementos de luna. */
+.app-shell:has(#page-home.active) .topbar{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(100%,520px);height:76px;padding:0 22px;
+  background:linear-gradient(180deg,rgba(4,7,12,.42),transparent);
+  border:0;box-shadow:none;z-index:8;
+}
+.app-shell:has(#page-home.active) .topbar .brand{font-size:27px;letter-spacing:-1px}
+.app-shell:has(#page-home.active) .topbar .brand .cyan{color:#f4c928}
+.app-shell:has(#page-home.active) .topbar .icon-button{
+  border-color:rgba(255,255,255,.24);background:rgba(9,13,18,.45);
+  color:#f5d45b;border-radius:50%;width:42px;height:42px;
+}
+#page-home .home-landmark-wrap{
+  height:238px;margin:-18px -16px -42px;
+  background:#07090d;
+}
+#page-home .home-landmark{object-position:center 58%;filter:brightness(1.08) saturate(1.08)}
+#page-home .home-landmark-shade{
+  background:linear-gradient(180deg,rgba(2,4,8,.22),rgba(2,4,8,.04) 42%,#050607 100%);
+}
+#page-home .home-weather-card{padding:14px 15px 10px;margin-bottom:13px}
+#page-home .home-weather-location .text-button{font-size:14px}
+#page-home .temperature{font-size:56px}
+#page-home .home-weather-meta>div{min-height:45px}
+#page-home .home-weather-meta b{font-size:12px}
+#page-home .home-weather-art{max-width:140px;height:116px}
+#page-home .tip-card{min-height:82px;padding:13px 16px;border-radius:21px}
+#page-home .tip-copy b{font-size:14px}
+#page-home .tip-copy>span{font-size:12px;line-height:1.35}
+#page-home .home-forecast-link{min-height:49px;font-size:15px}
+#page-home .home-shortcuts{gap:10px}
+#page-home .home-shortcut{min-height:104px;border-radius:21px}
+#page-home .home-shortcut b{font-size:14px}
+@media(max-width:380px){
+  #page-home .home-landmark-wrap{height:210px}
+  #page-home .home-weather-card{padding:11px 10px 8px}
+  #page-home .temperature{font-size:49px}
+  #page-home .home-weather-meta>div{min-height:40px}
+  #page-home .home-weather-meta b{font-size:10px}
+  #page-home .home-weather-art{height:98px}
+  #page-home .home-shortcut{min-height:92px}
+}
