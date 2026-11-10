@@ -857,3 +857,12 @@
 #page-home .home-forecast-link{
   border-color:rgba(226,200,132,.76);
 }
+
+
+/* Diagnóstico de renderizado Android: evitar la animación transformada
+   únicamente en Inicio. No cambia geometría, colores ni contenido. */
+#page-home.page,
+#page-home.page.active{
+  animation:none!important;
+  transform:none!important;
+}
