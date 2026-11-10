@@ -829,3 +829,31 @@
   #page-home .home-shortcut{min-height:92px}
   #page-home .home-shortcut b{font-size:12px}
 }
+
+
+/* Etapa 1 · contornos luminosos de los cuatro bloques de Inicio.
+   Se conserva el relleno, contenido, dimensiones e interacciones existentes. */
+#page-home .home-weather-card,
+#page-home .tip-card,
+#page-home .home-forecast-link,
+#page-home .home-shortcut{
+  border:1px solid rgba(218,196,139,.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(255,255,255,.035),
+    0 0 5px rgba(246,211,119,.18),
+    0 0 13px rgba(246,211,119,.075),
+    0 5px 15px rgba(0,0,0,.24);
+}
+#page-home .home-weather-card{
+  border-color:rgba(230,204,139,.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(255,255,255,.045),
+    0 0 7px rgba(248,214,132,.25),
+    0 0 17px rgba(248,214,132,.10),
+    0 5px 16px rgba(0,0,0,.26);
+}
+#page-home .home-forecast-link{
+  border-color:rgba(226,200,132,.76);
+}
