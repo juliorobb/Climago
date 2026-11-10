@@ -12,6 +12,13 @@ document.addEventListener("click",e=>{
   if(nav){e.preventDefault();showPage(nav.dataset.page);}
 });
 document.getElementById("location-shortcut").addEventListener("click",()=>showPage("radar"));
+document.addEventListener("click",event=>{
+  const shortcut=event.target.closest("[data-myday-action]");if(!shortcut)return;
+  const action=shortcut.dataset.mydayAction;
+  if(action==="challenge"){event.preventDefault();showPage("myday");return;}
+  event.preventDefault();showPage("myday");
+  setTimeout(()=>document.getElementById(action==="routine"?"add-routine":"add-event")?.click(),80);
+});
 
 const dialog=document.getElementById("simple-dialog"), dialogTitle=document.getElementById("dialog-title"), dialogContent=document.getElementById("dialog-content"), dialogSave=document.getElementById("dialog-save");
 let dialogAction=null;
@@ -172,23 +179,15 @@ function getSelectedCoordinates(){
 }
 
 function setWeatherVisual(code,temperature,wind,weatherTime,isDay){
-  const hero=document.querySelector('.weather-hero');
+  const hero=document.querySelector('.home-weather-card'),art=document.getElementById('home-weather-art');
   if(!hero)return;
-  let type='sun';
-  if([95,96,99].includes(code))type='storm';
-  else if([71,73,75].includes(code))type='cold';
-  else if([51,53,55,61,63,65,80,81,82].includes(code))type='rain';
-  else if([3,45,48].includes(code))type='cloud';
-  else if(wind>=40)type='wind';
-  else if(temperature>=35 && [0,1,2].includes(code))type='heat';
-  else if(temperature<=2)type='cold';
-  hero.dataset.weather=type;
-  // Usar el indicador día/noche del servicio meteorológico, no una hora fija.
-  const localHour=Number(String(weatherTime||"").slice(11,13));
-  const hour=Number.isFinite(localHour)&&String(weatherTime||"").length>=13?localHour:new Date().getHours();
+  const localHour=Number(String(weatherTime||"").slice(11,13)),hour=Number.isFinite(localHour)&&String(weatherTime||"").length>=13?localHour:new Date().getHours();
   const hasDayFlag=isDay!==undefined&&isDay!==null&&Number.isFinite(Number(isDay));
-  hero.dataset.phase=(hasDayFlag?Number(isDay)===1:(hour>=7&&hour<19))?"day":"night";
-  hero.dataset.sky=([95,96,99].includes(code)?"storm":[51,53,55,61,63,65,80,81,82].includes(code)?"rain":[3,45,48,71,73,75,77,85,86].includes(code)?"overcast":code===2?"partly":"clear");
+  const phase=(hasDayFlag?Number(isDay)===1:(hour>=7&&hour<19))?"day":"night";
+  const c=Number(code),storm=[95,96,99].includes(c),snow=[71,73,75,77,85,86].includes(c),rain=[51,53,55,61,63,65,66,67,80,81,82].includes(c);
+  const sky=storm?"storm":snow?"snow":rain?"rain":[3,45,48].includes(c)?"cloudy":c===2?"partly":"clear";
+  hero.dataset.phase=phase;hero.dataset.sky=sky;
+  if(art){art.dataset.phase=phase;art.dataset.weather=sky;art.setAttribute("aria-label",({clear:phase==="day"?"Cielo despejado":"Noche despejada",partly:phase==="day"?"Día parcialmente nublado":"Noche parcialmente nublada",cloudy:phase==="day"?"Día nublado":"Noche nublada",rain:phase==="day"?"Lluvia de día":"Lluvia de noche",storm:"Tormenta eléctrica",snow:"Nieve"})[sky]);}
 }
 
 let weatherRequestId=0;

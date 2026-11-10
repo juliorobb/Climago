@@ -22,31 +22,41 @@
 
     <main id="app-main">
       <section class="page active" id="page-home">
-        <div class="home-landscape">
-          <img class="weather-scenery" id="weather-scenery" src="assets/landscapes/sierras.jpg" alt="" aria-hidden="true">
-          <div class="weather-atmosphere" id="weather-atmosphere" aria-hidden="true"><span class="rain-streaks"></span><span class="night-sky"><span class="moon-phase" aria-hidden="true"></span></span></div>
-          <article class="weather-hero" data-scenery="sierras" aria-label="Estado del tiempo y paisaje seleccionado">
-          <div class="location-line"><div class="location-copy"><button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button></div><div class="scenery-control"><button class="scenery-toggle" id="scenery-toggle" type="button" aria-expanded="false" aria-controls="home-scenery-picker">Cambiar paisaje ▾</button><div class="scenery-picker" id="home-scenery-picker" hidden><button type="button" data-scenery-choice="sierras">Sierras</button><button type="button" data-scenery-choice="ciudad">Ciudad</button><button type="button" data-scenery-choice="mar">Mar</button></div></div></div>
-          <div class="weather-main"><div class="temperature" id="home-temperature">—°</div><div class="condition" id="home-condition">Consultando el tiempo…</div><div class="feels" id="home-feels">Sensación térmica: —</div></div>
-          <div class="weather-meta">
-            <div><span>☀</span><b id="home-uv">UV —</b><small>Índice UV</small></div>
-            <div><span>〰</span><b id="home-wind">— km/h</b><small>Viento</small></div>
-            <div><span>💧</span><b id="home-humidity">—%</b><small>Humedad</small></div>
+        <div class="home-landmark-wrap">
+          <img class="home-landmark" src="assets/landscapes/new-york.svg" alt="" aria-hidden="true">
+          <div class="home-landmark-shade" aria-hidden="true"></div>
+        </div>
+        <article class="home-weather-card panel" aria-label="Clima actual">
+          <div class="home-weather-location">
+            <button class="text-button" data-page="locations" id="current-location-label">Córdoba, Argentina ▾</button>
+            <span class="home-source">Open-Meteo</span>
+          </div>
+          <div class="home-weather-layout">
+            <div class="home-weather-main">
+              <div class="temperature" id="home-temperature">—°</div>
+              <div class="condition" id="home-condition">Consultando el tiempo…</div>
+              <div class="feels" id="home-feels">Sensación térmica: —</div>
+            </div>
+            <div class="home-weather-meta">
+              <div><span class="meta-uv">☼</span><b id="home-uv">UV —</b></div>
+              <div><span class="meta-wind">≋</span><b id="home-wind">— km/h</b></div>
+              <div><span class="meta-humidity">◉</span><b id="home-humidity">—%</b></div>
+            </div>
+            <div id="home-weather-art" class="home-weather-art" role="img" aria-label="Ilustración del estado del tiempo" data-weather="clear" data-phase="day"></div>
           </div>
           <p class="data-source" id="weather-updated">Conectando con el servicio meteorológico…</p>
-          </article>
-          <button class="risk-card panel risk-neutral" id="home-alert-status" data-page="alerts">
-          <span class="risk-icon">△</span><span class="risk-copy"><small>ESTADO DE ALERTAS</small><b id="home-alert-text">Avisos oficiales no conectados</b><small id="home-alert-detail">No se debe interpretar como ausencia de riesgo.</small></span><span class="risk-chevron">›</span>
-          </button>
-        </div>
-        <div class="section-heading"><h2>Próximas horas</h2><button class="text-button" data-page="forecast">Ver pronóstico ›</button></div>
-        <div class="hourly-strip" id="home-hourly"><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div><div class="hour"><small>—</small><span>…</span><b>—°</b></div></div>
+        </article>
         <button class="tip-card panel" id="home-recommendation" data-page="prevention">
-          <span class="tip-title">Lo más importante del pronóstico</span>
-          <span class="tip-content"><span class="tip-illustration" id="tip-illustration">☂</span><span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span></span>
-          <span class="tip-action">Ver recomendaciones <span>›</span></span>
+          <span class="tip-illustration" id="tip-illustration">☂</span>
+          <span class="tip-copy"><b id="tip-heading">Preparando una recomendación…</b><span id="tip-description">Según las condiciones meteorológicas de tu ubicación.</span></span>
+          <span class="tip-chevron" aria-hidden="true">›</span>
         </button>
-
+        <button class="home-forecast-link" type="button" data-page="forecast">Ver pronóstico <span aria-hidden="true">›</span></button>
+        <div class="home-shortcuts" aria-label="Accesos rápidos">
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="routine"><span class="shortcut-icon routine-icon">▱</span><b>Rutinas</b></button>
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="event"><span class="shortcut-icon agenda-icon">▦</span><b>Agenda</b></button>
+          <button class="home-shortcut" type="button" data-page="myday" data-myday-action="challenge"><span class="shortcut-icon challenge-icon">♧</span><b>Desafíos</b></button>
+        </div>
       </section>
 
       <section class="page" id="page-radar">
