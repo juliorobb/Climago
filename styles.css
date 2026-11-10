@@ -866,3 +866,28 @@
   animation:none!important;
   transform:none!important;
 }
+
+
+/* Etapa contornos v2: borde plateado fino, reflejo blanco interior
+   y resplandor dorado mínimo. Sin pseudo-elementos ni filtros. */
+#page-home .home-weather-card,
+#page-home .tip-card,
+#page-home .home-forecast-link,
+#page-home .home-shortcut{
+  border:1px solid rgba(226,231,237,.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(255,255,255,.035),
+    0 0 3px rgba(255,255,255,.10),
+    0 0 5px rgba(239,204,116,.10),
+    0 5px 14px rgba(0,0,0,.22);
+}
+#page-home .home-weather-card{
+  border-color:rgba(232,232,226,.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    inset 0 -1px 0 rgba(255,255,255,.045),
+    0 0 4px rgba(255,255,255,.13),
+    0 0 7px rgba(242,205,119,.14),
+    0 5px 15px rgba(0,0,0,.24);
+}
