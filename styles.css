@@ -708,3 +708,124 @@
   #page-home .home-weather-art{height:98px}
   #page-home .home-shortcut{min-height:92px}
 }
+
+
+/* Inicio: composición fiel a la referencia aprobada. */
+.app-shell:has(#page-home.active){background:#050607}
+.app-shell:has(#page-home.active) .topbar{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:min(100%,520px);height:82px;padding:0 24px;
+  background:linear-gradient(180deg,rgba(3,5,9,.5),rgba(3,5,9,.08));
+  border:0;box-shadow:none;z-index:8;
+}
+.app-shell:has(#page-home.active) .topbar .brand{
+  font-size:28px;letter-spacing:-1px;text-shadow:0 2px 12px #0009
+}
+.app-shell:has(#page-home.active) .topbar .brand .cyan{color:#f4c928}
+.app-shell:has(#page-home.active) .topbar .notification-button{
+  position:relative;border:0;background:transparent;color:#fff;
+  width:46px;height:46px;padding:8px;box-shadow:none
+}
+.app-shell:has(#page-home.active) .notification-button svg{
+  width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round
+}
+.app-shell:has(#page-home.active) .notification-button i{
+  position:absolute;right:5px;top:5px;width:9px;height:9px;
+  border-radius:50%;background:#f4ca36;box-shadow:0 0 8px #f4ca36
+}
+#page-home{
+  background:#050607;margin:-18px -16px 0;padding:0 16px 24px;
+  color:#f7f7f7
+}
+#page-home .home-landmark-wrap{
+  height:252px;margin:0 -16px -44px;position:relative;
+  overflow:hidden;background:#07090d
+}
+#page-home .home-landmark{
+  object-fit:cover;object-position:center 66%;
+  filter:brightness(.86) saturate(1.12)
+}
+#page-home .home-landmark-shade{
+  background:linear-gradient(180deg,rgba(2,4,8,.2) 0%,rgba(2,4,8,.02) 48%,#050607 100%)
+}
+#page-home .home-weather-card{
+  position:relative;z-index:2;margin:0 0 14px;padding:14px 15px 10px;
+  border:1px solid rgba(220,194,117,.5);border-radius:24px;
+  background:linear-gradient(145deg,rgba(38,41,44,.97),rgba(12,14,17,.99) 78%);
+  box-shadow:0 0 17px rgba(228,190,83,.12),inset 0 1px 0 rgba(255,255,255,.13)
+}
+#page-home .home-weather-location{margin-bottom:10px}
+#page-home .home-weather-location .text-button{
+  color:#fff;font-size:14px;font-weight:700
+}
+#page-home .home-source{font-size:10px;color:#e2e2e2}
+#page-home .home-weather-layout{
+  grid-template-columns:minmax(0,1.04fr) minmax(0,.9fr) minmax(100px,.92fr);
+  gap:9px;align-items:center
+}
+#page-home .temperature{font-size:57px;letter-spacing:-3.4px}
+#page-home .condition{font-size:15px;margin-top:4px}
+#page-home .feels{font-size:11px;margin-top:6px;color:#dedede}
+#page-home .home-weather-meta{padding:0 8px}
+#page-home .home-weather-meta>div{min-height:45px;gap:6px}
+#page-home .home-weather-meta span{font-size:22px}
+#page-home .home-weather-meta b{font-size:12px}
+#page-home .home-weather-art{
+  width:100%;max-width:140px;height:118px;
+  filter:drop-shadow(0 7px 13px rgba(0,0,0,.42))
+}
+#page-home .data-source{font-size:9px;margin:5px 0 0;color:#aeb3b8}
+#page-home .tip-card{
+  display:grid;grid-template-columns:64px 1fr 18px;align-items:center;
+  gap:12px;min-height:84px;padding:12px 16px;margin:0 0 14px;
+  border:1px solid rgba(205,210,214,.38);border-radius:22px;
+  background:linear-gradient(145deg,#303438,#171a1e 78%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 6px 16px #0005;
+  color:#fff;text-align:left
+}
+#page-home .tip-illustration{
+  display:block;width:54px;height:58px;margin:auto;
+  background-position:center;background-size:contain;background-repeat:no-repeat;
+  font-size:0
+}
+#page-home .tip-copy{display:grid;gap:4px;min-width:0}
+#page-home .tip-copy b{font-size:14px;line-height:1.2}
+#page-home .tip-copy>span{font-size:12px;line-height:1.35;color:#e4e5e6}
+#page-home .tip-chevron{font-size:28px;color:#f4d04d}
+#page-home .home-forecast-link{
+  min-height:50px;margin:0 0 14px;border:1px solid rgba(225,193,100,.72);
+  border-radius:26px;background:linear-gradient(120deg,#292c2f,#151719);
+  color:#fff;font-size:15px;box-shadow:0 0 13px rgba(235,192,69,.12)
+}
+#page-home .home-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#page-home .home-shortcut{
+  min-height:104px;border:1px solid rgba(205,210,214,.38);
+  border-radius:22px;background:linear-gradient(145deg,#34383c,#191c20 78%);
+  gap:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 16px #0005
+}
+#page-home .shortcut-icon{width:42px;height:42px}
+#page-home .shortcut-icon svg{width:37px;height:37px}
+#page-home .home-shortcut b{font-size:14px}
+.app-shell:has(#page-home.active) .bottom-nav{
+  background:rgba(15,17,20,.97);border-top:1px solid rgba(205,210,214,.22);
+  box-shadow:0 -8px 24px rgba(0,0,0,.28)
+}
+.app-shell:has(#page-home.active) .nav-item{color:#d8dadd}
+.app-shell:has(#page-home.active) .nav-item.active,
+.app-shell:has(#page-home.active) .nav-item.active span{color:#f3cc4a}
+@media(max-width:380px){
+  #page-home .home-landmark-wrap{height:224px}
+  #page-home .home-weather-card{padding:11px 10px 8px}
+  #page-home .home-weather-layout{grid-template-columns:minmax(0,1fr) minmax(0,.88fr) minmax(82px,.82fr);gap:5px}
+  #page-home .temperature{font-size:49px}
+  #page-home .home-weather-meta{padding:0 5px}
+  #page-home .home-weather-meta>div{min-height:40px;gap:4px}
+  #page-home .home-weather-meta span{width:19px;flex-basis:19px;font-size:18px}
+  #page-home .home-weather-meta b{font-size:10px}
+  #page-home .home-weather-art{height:98px}
+  #page-home .tip-card{grid-template-columns:54px 1fr 16px;gap:8px;padding:10px 12px}
+  #page-home .tip-illustration{width:48px;height:52px}
+  #page-home .home-shortcut{min-height:92px}
+  #page-home .home-shortcut b{font-size:12px}
+}
