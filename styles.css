@@ -891,3 +891,70 @@
     0 0 7px rgba(242,205,119,.14),
     0 5px 15px rgba(0,0,0,.24);
 }
+
+
+/* Etapa visual: tarjetas cápsula y estado activo de navegación. */
+#page-home .home-weather-card{
+  border-radius:29px;
+}
+#page-home .tip-card{
+  border-radius:27px;
+}
+#page-home .home-forecast-link{
+  border-radius:999px;
+}
+#page-home .home-shortcut{
+  border-radius:27px;
+}
+.app-shell:has(#page-home.active) .bottom-nav{
+  border-radius:25px 25px 0 0;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
+  gap:4px;
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item{
+  position:relative;
+  isolation:isolate;
+  min-height:68px;
+  border-radius:19px;
+  border:1px solid transparent;
+  background:transparent;
+  transition:none;
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active{
+  color:#f4cf4b;
+  border-color:rgba(244,211,111,.22);
+  background:linear-gradient(180deg,rgba(255,220,105,.20),rgba(225,174,43,.10) 58%,rgba(255,255,255,.035));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 0 12px rgba(241,194,63,.12);
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;left:18%;right:18%;
+  height:9px;
+  border-radius:50%;
+  background:rgba(255,211,77,.50);
+  filter:blur(8px);
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::after{
+  content:"";
+  position:absolute;
+  bottom:5px;
+  left:34%;right:34%;
+  height:2px;
+  border-radius:99px;
+  background:linear-gradient(90deg,rgba(255,255,255,.65),#f5d34d,rgba(255,255,255,.65));
+  box-shadow:0 0 7px rgba(255,213,79,.55);
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active span,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active small{
+  color:#f5d34d;
+}
+@media(max-width:380px){
+  #page-home .home-weather-card{border-radius:25px}
+  #page-home .tip-card{border-radius:24px}
+  #page-home .home-shortcut{border-radius:24px}
+  .app-shell:has(#page-home.active) .bottom-nav .nav-item{min-height:64px;border-radius:17px}
+}
