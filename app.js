@@ -34,13 +34,126 @@ function renderRecords(){
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 renderRecords();
 
-document.getElementById("add-task").addEventListener("click",()=>{
-  openDialog("Nueva actividad",`<label>Actividad<input id="task-name" placeholder="Ej.: llevar el auto al service"></label><label>Fecha<input id="task-date" type="date"></label><label>Hora<input id="task-time" type="time"></label>`,()=>{
-    const name=val("task-name");if(!name)return;
-    const row=document.createElement("div");row.className="task";row.innerHTML=`<span class="check">•</span><div><b>${escapeHtml(name)}</b><small>${escapeHtml(val("task-date"))} ${escapeHtml(val("task-time"))}</small></div>`;
-    document.getElementById("task-list").appendChild(row);
+const TASKS_KEY="climagoTasks";
+
+function readTasks(){
+  try{
+    const stored=localStorage.getItem(TASKS_KEY);
+    if(!stored)return [];
+    const parsed=JSON.parse(stored);
+    if(!Array.isArray(parsed))return [];
+    return parsed.filter(task=>task&&typeof task.name==="string").map((task,index)=>({
+      id:String(task.id||`legacy-${index}`),
+      name:task.name,
+      date:String(task.date||""),
+      time:String(task.time||""),
+      createdAt:String(task.createdAt||""),
+      updatedAt:String(task.updatedAt||"")
+    }));
+  }catch(error){
+    console.error("No se pudieron leer las actividades guardadas de ClimaGo.",error);
+    return [];
+  }
+}
+
+function saveTasks(tasks){
+  try{
+    localStorage.setItem(TASKS_KEY,JSON.stringify(tasks));
+    return true;
+  }catch(error){
+    console.error("No se pudieron guardar las actividades de ClimaGo.",error);
+    alert("ClimaGo no pudo guardar los cambios en este dispositivo. Revisá el espacio disponible y los permisos del navegador.");
+    return false;
+  }
+}
+
+function createTaskId(){
+  return window.crypto&&typeof window.crypto.randomUUID==="function"
+    ?window.crypto.randomUUID()
+    :`task-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
+}
+
+function renderTasks(){
+  const host=document.getElementById("task-list");
+  if(!host)return;
+  const tasks=readTasks();
+  host.replaceChildren();
+  if(!tasks.length){
+    const empty=document.createElement("div");
+    empty.className="empty-state";
+    empty.textContent="Todavía no tenés actividades guardadas. Agregá una para organizar tu día.";
+    host.append(empty);
+    return;
+  }
+  tasks.forEach(task=>{
+    const row=document.createElement("div");
+    row.className="task";
+    const marker=document.createElement("span");
+    marker.className="check";
+    marker.textContent="•";
+    const content=document.createElement("div");
+    content.className="task-content";
+    const title=document.createElement("b");
+    title.textContent=task.name;
+    const details=document.createElement("small");
+    details.textContent=[task.date,task.time].filter(Boolean).join(" · ")||"Sin fecha ni horario";
+    content.append(title,details);
+    const actions=document.createElement("div");
+    actions.className="task-actions";
+    const edit=document.createElement("button");
+    edit.type="button";
+    edit.className="text-button";
+    edit.textContent="Editar";
+    edit.addEventListener("click",()=>editTask(task.id));
+    const remove=document.createElement("button");
+    remove.type="button";
+    remove.className="text-button";
+    remove.textContent="Eliminar";
+    remove.addEventListener("click",()=>deleteTask(task.id));
+    actions.append(edit,remove);
+    row.append(marker,content,actions);
+    host.append(row);
   });
-});
+}
+
+function taskFields(task={}){
+  return `<label>Actividad<input id="task-name" maxlength="120" placeholder="Ej.: llevar el auto al service" value="${escapeHtml(task.name||"")}"></label><label>Fecha<input id="task-date" type="date" value="${escapeHtml(task.date||"")}"></label><label>Hora<input id="task-time" type="time" value="${escapeHtml(task.time||"")}"></label>`;
+}
+
+function addTask(){
+  openDialog("Nueva actividad",taskFields(),()=>{
+    const name=val("task-name");
+    if(!name){alert("Escribí el nombre de la actividad.");return;}
+    const now=new Date().toISOString();
+    const tasks=readTasks();
+    tasks.push({id:createTaskId(),name,date:val("task-date"),time:val("task-time"),createdAt:now,updatedAt:now});
+    if(saveTasks(tasks))renderTasks();
+  });
+}
+
+function editTask(id){
+  const task=readTasks().find(item=>item.id===id);
+  if(!task)return;
+  openDialog("Editar actividad",taskFields(task),()=>{
+    const name=val("task-name");
+    if(!name){alert("Escribí el nombre de la actividad.");return;}
+    const tasks=readTasks();
+    const index=tasks.findIndex(item=>item.id===id);
+    if(index<0)return;
+    tasks[index]={...tasks[index],name,date:val("task-date"),time:val("task-time"),updatedAt:new Date().toISOString()};
+    if(saveTasks(tasks))renderTasks();
+  });
+}
+
+function deleteTask(id){
+  const task=readTasks().find(item=>item.id===id);
+  if(!task||!confirm(`¿Eliminar la actividad "${task.name}"?`))return;
+  const tasks=readTasks().filter(item=>item.id!==id);
+  if(saveTasks(tasks))renderTasks();
+}
+
+document.getElementById("add-task").addEventListener("click",addTask);
+renderTasks();
 
 const LOCATIONS_KEY="climagoLocations";
 const PRIMARY_KEY="climagoPrimaryLocation";
