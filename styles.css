@@ -958,3 +958,50 @@
   #page-home .home-shortcut{border-radius:24px}
   .app-shell:has(#page-home.active) .bottom-nav .nav-item{min-height:64px;border-radius:17px}
 }
+
+
+/* Inicio · acabado cápsula v1 (sin pseudo-elementos ni capas extra) */
+#page-home .home-weather-card{
+  border-radius:32px;
+  border:1px solid rgba(239,240,237,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.38),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 0 0 1px rgba(255,255,255,.08),
+    0 0 5px rgba(255,255,255,.20),
+    0 0 9px rgba(232,190,83,.22),
+    0 5px 16px rgba(0,0,0,.28);
+}
+#page-home .tip-card{
+  border-radius:30px;
+  border:1px solid rgba(232,235,238,.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 1px rgba(255,255,255,.06),
+    0 0 4px rgba(255,255,255,.18),
+    0 0 8px rgba(229,190,92,.18),
+    0 5px 14px rgba(0,0,0,.25);
+}
+#page-home .home-forecast-link{
+  border-radius:999px;
+  border:1px solid rgba(235,237,239,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.38),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 1px rgba(255,255,255,.06),
+    0 0 5px rgba(255,255,255,.20),
+    0 0 9px rgba(234,194,91,.20),
+    0 5px 14px rgba(0,0,0,.25);
+}
+#page-home .home-shortcut{
+  border-radius:30px;
+  border:1px solid rgba(232,235,238,.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 1px rgba(255,255,255,.06),
+    0 0 4px rgba(255,255,255,.18),
+    0 0 8px rgba(229,190,92,.18),
+    0 5px 14px rgba(0,0,0,.25);
+}
