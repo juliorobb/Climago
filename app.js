@@ -136,10 +136,10 @@ function editTask(id){
   if(!task)return;
   openDialog("Editar actividad",taskFields(task),()=>{
     const name=val("task-name");
-    if(!name){alert("Escribí el nombre de la actividad.");return;}
+    if(!name){alert("Escribí el nombre de la actividad.");return false;}
     const tasks=readTasks();
     const index=tasks.findIndex(item=>item.id===id);
-    if(index<0)return;
+    if(index<0)return false;
     tasks[index]={...tasks[index],name,date:val("task-date"),time:val("task-time"),updatedAt:new Date().toISOString()};
     if(saveTasks(tasks)){renderTasks();return true;}return false;
   });
