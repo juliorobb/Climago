@@ -960,102 +960,91 @@
 }
 
 
-/* Inicio · acabado de contornos cápsula plata y reflejos dorados.
-   Se limita a los cuatro tipos de tarjeta existentes. Sin pseudo-elementos,
-   filtros, animaciones ni cambios de geometría o contenido. */
+/* Inicio · contorno cápsula corregido: el degradado metálico queda SOLO en el borde.
+   La primera capa es el relleno oscuro interior; la segunda dibuja el aro exterior.
+   Sin pseudo-elementos, filtros, animaciones ni cambios de geometría o contenido. */
 #page-home .home-weather-card,
 #page-home .tip-card,
 #page-home .home-forecast-link,
 #page-home .home-shortcut{
   border:1px solid transparent;
-  background-clip:border-box,padding-box;
-  background-origin:border-box,padding-box;
+  background-clip:padding-box,border-box;
+  background-origin:padding-box,border-box;
 }
 
-/* Tarjeta meteorológica: conserva exactamente su relleno oscuro. */
+/* Interior oscuro original + contorno plata con reflejos blancos y oro puntual. */
 #page-home .home-weather-card{
   border-radius:32px;
   background-image:
+    linear-gradient(145deg,rgba(38,41,44,.97),rgba(12,14,17,.99) 78%),
     linear-gradient(118deg,
-      rgba(255,255,255,.78) 0%,
-      rgba(221,227,233,.42) 12%,
-      rgba(255,255,255,.10) 27%,
-      rgba(255,255,255,.035) 56%,
-      rgba(226,190,105,.30) 79%,
-      rgba(255,255,255,.66) 100%),
-    linear-gradient(145deg,rgba(38,41,44,.97),rgba(12,14,17,.99) 78%);
+      rgba(255,255,255,.82) 0%,
+      rgba(213,220,227,.42) 13%,
+      rgba(255,255,255,.16) 31%,
+      rgba(255,255,255,.10) 55%,
+      rgba(224,185,91,.34) 78%,
+      rgba(255,255,255,.70) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 1px 0 0 rgba(255,255,255,.12),
-    inset -1px 0 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(255,255,255,.09),
-    0 0 4px rgba(255,255,255,.14),
-    0 0 8px rgba(232,190,83,.13),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 1px 0 0 rgba(255,255,255,.08),
+    0 0 3px rgba(255,255,255,.12),
+    0 0 5px rgba(226,190,100,.07),
     0 5px 16px rgba(0,0,0,.28);
 }
 
-/* Recomendación: mismo vidrio oscuro y reflejo fino en el perímetro. */
 #page-home .tip-card{
   border-radius:30px;
   background-image:
+    linear-gradient(145deg,#303438,#171a1e 78%),
     linear-gradient(118deg,
-      rgba(255,255,255,.72) 0%,
-      rgba(221,227,233,.38) 13%,
-      rgba(255,255,255,.08) 29%,
-      rgba(255,255,255,.035) 58%,
-      rgba(226,190,105,.27) 80%,
-      rgba(255,255,255,.58) 100%),
-    linear-gradient(145deg,#303438,#171a1e 78%);
+      rgba(255,255,255,.78) 0%,
+      rgba(213,220,227,.40) 14%,
+      rgba(255,255,255,.15) 32%,
+      rgba(255,255,255,.09) 58%,
+      rgba(224,185,91,.30) 80%,
+      rgba(255,255,255,.66) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.30),
-    inset 1px 0 0 rgba(255,255,255,.10),
-    inset -1px 0 0 rgba(255,255,255,.07),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    0 0 4px rgba(255,255,255,.13),
-    0 0 7px rgba(229,190,92,.11),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 1px 0 0 rgba(255,255,255,.07),
+    0 0 3px rgba(255,255,255,.11),
+    0 0 5px rgba(226,190,100,.06),
     0 5px 14px rgba(0,0,0,.25);
 }
 
-/* Pronóstico: cápsula continua, con destello dorado corto en el borde. */
 #page-home .home-forecast-link{
   border-radius:999px;
   background-image:
+    linear-gradient(120deg,#272a2d,#151719),
     linear-gradient(118deg,
-      rgba(255,255,255,.76) 0%,
-      rgba(221,227,233,.40) 15%,
-      rgba(255,255,255,.08) 31%,
-      rgba(255,255,255,.035) 58%,
-      rgba(232,194,103,.34) 82%,
-      rgba(255,255,255,.62) 100%),
-    linear-gradient(120deg,#292c2f,#151719);
+      rgba(255,255,255,.82) 0%,
+      rgba(213,220,227,.42) 15%,
+      rgba(255,255,255,.15) 33%,
+      rgba(255,255,255,.09) 58%,
+      rgba(228,188,91,.34) 82%,
+      rgba(255,255,255,.68) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 1px 0 0 rgba(255,255,255,.10),
-    inset -1px 0 0 rgba(255,255,255,.07),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    0 0 4px rgba(255,255,255,.14),
-    0 0 8px rgba(234,194,91,.13),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 1px 0 0 rgba(255,255,255,.07),
+    0 0 3px rgba(255,255,255,.12),
+    0 0 5px rgba(226,190,100,.07),
     0 5px 14px rgba(0,0,0,.25);
 }
 
-/* Rutinas, Agenda y Desafíos: conserva sus superficies y proporciones. */
 #page-home .home-shortcut{
   border-radius:30px;
   background-image:
+    linear-gradient(145deg,#303438,#191c20 76%),
     linear-gradient(118deg,
-      rgba(255,255,255,.72) 0%,
-      rgba(221,227,233,.38) 13%,
-      rgba(255,255,255,.08) 29%,
-      rgba(255,255,255,.035) 58%,
-      rgba(226,190,105,.27) 80%,
-      rgba(255,255,255,.58) 100%),
-    linear-gradient(145deg,#34383c,#191c20 78%);
+      rgba(255,255,255,.78) 0%,
+      rgba(213,220,227,.40) 14%,
+      rgba(255,255,255,.15) 32%,
+      rgba(255,255,255,.09) 58%,
+      rgba(224,185,91,.30) 80%,
+      rgba(255,255,255,.66) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.30),
-    inset 1px 0 0 rgba(255,255,255,.10),
-    inset -1px 0 0 rgba(255,255,255,.07),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    0 0 4px rgba(255,255,255,.13),
-    0 0 7px rgba(229,190,92,.11),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 1px 0 0 rgba(255,255,255,.07),
+    0 0 3px rgba(255,255,255,.11),
+    0 0 5px rgba(226,190,100,.06),
     0 5px 14px rgba(0,0,0,.25);
 }
