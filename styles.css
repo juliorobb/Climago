@@ -126,3 +126,7 @@
 .weather-hero[data-scenery="mar"] .weather-scenery{object-position:center 64%}
 .weather-meta>div{background:rgba(5,18,32,.9);border-color:rgba(190,160,255,.62)}
 @media(max-width:380px){.location-line{gap:4px}.scenery-toggle{font-size:9px;padding:6px 7px}.weather-hero{padding:13px}}
+
+
+/* Mi día: acciones funcionales de edición y eliminación */
+.task-content{min-width:0;flex:1}.task-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}.task-actions .text-button{font-size:10px;padding:6px 3px}
