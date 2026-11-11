@@ -25,7 +25,7 @@ document.getElementById("add-vehicle-record").addEventListener("click",()=>{
   });
 });
 function val(id){return document.getElementById(id)?.value?.trim()||""}
-dialogSave.addEventListener("click",e=>{e.preventDefault();if(dialogAction)dialogAction();dialog.close();});
+dialogSave.addEventListener("click",e=>{e.preventDefault();const result=dialogAction?dialogAction():true;if(result!==false)dialog.close();});
 function renderRecords(){
   const host=document.getElementById("vehicle-records"),arr=JSON.parse(localStorage.getItem("climagoVehicleRecords")||"[]");
   if(!arr.length){host.innerHTML='<div class="empty-state">Todavía no hay registros. Podés guardar cambios de aceite, filtros, correa, batería, reparaciones, lavados y sus costos.</div>';return;}
@@ -123,11 +123,11 @@ function taskFields(task={}){
 function addTask(){
   openDialog("Nueva actividad",taskFields(),()=>{
     const name=val("task-name");
-    if(!name){alert("Escribí el nombre de la actividad.");return;}
+    if(!name){alert("Escribí el nombre de la actividad.");return false;}
     const now=new Date().toISOString();
     const tasks=readTasks();
     tasks.push({id:createTaskId(),name,date:val("task-date"),time:val("task-time"),createdAt:now,updatedAt:now});
-    if(saveTasks(tasks))renderTasks();
+    if(saveTasks(tasks)){renderTasks();return true;}return false;
   });
 }
 
@@ -141,7 +141,7 @@ function editTask(id){
     const index=tasks.findIndex(item=>item.id===id);
     if(index<0)return;
     tasks[index]={...tasks[index],name,date:val("task-date"),time:val("task-time"),updatedAt:new Date().toISOString()};
-    if(saveTasks(tasks))renderTasks();
+    if(saveTasks(tasks)){renderTasks();return true;}return false;
   });
 }
 
