@@ -958,3 +958,72 @@
   #page-home .home-shortcut{border-radius:24px}
   .app-shell:has(#page-home.active) .bottom-nav .nav-item{min-height:64px;border-radius:17px}
 }
+
+
+/* Ajuste fino de referencia: contorno plata con reflejos localizados.
+   Se limita a los cuatro bloques de Inicio; sin cambiar fondos ni contenido. */
+#page-home .home-weather-card,
+#page-home .tip-card,
+#page-home .home-forecast-link,
+#page-home .home-shortcut{
+  border:1px solid rgba(232,236,242,.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 0 2px rgba(255,255,255,.24),
+    0 0 5px rgba(241,205,115,.16),
+    0 5px 13px rgba(0,0,0,.25);
+}
+#page-home .home-weather-card{
+  border-radius:30px;
+  border-color:rgba(238,235,225,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 0 3px rgba(255,255,255,.30),
+    0 0 7px rgba(243,204,105,.24),
+    0 5px 15px rgba(0,0,0,.26);
+}
+#page-home .tip-card{border-radius:25px}
+#page-home .home-forecast-link{border-radius:999px}
+#page-home .home-shortcut{border-radius:25px}
+
+/* Reflejos pequeños sobre el borde: no cubren ni duplican el contenido. */
+#page-home .home-weather-card,
+#page-home .tip-card,
+#page-home .home-forecast-link,
+#page-home .home-shortcut{position:relative}
+#page-home .home-weather-card::after,
+#page-home .tip-card::after,
+#page-home .home-forecast-link::after,
+#page-home .home-shortcut::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 34px 3px at 17% 0%,rgba(255,255,255,.34),transparent 80%),
+    radial-gradient(ellipse 28px 3px at 79% 100%,rgba(255,220,135,.34),transparent 82%);
+  opacity:.9;
+}
+#page-home .home-weather-card::after{
+  background:
+    radial-gradient(ellipse 46px 4px at 18% 0%,rgba(255,255,255,.42),transparent 80%),
+    radial-gradient(ellipse 38px 4px at 82% 100%,rgba(255,214,115,.48),transparent 82%),
+    radial-gradient(ellipse 22px 3px at 92% 28%,rgba(255,255,255,.24),transparent 80%);
+}
+
+/* Navegación: cápsula completa y selección más contenida. */
+.app-shell:has(#page-home.active) .bottom-nav{
+  border-radius:24px 24px 0 0;
+  background:rgba(17,19,22,.98);
+}
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active{
+  min-height:60px;
+  margin:0 5px;
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,218,105,.23),rgba(235,183,55,.12) 65%,rgba(255,255,255,.035));
+  border:1px solid rgba(244,211,111,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 0 13px rgba(241,194,63,.16);
+}
