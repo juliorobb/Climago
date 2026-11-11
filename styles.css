@@ -960,48 +960,102 @@
 }
 
 
-/* Inicio · acabado cápsula v1 (sin pseudo-elementos ni capas extra) */
+/* Inicio · acabado de contornos cápsula plata y reflejos dorados.
+   Se limita a los cuatro tipos de tarjeta existentes. Sin pseudo-elementos,
+   filtros, animaciones ni cambios de geometría o contenido. */
+#page-home .home-weather-card,
+#page-home .tip-card,
+#page-home .home-forecast-link,
+#page-home .home-shortcut{
+  border:1px solid transparent;
+  background-clip:border-box,padding-box;
+  background-origin:border-box,padding-box;
+}
+
+/* Tarjeta meteorológica: conserva exactamente su relleno oscuro. */
 #page-home .home-weather-card{
   border-radius:32px;
-  border:1px solid rgba(239,240,237,.82);
+  background-image:
+    linear-gradient(118deg,
+      rgba(255,255,255,.78) 0%,
+      rgba(221,227,233,.42) 12%,
+      rgba(255,255,255,.10) 27%,
+      rgba(255,255,255,.035) 56%,
+      rgba(226,190,105,.30) 79%,
+      rgba(255,255,255,.66) 100%),
+    linear-gradient(145deg,rgba(38,41,44,.97),rgba(12,14,17,.99) 78%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.38),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    0 0 0 1px rgba(255,255,255,.08),
-    0 0 5px rgba(255,255,255,.20),
-    0 0 9px rgba(232,190,83,.22),
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 1px 0 0 rgba(255,255,255,.12),
+    inset -1px 0 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(255,255,255,.09),
+    0 0 4px rgba(255,255,255,.14),
+    0 0 8px rgba(232,190,83,.13),
     0 5px 16px rgba(0,0,0,.28);
 }
+
+/* Recomendación: mismo vidrio oscuro y reflejo fino en el perímetro. */
 #page-home .tip-card{
   border-radius:30px;
-  border:1px solid rgba(232,235,238,.78);
+  background-image:
+    linear-gradient(118deg,
+      rgba(255,255,255,.72) 0%,
+      rgba(221,227,233,.38) 13%,
+      rgba(255,255,255,.08) 29%,
+      rgba(255,255,255,.035) 58%,
+      rgba(226,190,105,.27) 80%,
+      rgba(255,255,255,.58) 100%),
+    linear-gradient(145deg,#303438,#171a1e 78%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 0 -1px 0 rgba(255,255,255,.07),
-    0 0 0 1px rgba(255,255,255,.06),
-    0 0 4px rgba(255,255,255,.18),
-    0 0 8px rgba(229,190,92,.18),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.13),
+    0 0 7px rgba(229,190,92,.11),
     0 5px 14px rgba(0,0,0,.25);
 }
+
+/* Pronóstico: cápsula continua, con destello dorado corto en el borde. */
 #page-home .home-forecast-link{
   border-radius:999px;
-  border:1px solid rgba(235,237,239,.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.38),
-    inset 0 -1px 0 rgba(255,255,255,.07),
-    0 0 0 1px rgba(255,255,255,.06),
-    0 0 5px rgba(255,255,255,.20),
-    0 0 9px rgba(234,194,91,.20),
-    0 5px 14px rgba(0,0,0,.25);
-}
-#page-home .home-shortcut{
-  border-radius:30px;
-  border:1px solid rgba(232,235,238,.78);
+  background-image:
+    linear-gradient(118deg,
+      rgba(255,255,255,.76) 0%,
+      rgba(221,227,233,.40) 15%,
+      rgba(255,255,255,.08) 31%,
+      rgba(255,255,255,.035) 58%,
+      rgba(232,194,103,.34) 82%,
+      rgba(255,255,255,.62) 100%),
+    linear-gradient(120deg,#292c2f,#151719);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.34),
-    inset 0 -1px 0 rgba(255,255,255,.07),
-    0 0 0 1px rgba(255,255,255,.06),
-    0 0 4px rgba(255,255,255,.18),
-    0 0 8px rgba(229,190,92,.18),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.14),
+    0 0 8px rgba(234,194,91,.13),
+    0 5px 14px rgba(0,0,0,.25);
+}
+
+/* Rutinas, Agenda y Desafíos: conserva sus superficies y proporciones. */
+#page-home .home-shortcut{
+  border-radius:30px;
+  background-image:
+    linear-gradient(118deg,
+      rgba(255,255,255,.72) 0%,
+      rgba(221,227,233,.38) 13%,
+      rgba(255,255,255,.08) 29%,
+      rgba(255,255,255,.035) 58%,
+      rgba(226,190,105,.27) 80%,
+      rgba(255,255,255,.58) 100%),
+    linear-gradient(145deg,#34383c,#191c20 78%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 0 4px rgba(255,255,255,.13),
+    0 0 7px rgba(229,190,92,.11),
     0 5px 14px rgba(0,0,0,.25);
 }
