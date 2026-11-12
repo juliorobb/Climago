@@ -7,7 +7,7 @@
   <meta name="description" content="ClimaGo: clima, prevención y organización para tu día a día.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=home-shortcut-full-artwork-20261112-26">
+  <link rel="stylesheet" href="styles.css?v=home-shortcut-full-artwork-nav-20261112-27">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <title>ClimaGo</title>
 </head>
@@ -187,11 +187,9 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Navegación principal">
-      <button class="nav-item active" data-page="home"><span>⌂</span><small>Inicio</small></button>
-      <button class="nav-item" data-page="radar"><span>◎</span><small>Radar</small></button>
-      <button class="nav-item" data-page="myday"><span>▦</span><small>Mi día</small></button>
-      <button class="nav-item" data-page="alerts"><span>△</span><small>Alertas</small></button>
-      <button class="nav-item" data-page="more"><span>☰</span><small>Más</small></button>
+      <button class="nav-item active" type="button" data-page="home" aria-label="Inicio" aria-current="page"><span aria-hidden="true">⌂</span><small>Inicio</small></button>
+      <button class="nav-item" type="button" data-page="myday" aria-label="Mi día"><span aria-hidden="true">▦</span><small>Mi día</small></button>
+      <button class="nav-item" type="button" data-page="more" aria-label="Más"><span aria-hidden="true">☰</span><small>Más</small></button>
     </nav>
   </div>
   <dialog id="simple-dialog">
