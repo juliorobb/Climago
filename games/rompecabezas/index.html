@@ -55,7 +55,7 @@ button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-
 </section>
 </main>
 <div id="preview" role="dialog" aria-modal="true" aria-label="Imagen de referencia"><div class="preview-card"><img id="previewImage" alt="Fotografía completa de referencia"><button id="closePreview">Volver al rompecabezas</button></div></div>
-<img id="source" alt="" hidden crossorigin="anonymous" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Scenic_view_of_lake_with_mountains.jpg">
+<img id="source" alt="" hidden crossorigin="anonymous" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Lake_Mountain_Landscape.jpg/1280px-Lake_Mountain_Landscape.jpg">
 <script>
 (()=>{
 'use strict';
@@ -65,10 +65,10 @@ let cols=4,rows=4,pw=W/4,ph=H/4,tab=18,pieces=[],placed=0,moves=0,startedAt=0,ti
 const edgeMap={};
 function edgeKey(x,y,side){return side==='h'?'h'+x+','+y:'v'+x+','+y}
 function edgeValue(key){if(!(key in edgeMap))edgeMap[key]=Math.random()<.5?-1:1;return edgeMap[key]}
-function edgesFor(c,r){return {top:r===0?0:edgeValue(edgeKey(c,r,'h')),right:c===cols-1?0:edgeValue(edgeKey(c+1,r,'v')),bottom:r===rows-1?0:edgeValue(edgeKey(c,r+1,'h')),left:c===0?0:edgeValue(edgeKey(c,r,'v'))}}
+function edgesFor(c,r){return {top:r===0?0:-edgeValue(edgeKey(c,r,'h')),right:c===cols-1?0:edgeValue(edgeKey(c+1,r,'v')),bottom:r===rows-1?0:edgeValue(edgeKey(c,r+1,'h')),left:c===0?0:-edgeValue(edgeKey(c,r,'v'))}}
 function makePath(e){
  const p=new Path2D(),w=pw,h=ph,t=tab;
- p.moveTo(0,0);lineH(p,0,w,e.top,-1,t);lineV(p,w,0,h,e.right,1,t);lineH(p,w, h, e.bottom,1,t);lineV(p,0,h,0,e.left,-1,t);p.closePath();return p;
+ p.moveTo(0,0);lineH(p,0,w,e.top,-1,t);lineV(p,w,0,h,e.right,1,t);lineH(p,w, 0, e.bottom,1,t);lineV(p,0,h,0,e.left,-1,t);p.closePath();return p;
 }
 function lineH(p,x1,x2,sign,out,t){
  if(!sign){p.lineTo(x2,out===-1?0:out===1?ph:0);return}
