@@ -970,3 +970,18 @@
   #page-home .tip-card{border-radius:32px}
   #page-home .home-shortcut{border-radius:30px}
 }
+
+
+/* Inicio · acentos propios de los tres accesos directos.
+   Se conserva tamaño, distribución y cápsula de vidrio aprobada. */
+#page-home .home-shortcut .routine-icon{color:#e6bd59}
+#page-home .home-shortcut .agenda-icon{color:#cbd3dc}
+#page-home .home-shortcut .challenge-icon{color:#d9c7ff}
+#page-home .home-shortcut .shortcut-icon svg .icon-gold{
+  stroke:#e9bd4f;
+  stroke-width:2.1;
+}
+#page-home .home-shortcut .shortcut-icon svg .icon-violet{
+  stroke:#9b79df;
+  stroke-width:2;
+}
