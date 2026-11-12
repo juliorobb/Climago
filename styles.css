@@ -1104,3 +1104,12 @@
   #page-home .home-shortcut .shortcut-icon{height:55px;flex-basis:55px}
   #page-home .home-shortcut .shortcut-icon img{height:54px}
 }
+
+
+/* Integración de recortes · fundido del fondo oscuro de las imágenes.
+   Screen elimina visualmente los píxeles negros del recorte y conserva sus luces,
+   sin modificar el tamaño ni el área táctil del botón. */
+#page-home .home-shortcut .shortcut-icon img{
+  mix-blend-mode:screen;
+  background:transparent;
+}
