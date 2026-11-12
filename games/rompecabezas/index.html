@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#090d16">
+<title>ClimaGo · Rompecabezas</title>
+<style>
+:root{color-scheme:dark;--bg:#090d16;--panel:#121a27;--line:#667487;--gold:#e6bd69;--muted:#a7b1c0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#1b2b3b 0,#090d16 58%);color:#f4f6fa;font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(100%,520px);margin:auto;padding:18px 14px 30px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{font-size:19px;font-weight:800;letter-spacing:.2px}.brand span{color:var(--gold)}
+.tag{font-size:10px;letter-spacing:1.2px;color:var(--muted);border:1px solid #536174;border-radius:30px;padding:6px 9px}
+h1{font-size:23px;margin:5px 0}.sub{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+.panel{background:linear-gradient(145deg,#172231,#101722);border:1px solid #526173;border-radius:18px;padding:12px;box-shadow:0 12px 32px #0006}
+.stats{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}.stat{flex:1;text-align:center;background:#0b121d;border:1px solid #29394b;border-radius:12px;padding:8px}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{font-size:17px;color:#f6d995;font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;height:auto;touch-action:none;border-radius:12px;background:#0b1420}
+.controls{display:flex;gap:8px;margin-top:12px}.controls button,.controls select{flex:1;min-width:0;border:1px solid #67788c;border-radius:11px;background:linear-gradient(180deg,#273447,#172231);color:#f5f7fb;padding:11px 8px;font-size:12px;font-weight:700}
+.controls button.primary{border-color:#d3aa58;color:#ffe3a2;background:linear-gradient(180deg,#564629,#302719)}
+.help{font-size:11px;color:#bac5d1;line-height:1.5;margin:11px 2px 0}.status{min-height:20px;margin:9px 2px 0;color:#f2d58f;font-size:12px;text-align:center}
+@media(min-width:420px){main{padding-top:24px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">Clima<span>Go</span></div><div class="tag">DESAFÍOS · PRUEBA</div></header>
+<h1>Rompecabezas</h1>
+<p class="sub">Tomá una pieza, arrastrala con el dedo y soltala donde corresponda. Cuando está cerca de su lugar, encaja.</p>
+<section class="panel">
+<div class="stats"><div class="stat"><small>TIEMPO</small><b id="time">00:00</b></div><div class="stat"><small>PIEZAS</small><b id="count">0 / 9</b></div><div class="stat"><small>MOVIMIENTOS</small><b id="moves">0</b></div></div>
+<canvas id="game" aria-label="Tablero interactivo de rompecabezas"></canvas>
+<div class="controls"><select id="level" aria-label="Dificultad"><option value="3">Fácil · 9 piezas</option><option value="4">Medio · 16 piezas</option></select><button id="shuffle" class="primary">Mezclar</button><button id="reset">Reiniciar</button></div>
+<div class="status" id="status" aria-live="polite">Arrastrá una pieza hasta su lugar.</div>
+</section>
+<p class="help">Esta primera prueba comprueba la mecánica táctil de agarrar, mover y encajar piezas. La imagen es una ilustración de prueba; después se podrá reemplazar por fotografías.</p>
+</main>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),level=document.getElementById('level');
+const timeEl=document.getElementById('time'),countEl=document.getElementById('count'),movesEl=document.getElementById('moves'),statusEl=document.getElementById('status');
+let n=3,pieces=[],boardX=0,boardY=0,cell=0,tab=0,canvasW=0,canvasH=0,drag=null,moves=0,started=0,elapsed=0,tick=null,done=0;
+const source=document.createElement('canvas'),sctx=source.getContext('2d');
+function landscape(){
+source.width=900;source.height=900;
+let g=sctx.createLinearGradient(0,0,0,900);g.addColorStop(0,'#163d62');g.addColorStop(.55,'#82b6c4');g.addColorStop(1,'#d8b982');sctx.fillStyle=g;sctx.fillRect(0,0,900,900);
+let sun=sctx.createRadialGradient(690,180,15,690,180,150);sun.addColorStop(0,'#fff4c6');sun.addColorStop(1,'#f7d48b00');sctx.fillStyle=sun;sctx.fillRect(500,0,390,390);
+sctx.fillStyle='#34566a';sctx.beginPath();sctx.moveTo(0,530);sctx.lineTo(170,300);sctx.lineTo(300,470);sctx.lineTo(470,245);sctx.lineTo(680,500);sctx.lineTo(820,340);sctx.lineTo(900,430);sctx.lineTo(900,900);sctx.lineTo(0,900);sctx.fill();
+sctx.fillStyle='#557c78';sctx.beginPath();sctx.moveTo(0,610);sctx.lineTo(180,440);sctx.lineTo(360,610);sctx.lineTo(560,420);sctx.lineTo(900,650);sctx.lineTo(900,900);sctx.lineTo(0,900);sctx.fill();
+let water=sctx.createLinearGradient(0,590,0,900);water.addColorStop(0,'#367d91');water.addColorStop(1,'#173d59');sctx.fillStyle=water;sctx.fillRect(0,625,900,275);
+sctx.fillStyle='#f0d09a';sctx.beginPath();sctx.moveTo(0,740);sctx.quadraticCurveTo(260,670,420,760);sctx.quadraticCurveTo(650,850,900,730);sctx.lineTo(900,900);sctx.lineTo(0,900);sctx.fill();
+for(let i=0;i<28;i++){let x=(i*137)%900,y=650+(i*71)%230;sctx.fillStyle=i%2?'#d8e9d866':'#fff0c455';sctx.fillRect(x,y,35+(i%5)*12,3)}
+}
+function edge(ctx,x,y,w,h,top,right,bottom,left){
+ctx.beginPath();ctx.moveTo(x,y);
+function horiz(dir,sign){let a=x+w*.34,b=x+w*.66,m=x+w*.5,amp=tab*sign;ctx.lineTo(a,y);ctx.bezierCurveTo(a,y-amp*.15,m-tab*.55,y-amp,m,y-amp);ctx.bezierCurveTo(m+tab*.55,y-amp,b,y-amp*.15,b,y);ctx.lineTo(x+w,y)}
+if(top)horiz(1,top);else ctx.lineTo(x+w,y);
+function vert(sign){let a=y+h*.34,b=y+h*.66,m=y+h*.5,amp=tab*sign;ctx.lineTo(x+w,a);ctx.bezierCurveTo(x+w+amp*.15,a,x+w+amp,m-tab*.55+y,m+amp,y+h*.5);ctx.bezierCurveTo(x+w+amp,m+tab*.55+y,x+w+amp*.15,b,x+w,b)}
+if(right)vert(right);else ctx.lineTo(x+w,y+h);
+if(bottom){let a=x+w*.66,b=x+w*.34,m=x+w*.5,amp=tab*bottom;ctx.lineTo(a,y+h);ctx.bezierCurveTo(a,y+h+amp*.15,m+tab*.55,y+h+amp,m,y+h+amp);ctx.bezierCurveTo(m-tab*.55,y+h+amp,b,y+h+amp*.15,b,y+h)}else ctx.lineTo(x,y+h);
+if(left){let a=y+h*.66,b=y+h*.34,m=y+h*.5,amp=tab*left;ctx.lineTo(x,y+h-(h*.34));ctx.bezierCurveTo(x-amp*.15,a,x-amp,m+tab*.55,m,y+h*.5);ctx.bezierCurveTo(x-amp,m-tab*.55,x-amp*.15,b,x,y+h*.34)}else ctx.lineTo(x,y);
+ctx.closePath();
+}
+function signs(r,c){return {top:r===0?0:-piecesSign(r-1,c,'bottom'),right:c===n-1?0:piecesSign(r,c,'right'),bottom:r===n-1?0:-piecesSign(r+1,c,'top'),left:c===0?0:-piecesSign(r,c-1,'right')}}
+function piecesSign(r,c,side){let v=Math.sin((r+1)*91.7+(c+1)*37.3)*10000;return (Math.floor(Math.abs(v))%2?1:-1)}
+function resize(){
+const width=Math.min(canvas.parentElement.clientWidth-24,480);canvasW=Math.max(280,width);canvasH=canvasW*2.05;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(canvasW*dpr);canvas.height=Math.round(canvasH*dpr);canvas.style.width=canvasW+'px';canvas.style.height=canvasH+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+boardX=8;boardY=12;cell=(canvasW-16)/n;tab=cell*.19;draw();
+}
+function target(p){let s=signs(p.r,p.c);return {x:boardX+p.c*cell-(s.left?tab:0),y:boardY+p.r*cell-(s.top?tab:0)}}
+function init(shuffle=true){
+n=Number(level.value);pieces=[];moves=0;done=0;elapsed=0;started=0;clearInterval(tick);timeEl.textContent='00:00';movesEl.textContent='0';countEl.textContent='0 / '+(n*n);statusEl.textContent='Arrastrá una pieza hasta su lugar.';
+const trayY=boardY+n*cell+tab*2+22,cols=n,slotW=(canvasW-16)/cols,slotH=cell+tab*2+10;
+for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+let p={r,c,x:0,y:0,placed:false};let idx=r*n+c;p.x=8+c*slotW+(Math.random()-.5)*7;p.y=trayY+r*slotH+(Math.random()-.5)*6;
+pieces.push(p);
+}
+canvasH=trayY+n*slotH+16;const dpr=Math.min(devicePixelRatio||1,2);canvas.height=Math.round(canvasH*dpr);canvas.style.height=canvasH+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+if(!shuffle){pieces.forEach(p=>{let t=target(p);p.x=t.x;p.y=t.y;p.placed=true});done=n*n;countEl.textContent=done+' / '+(n*n)}
+draw();
+}
+function draw(){
+ctx.clearRect(0,0,canvasW,canvasH);
+ctx.fillStyle='#0a1420';ctx.fillRect(0,0,canvasW,canvasH);
+ctx.fillStyle='#aebdcb';ctx.font='10px system-ui';ctx.fillText('TABLERO',boardX,boardY-1);
+ctx.strokeStyle='#718196';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(boardX,boardY,cell*n,cell*n);ctx.setLineDash([]);
+for(let p of pieces.filter(p=>p.placed)){paint(p)}
+for(let p of pieces.filter(p=>!p.placed&&p!==drag?.p)){paint(p)}
+if(drag)paint(drag.p,true);
+}
+function paint(p,active=false){
+let s=signs(p.r,p.c),x=p.x,y=p.y;
+ctx.save();edge(ctx, x+(s.left?tab:0),y+(s.top?tab:0),cell,cell,s.top,s.right,s.bottom,s.left);
+ctx.save();ctx.clip();
+ctx.drawImage(source,-p.c*cell*900/(cell*n),-p.r*cell*900/(cell*n),900,900, x+(s.left?tab:0),y+(s.top?tab:0),cell*n,cell*n);
+ctx.restore();
+ctx.strokeStyle=active?'#ffe0a0':'#d5e0e8';ctx.lineWidth=active?2.5:1.5;edge(ctx,x+(s.left?tab:0),y+(s.top?tab:0),cell,cell,s.top,s.right,s.bottom,s.left);ctx.stroke();
+if(active){ctx.shadowColor='#f1c76d';ctx.shadowBlur=16;ctx.strokeStyle='#f1c76d';ctx.lineWidth=1;ctx.stroke()}
+ctx.restore();
+}
+function pos(e){let r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvasW/r.width,y:(e.clientY-r.top)*canvasH/r.height}}
+function hit(pt){for(let i=pieces.length-1;i>=0;i--){let p=pieces[i];if(p.placed)continue;let s=signs(p.r,p.c),x=p.x+(s.left?tab:0),y=p.y+(s.top?tab:0);if(pt.x>=x-tab&&pt.x<=x+cell+tab&&pt.y>=y-tab&&pt.y<=y+cell+tab)return p}return null}
+canvas.addEventListener('pointerdown',e=>{let pt=pos(e),p=hit(pt);if(!p)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);drag={p,dx:pt.x-p.x,dy:pt.y-p.y};pieces=pieces.filter(q=>q!==p).concat(p);if(!started){started=Date.now();tick=setInterval(()=>{let t=Math.floor((Date.now()-started)/1000);timeEl.textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')},500)}draw()});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;let pt=pos(e);drag.p.x=pt.x-drag.dx;drag.p.y=pt.y-drag.dy;draw()});
+canvas.addEventListener('pointerup',()=>{if(!drag)return;let p=drag.p,t=target(p);if(Math.hypot(p.x-t.x,p.y-t.y)<cell*.34){p.x=t.x;p.y=t.y;p.placed=true;done++;countEl.textContent=done+' / '+(n*n);statusEl.textContent='¡Bien! Pieza colocada.'}else{statusEl.textContent='Todavía no encaja. Probá en otra posición.'}moves++;movesEl.textContent=moves;drag=null;draw();if(done===n*n){clearInterval(tick);statusEl.textContent='¡Rompecabezas completo! Tiempo: '+timeEl.textContent+'.'}}); 
+document.getElementById('shuffle').addEventListener('click',()=>init(true));document.getElementById('reset').addEventListener('click',()=>init(false));level.addEventListener('change',()=>init(true));
+landscape();resize();init(true);window.addEventListener('resize',resize);
+})();
+</script>
+</body>
+</html>
