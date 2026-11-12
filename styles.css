@@ -922,6 +922,23 @@
 #page-home .home-forecast-link{border-radius:999px}
 #page-home .home-shortcut{border-radius:34px}
 
+/* Reflejo dorado inferior: luz localizada, no un halo perimetral. */
+#page-home .home-weather-card::before,
+#page-home .tip-card::before,
+#page-home .home-forecast-link::before,
+#page-home .home-shortcut::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:12%;
+  right:12%;
+  bottom:0;
+  height:4px;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(242,195,91,.72) 0%,rgba(225,174,68,.30) 42%,transparent 78%);
+  filter:blur(3px);
+}
 /* Brillo de superficie: reflejo superior difuso y dos destellos pequeños,
    no un halo luminoso alrededor de toda la tarjeta. */
 #page-home .home-weather-card::after,
