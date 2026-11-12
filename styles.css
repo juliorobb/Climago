@@ -1702,3 +1702,50 @@
 @media(prefers-reduced-motion:reduce){
   .app-shell .bottom-nav .nav-item.active::before{animation:none!important}
 }
+
+
+/* LUPA SATINADA PLATEADA: menor, nítida y sin halos dorados difusos. */
+.app-shell .bottom-nav .nav-item::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item::before{
+  width:min(90px,66%)!important;
+  height:82px!important;
+  border-radius:21px!important;
+  background:linear-gradient(150deg,rgba(57,63,70,.96),rgba(22,26,31,.98) 56%,rgba(7,9,12,.99))!important;
+  border:1px solid rgba(195,204,214,.62)!important;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.20),
+    inset 0 -6px 10px rgba(0,0,0,.48),
+    0 4px 9px rgba(0,0,0,.40)!important;
+  filter:none!important;
+}
+.app-shell .bottom-nav .nav-item.active::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::before{
+  background:linear-gradient(150deg,rgba(66,72,79,.98),rgba(25,29,34,.99) 58%,rgba(8,10,13,.99))!important;
+  border:1px solid rgba(220,228,236,.82)!important;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.24),
+    inset 0 -6px 10px rgba(0,0,0,.48),
+    0 4px 9px rgba(0,0,0,.42)!important;
+  animation:climago-silver-lens-settle .48s cubic-bezier(.2,.78,.22,1) both!important;
+}
+.app-shell .bottom-nav .nav-item.active span,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active span,
+.app-shell .bottom-nav .nav-item.active small,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active small{
+  color:#e3e8ed!important;
+  filter:none!important;
+}
+.app-shell .bottom-nav .nav-item.active::after,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::after{
+  background:linear-gradient(90deg,rgba(221,229,236,.30),#e4e9ee,rgba(221,229,236,.30))!important;
+  box-shadow:0 0 2px rgba(220,230,238,.38)!important;
+}
+@keyframes climago-silver-lens-settle{
+  0%{transform:translate(-50%,-50%) scale(.96,.96)}
+  42%{transform:translate(-50%,-50%) scale(1.018,1.02)}
+  72%{transform:translate(-50%,-50%) scale(.994,.995)}
+  100%{transform:translate(-50%,-50%) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-shell .bottom-nav .nav-item.active::before{animation:none!important}
+}
