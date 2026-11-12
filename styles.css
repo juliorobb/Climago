@@ -1524,3 +1524,114 @@
 @media(prefers-reduced-motion:reduce){
   .app-shell .bottom-nav .nav-item::before{animation:none!important;transition:none!important}
 }
+
+
+/* AJUSTE FINAL DE LUPA — una sola pieza elevada, compacta y casi cuadrada.
+   La barra es una cápsula continua; los accesos inactivos no son tarjetas. */
+.app-shell .bottom-nav{
+  overflow:visible!important;
+  background:linear-gradient(180deg,rgba(27,31,36,.88),rgba(5,7,10,.94))!important;
+  border:1px solid rgba(184,196,208,.30)!important;
+  border-radius:28px!important;
+  box-shadow:0 14px 28px rgba(0,0,0,.48),inset 0 1px 1px rgba(255,255,255,.17),inset 0 -2px 5px rgba(0,0,0,.56)!important;
+}
+.app-shell .bottom-nav .nav-item,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item{
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.app-shell .bottom-nav .nav-item::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:1!important;
+  top:-10px!important;
+  bottom:-10px!important;
+  left:50%!important;
+  right:auto!important;
+  width:min(116px,76%)!important;
+  height:auto!important;
+  border-radius:25px!important;
+  opacity:0!important;
+  transform:translateX(-50%) scale(.86,.88)!important;
+  transform-origin:center!important;
+  background:
+    radial-gradient(ellipse at 27% 8%,rgba(255,255,255,.20),transparent 34%),
+    radial-gradient(ellipse at 75% 88%,rgba(229,190,89,.16),transparent 43%),
+    radial-gradient(ellipse at 50% 45%,rgba(101,112,126,.25),rgba(24,29,36,.70) 56%,rgba(5,8,12,.86) 100%)!important;
+  border:1px solid rgba(196,208,220,.42)!important;
+  box-shadow:
+    inset 0 1px 3px rgba(255,255,255,.23),
+    inset 0 -9px 16px rgba(0,0,0,.48),
+    0 8px 18px rgba(0,0,0,.42),
+    0 0 13px rgba(190,207,224,.13)!important;
+  filter:drop-shadow(0 0 5px rgba(204,218,231,.12))!important;
+  pointer-events:none!important;
+  transition:opacity .2s ease,transform .38s cubic-bezier(.18,.82,.25,1.16),filter .3s ease!important;
+}
+.app-shell .bottom-nav .nav-item.active,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active{
+  color:#f0cf65!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.app-shell .bottom-nav .nav-item.active::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::before{
+  opacity:1!important;
+  transform:translateX(-50%) scale(1)!important;
+  background:
+    radial-gradient(ellipse at 25% 7%,rgba(255,255,255,.23),transparent 35%),
+    radial-gradient(ellipse at 72% 86%,rgba(238,194,83,.20),transparent 45%),
+    radial-gradient(ellipse at 50% 45%,rgba(112,105,83,.31),rgba(27,29,31,.78) 58%,rgba(5,8,11,.91) 100%)!important;
+  border-color:rgba(220,197,135,.48)!important;
+  box-shadow:
+    inset 0 1px 4px rgba(255,255,255,.26),
+    inset 0 -10px 17px rgba(0,0,0,.50),
+    0 9px 19px rgba(0,0,0,.48),
+    0 0 12px rgba(231,195,104,.16)!important;
+  animation:climago-glass-refraction .62s cubic-bezier(.18,.82,.25,1.12) both!important;
+}
+.app-shell .bottom-nav .nav-item span,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item span{
+  z-index:2!important;
+  color:#c5ccd4!important;
+  filter:drop-shadow(0 1px 2px rgba(255,255,255,.15))!important;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),color .22s ease,filter .22s ease!important;
+}
+.app-shell .bottom-nav .nav-item small,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item small{
+  z-index:2!important;
+  color:#bfc7d0!important;
+}
+.app-shell .bottom-nav .nav-item.active span,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active span{
+  color:#f5d36b!important;
+  transform:scale(1.14)!important;
+  filter:drop-shadow(0 0 5px rgba(242,202,83,.42))!important;
+}
+.app-shell .bottom-nav .nav-item.active small,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active small{
+  color:#f0d16e!important;
+}
+.app-shell .bottom-nav .nav-item.active::after,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::after{
+  z-index:3!important;
+  bottom:-3px!important;
+  left:34%!important;
+  right:34%!important;
+  height:2px!important;
+  background:linear-gradient(90deg,rgba(255,225,150,.40),#f5d45e,rgba(255,225,150,.40))!important;
+  box-shadow:0 0 6px rgba(246,211,82,.68),0 0 12px rgba(246,211,82,.28)!important;
+}
+@keyframes climago-glass-refraction{
+  0%{transform:translateX(-50%) scale(.88,.91);filter:brightness(.94) saturate(.94) drop-shadow(0 0 2px rgba(210,224,237,.10))}
+  32%{transform:translateX(-50%) scale(1.035,1.045);filter:brightness(1.10) saturate(1.10) drop-shadow(0 0 8px rgba(221,231,240,.20))}
+  58%{transform:translateX(-50%) scale(.988,1.012);filter:brightness(1.035) saturate(1.04) drop-shadow(0 0 6px rgba(221,231,240,.17))}
+  100%{transform:translateX(-50%) scale(1);filter:brightness(1) saturate(1) drop-shadow(0 0 5px rgba(204,218,231,.12))}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-shell .bottom-nav .nav-item::before{animation:none!important;transition:none!important}
+}
