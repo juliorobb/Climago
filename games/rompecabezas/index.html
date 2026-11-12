@@ -1,52 +1,131 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071a2b"><title>ClimaGo · Rompecabezas</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a2b">
+<title>ClimaGo · Desafío · Rompecabezas</title>
 <style>
-:root{color-scheme:dark;--bg:#061626;--panel:#0d263c;--line:#25445d;--text:#f3f8fc;--muted:#a7bacb;--cyan:#5dd9ed}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#102d47,#061626 55%);color:var(--text);font:15px system-ui,-apple-system,sans-serif}
-main{max-width:620px;margin:auto;padding:18px 15px 36px}.eyebrow{color:#a9d9e7;font-size:11px;letter-spacing:2px;font-weight:800}.top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}h1{font-size:27px;margin:18px 0 4px}.sub{color:var(--muted);margin:0 0 16px;font-size:13px}
-.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar label{font-size:12px;color:var(--muted)}select,button{font:inherit;color:var(--text);background:#152e45;border:1px solid #3a566e;border-radius:12px;padding:10px 13px}button{cursor:pointer}.stats{display:flex;gap:16px;justify-content:flex-end;color:var(--muted);font-size:12px;margin:7px 2px 12px}.stats b{color:white;font-variant-numeric:tabular-nums}
-.board-wrap{background:#0a1b2b;border:1px solid #314b60;border-radius:22px;padding:10px;box-shadow:0 12px 30px #0004}.board{width:100%;aspect-ratio:16/9;position:relative;border-radius:13px;overflow:hidden;background:#203a50}.board canvas{width:100%;height:100%;display:block;touch-action:none}.help{text-align:center;color:var(--muted);font-size:12px;margin:10px 5px 18px}
-.tray-head{display:flex;justify-content:space-between;align-items:center;margin:0 3px 9px}.tray-head b{font-size:14px}.tray-head span{font-size:11px;color:var(--muted)}.tray{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;background:#091b2b;border:1px solid #28445a;border-radius:18px;padding:9px;min-height:110px}.piece{width:100%;aspect-ratio:1.25;background:#1b344b;border:1px solid #48647a;border-radius:10px;overflow:hidden;touch-action:none;position:relative}.piece canvas{width:100%;height:100%;display:block;touch-action:none}.piece.selected{outline:2px solid var(--cyan)}
-.message{margin-top:14px;padding:13px;border-radius:14px;background:#102b40;border:1px solid #31536c;color:#c9dce8;font-size:12px;line-height:1.5}.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;font-size:12px}.primary{background:linear-gradient(100deg,#087e9e,#176fc0);border:0;font-weight:700}
-#photo{display:none}.win{display:none;margin-top:12px;text-align:center;padding:17px;background:#103b38;border:1px solid #347e70;border-radius:16px}.win.show{display:block}.win strong{display:block;font-size:19px;margin-bottom:4px}
-@media(max-width:390px){main{padding:14px 11px}.tray{gap:5px;padding:7px}.piece{border-radius:8px}.stats{gap:10px}}
-</style></head>
-<body><main>
-<div class="top"><span class="eyebrow">CLIMAGO · DESAFÍO</span><span>Prototipo de desarrollo</span></div>
-<h1>Rompecabezas</h1><p class="sub">Armá la fotografía colocando cada pieza en su lugar.</p>
-<div class="toolbar"><label for="difficulty">Piezas</label><select id="difficulty"><option value="16">16 · Fácil</option></select><button id="restart">Reiniciar</button></div>
-<div class="stats"><span>Tiempo <b id="clock">00:00</b></span><span>Movimientos <b id="moves">0</b></span></div>
-<div class="board-wrap"><div class="board"><canvas id="board" width="960" height="540"></canvas></div></div>
-<p class="help">Elegí una pieza de la bandeja y arrastrala hasta su lugar. Podés consultar la fotografía completa.</p>
-<div class="tray-head"><b>Piezas disponibles</b><span id="remaining">16 restantes</span></div><div class="tray" id="tray"></div>
-<div class="actions"><button id="showPhoto">Ver fotografía</button><button id="restart2" class="primary">Volver a empezar</button></div>
-<div class="message">Primera versión del motor: encastres, arrastre táctil, bandeja ordenada y detección de piezas colocadas. Los niveles, medallas y colecciones se incorporarán después de validar el funcionamiento básico.</div>
-<div class="win" id="win"><strong>¡Rompecabezas completado!</strong><span id="result"></span></div>
-<img id="photo" crossorigin="anonymous" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Scenic_view_of_lake_with_mountains.jpg" alt="">
+:root{color-scheme:dark;--bg:#071827;--panel:#102b40;--line:#31516a;--muted:#a9bdcc;--cyan:#65d9e9;--gold:#e6c77b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#24445c 0,#0a2032 48%,#061522 100%);color:#f3f8fc;font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:700px;margin:auto;padding:18px 14px 34px}
+.top{display:flex;justify-content:space-between;align-items:center;color:#b9dce8;font-size:11px;letter-spacing:1.8px;font-weight:800}
+.top small{font-size:11px;letter-spacing:0;color:var(--muted);font-weight:500}
+h1{font-size:27px;margin:17px 0 3px;letter-spacing:-.5px}.sub{color:var(--muted);font-size:13px;margin:0 0 17px}
+.panel{background:linear-gradient(145deg,#102c42ed,#0b2032ed);border:1px solid #35536a;border-radius:20px;padding:12px;box-shadow:0 12px 28px #0003}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:11px}
+label{font-size:12px;color:var(--muted)}select,button{font:inherit;color:#f5f9fc;background:#18354c;border:1px solid #3c5b72;border-radius:12px;padding:9px 12px}
+button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-weight:700}
+.stats{display:flex;justify-content:space-between;gap:8px;margin:3px 2px 10px;color:var(--muted);font-size:12px}.stats b{color:#fff;font-variant-numeric:tabular-nums}
+.board-shell{padding:8px;border-radius:17px;background:#061522;border:1px solid #36546b}
+#board{display:block;width:100%;aspect-ratio:16/9;border-radius:10px;background:#10283a;touch-action:none}
+.hint{text-align:center;color:#b1c4d1;font-size:12px;line-height:1.45;margin:10px 3px 3px}
+.tray-title{display:flex;align-items:center;justify-content:space-between;margin:16px 3px 8px}.tray-title b{font-size:14px}.tray-title span{font-size:11px;color:var(--muted)}
+#tray{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:9px;border:1px solid #29475e;border-radius:16px;background:#071b2b;min-height:100px}
+.piece{position:relative;min-width:0;aspect-ratio:1.25;border:1px solid #45657d;border-radius:10px;background:#18364e;overflow:hidden;touch-action:none;user-select:none}
+.piece canvas{display:block;width:100%;height:100%;touch-action:none}.piece:active{border-color:var(--cyan)}
+.piece.dragging{opacity:.35}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;font-size:12px}
+.note{font-size:11px;color:#a9bdcc;line-height:1.5;margin:12px 2px 0}
+#preview{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#020a12eF;z-index:10}
+#preview.open{display:flex}#preview .preview-card{width:min(100%,620px);background:#102a3f;border:1px solid #45657c;border-radius:18px;padding:12px}
+#preview img{display:block;width:100%;height:auto;border-radius:11px}#preview button{width:100%;margin-top:10px}
+#win{display:none;text-align:center;margin-top:12px;padding:18px;background:linear-gradient(140deg,#153e3a,#102f35);border:1px solid #4c9584;border-radius:17px}
+#win.show{display:block}#win strong{display:block;font-size:20px;margin-bottom:5px;color:#e4fff5}#win p{font-size:12px;color:#c2ddd6;margin:0 0 12px}
+@media(max-width:390px){main{padding:14px 10px 28px}.panel{padding:9px}#tray{gap:6px;padding:7px}.piece{border-radius:8px}.controls{gap:6px}select,button{padding:8px 10px}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><span>CLIMAGO · DESAFÍO</span><small>Rompecabezas · versión de prueba</small></div>
+<h1>Un momento para desconectar</h1>
+<p class="sub">Armá la fotografía pieza por pieza. Cada nivel suma un nuevo desafío.</p>
+<section class="panel">
+<div class="controls"><label for="level">Dificultad</label><select id="level"><option value="16">Fácil · 16 piezas</option><option value="36">Intermedio · 36 piezas</option><option value="64">Avanzado · 64 piezas</option></select><button id="restart">Reiniciar</button></div>
+<div class="stats"><span>Tiempo <b id="clock">00:00</b></span><span>Movimientos <b id="moves">0</b></span><span>Colocadas <b id="progress">0/16</b></span></div>
+<div class="board-shell"><canvas id="board" width="960" height="540" aria-label="Tablero del rompecabezas"></canvas></div>
+<p class="hint">Arrastrá cada pieza hasta su lugar. Acercala a la posición correcta para que encastre.</p>
+<div class="tray-title"><b>Piezas disponibles</b><span id="remaining">16 por colocar</span></div>
+<div id="tray" aria-label="Bandeja ordenada de piezas"></div>
+<div class="actions"><button id="showPhoto">Ver imagen completa</button><button id="newGame" class="primary">Nuevo desafío</button></div>
+<div class="note">Modo libre: armá a tu ritmo. El tiempo y los movimientos se registran para que puedas intentar mejorar tu propio resultado.</div>
+<div id="win"><strong>¡Desafío completado!</strong><p id="result"></p><button id="again" class="primary">Volver a jugar</button></div>
+</section>
 </main>
+<div id="preview" role="dialog" aria-modal="true" aria-label="Imagen de referencia"><div class="preview-card"><img id="previewImage" alt="Fotografía completa de referencia"><button id="closePreview">Volver al rompecabezas</button></div></div>
+<img id="source" alt="" hidden crossorigin="anonymous" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Scenic_view_of_lake_with_mountains.jpg">
 <script>
 (()=>{
-const img=document.getElementById('photo'),board=document.getElementById('board'),ctx=board.getContext('2d'),tray=document.getElementById('tray');
-const N=4,CW=240,CH=135,tab=22;let pieces=[],placed=0,moves=0,started=false,startAt=0,tick=null,drag=null;
-const $=id=>document.getElementById(id);
-function pathFor(c,r){const p=new Path2D();p.moveTo(c*CW,r*CH);p.lineTo((c+1)*CW,r*CH);p.lineTo((c+1)*CW,(r+1)*CH);p.lineTo(c*CW,(r+1)*CH);p.closePath();return p}
-function paintBoard(){ctx.clearRect(0,0,960,540);ctx.fillStyle='#203a50';ctx.fillRect(0,0,960,540);if(!img.complete||!img.naturalWidth)return;ctx.globalAlpha=.19;ctx.drawImage(img,0,0,960,540);ctx.globalAlpha=1;
-for(let r=0;r<N;r++)for(let c=0;c<N;c++){ctx.strokeStyle='#d7e5ed55';ctx.lineWidth=2;ctx.strokeRect(c*CW,r*CH,CW,CH)}
-pieces.filter(p=>p.done).forEach(p=>drawPiece(ctx,p,p.c*CW,p.r*CH,1));
-if(drag)drawPiece(ctx,drag.p,drag.x,drag.y,1);
+'use strict';
+const $=id=>document.getElementById(id), board=$('board'), bctx=board.getContext('2d'), tray=$('tray'), source=$('source');
+const W=960,H=540;
+let cols=4,rows=4,pw=W/4,ph=H/4,tab=18,pieces=[],placed=0,moves=0,startedAt=0,timer=null,started=false,drag=null,elapsed=0;
+const edgeMap={};
+function edgeKey(x,y,side){return side==='h'?'h'+x+','+y:'v'+x+','+y}
+function edgeValue(key){if(!(key in edgeMap))edgeMap[key]=Math.random()<.5?-1:1;return edgeMap[key]}
+function edgesFor(c,r){return {top:r===0?0:edgeValue(edgeKey(c,r,'h')),right:c===cols-1?0:edgeValue(edgeKey(c+1,r,'v')),bottom:r===rows-1?0:edgeValue(edgeKey(c,r+1,'h')),left:c===0?0:edgeValue(edgeKey(c,r,'v'))}}
+function makePath(e){
+ const p=new Path2D(),w=pw,h=ph,t=tab;
+ p.moveTo(0,0);lineH(p,0,w,e.top,-1,t);lineV(p,w,0,h,e.right,1,t);lineH(p,w, h, e.bottom,1,t);lineV(p,0,h,0,e.left,-1,t);p.closePath();return p;
 }
-function drawPiece(target,p,x,y,scale){target.save();target.translate(x,y);target.scale(scale,scale);target.beginPath();target.rect(0,0,CW,CH);target.clip();target.drawImage(img,-p.c*CW,-p.r*CH,960,540);target.strokeStyle='#f1f8ff';target.lineWidth=3;target.strokeRect(1,1,CW-2,CH-2);target.restore()}
-function makePiece(p){const box=document.createElement('div');box.className='piece';box.dataset.id=p.id;const can=document.createElement('canvas');can.width=300;can.height=168;const c=can.getContext('2d');c.save();c.scale(300/CW,168/CH);c.drawImage(img,-p.c*CW,-p.r*CH,960,540);c.strokeStyle='#d6e7f4';c.lineWidth=2;c.strokeRect(1,1,CW-2,CH-2);c.restore();box.append(can);box.addEventListener('pointerdown',e=>beginDrag(e,p,box));return box}
-function beginDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if(!started){started=true;startAt=Date.now();tick=setInterval(updateClock,250)}const rect=board.getBoundingClientRect();const x=(e.clientX-rect.left)*960/rect.width,y=(e.clientY-rect.top)*540/rect.height;drag={p,el,x:x-CW/2,y:y-CH/2,pointer:e.pointerId};el.classList.add('selected');window.addEventListener('pointermove',moveDrag);window.addEventListener('pointerup',endDrag,{once:true})}
-function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const rect=board.getBoundingClientRect();drag.x=(e.clientX-rect.left)*960/rect.width-CW/2;drag.y=(e.clientY-rect.top)*540/rect.height-CH/2;paintBoard()}
-function endDrag(e){if(!drag)return;const rect=board.getBoundingClientRect(),x=(e.clientX-rect.left)*960/rect.width,y=(e.clientY-rect.top)*540/rect.height,p=drag.p;window.removeEventListener('pointermove',moveDrag);drag.el.classList.remove('selected');if(x>=p.c*CW-35&&x<=(p.c+1)*CW+35&&y>=p.r*CH-30&&y<=(p.r+1)*CH+30){p.done=true;placed++;moves++;drag.el.remove();$('remaining').textContent=(16-placed)+' restantes';$('moves').textContent=moves;if(placed===16)finish()}else{moves++;$('moves').textContent=moves}drag=null;paintBoard()}
-function updateClock(){if(!started)return;const s=Math.floor((Date.now()-startAt)/1000);$('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function finish(){clearInterval(tick);updateClock();$('win').classList.add('show');$('result').textContent='Tiempo: '+$('clock').textContent+' · Movimientos: '+moves}
-function reset(){clearInterval(tick);pieces=[];placed=0;moves=0;started=false;drag=null;$('clock').textContent='00:00';$('moves').textContent='0';$('remaining').textContent='16 restantes';$('win').classList.remove('show');tray.innerHTML='';for(let r=0;r<N;r++)for(let c=0;c<N;c++)pieces.push({id:r*N+c,c,r,done:false});pieces.sort(()=>Math.random()-.5).forEach(p=>tray.append(makePiece(p)));paintBoard()}
-$('restart').onclick=reset;$('restart2').onclick=reset;$('showPhoto').onclick=()=>{const w=window.open('','_blank');if(w){w.document.write('<title>Fotografía de referencia</title><img style="width:100%;height:auto" src="'+img.src+'">')}}
-img.onload=()=>{paintBoard();reset()};img.onerror=()=>{document.querySelector('.message').textContent='No se pudo cargar la fotografía de prueba. Revisaremos el archivo local antes de integrar el módulo.'};if(img.complete&&img.naturalWidth)reset();
+function lineH(p,x1,x2,sign,out,t){
+ if(!sign){p.lineTo(x2,out===-1?0:out===1?ph:0);return}
+ const y=out===-1?0:ph,dir=out*sign,span=x2-x1,a=x1+span*.36,b=x1+span*.64;
+ p.lineTo(a,y);p.bezierCurveTo(a+span*.035,y,a+span*.055,y+dir*t*.95,(x1+x2)/2,y+dir*t);
+ p.bezierCurveTo(b-span*.055,y+dir*t*.95,b-span*.035,y,b,y);p.lineTo(x2,y);
+}
+function lineV(p,x1,y1,y2,sign,out,t){
+ if(!sign){p.lineTo(out===-1?0:pw,y2);return}
+ const x=out===-1?0:pw,dir=out*sign,span=y2-y1,a=y1+span*.36,b=y1+span*.64;
+ p.lineTo(x,a);p.bezierCurveTo(x,a+span*.035,x+dir*t*.95,a+span*.055,x+dir*t,(y1+y2)/2);
+ p.bezierCurveTo(x+dir*t*.95,b-span*.055,x,b-span*.035,x,b);p.lineTo(x,y2);
+}
+function makePiece(c,r){const p={id:r*cols+c,c,r,done:false,edges:edgesFor(c,r)};p.path=makePath(p.edges);return p}
+function drawPhotoPiece(ctx,p,x,y,scale,outline=true){
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.save();ctx.clip(p.path);
+ ctx.drawImage(source,-p.c*pw,-p.r*ph,W,H);ctx.restore();
+ if(outline){ctx.strokeStyle='#effaff';ctx.lineWidth=2.1;ctx.stroke(p.path);ctx.strokeStyle='#10283a88';ctx.lineWidth=4;ctx.stroke(p.path)}
+ ctx.restore();
+}
+function drawBoard(){
+ bctx.clearRect(0,0,W,H);bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);
+ bctx.save();bctx.globalAlpha=.16;bctx.drawImage(source,0,0,W,H);bctx.restore();
+ for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true);else{bctx.save();bctx.translate(p.c*pw,p.r*ph);bctx.strokeStyle='#c6e1ed55';bctx.lineWidth=1.4;bctx.stroke(p.path);bctx.restore()}}
+ if(drag&&drag.over)drawPhotoPiece(bctx,drag.p,drag.x-pw/2,drag.y-ph/2,1,true);
+}
+function makeTile(p){
+ const el=document.createElement('div');el.className='piece';el.dataset.id=p.id;
+ const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d'),scale=Math.min(300/(pw+tab*2),180/(ph+tab*2));
+ drawPhotoPiece(c,p,(300-pw*scale)/2,(180-ph*scale)/2,scale,true);el.append(can);
+ el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
+}
+function boardPoint(e){const r=board.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height,inside:e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}}
+function startDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if(!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
+ drag={p,el,pointer:e.pointerId,x:0,y:0,over:false};el.classList.add('dragging');window.addEventListener('pointermove',moveDrag,{passive:false});window.addEventListener('pointerup',endDrag,{once:true});window.addEventListener('pointercancel',cancelDrag,{once:true});}
+function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const pt=boardPoint(e);drag.x=pt.x;drag.y=pt.y;drag.over=pt.inside;drawBoard()}
+function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPoint(e),p=drag.p;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointercancel',cancelDrag);drag.el.classList.remove('dragging');
+ const tx=(p.c+.5)*pw,ty=(p.r+.5)*ph,dist=Math.hypot(pt.x-tx,pt.y-ty),limit=Math.min(pw,ph)*.22;
+ moves++;$('moves').textContent=moves;
+ if(pt.inside&&dist<=limit){p.done=true;placed++;drag.el.remove()}
+ drag=null;updateProgress();drawBoard();if(placed===pieces.length)complete();
+}
+function cancelDrag(){if(!drag)return;window.removeEventListener('pointermove',moveDrag);drag.el.classList.remove('dragging');drag=null;drawBoard()}
+function updateProgress(){$('progress').textContent=placed+'/'+pieces.length;$('remaining').textContent=(pieces.length-placed)+' por colocar'}
+function updateClock(){if(!started)return;elapsed=Math.floor((Date.now()-startedAt)/1000);$('clock').textContent=fmt(elapsed)}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function complete(){clearInterval(timer);timer=null;updateClock();$('result').textContent='Tiempo: '+fmt(elapsed)+' · Movimientos: '+moves;$('win').classList.add('show')}
+function reset(){clearInterval(timer);timer=null;started=false;startedAt=0;elapsed=0;placed=0;moves=0;drag=null;edgeMapReset();const count=Number($('level').value);cols=rows=Math.sqrt(count);pw=W/cols;ph=H/rows;tab=Math.min(pw,ph)*.19;pieces=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)pieces.push(makePiece(c,r));pieces.sort(()=>Math.random()-.5);tray.innerHTML='';pieces.forEach(p=>tray.append(makeTile(p)));$('clock').textContent='00:00';$('moves').textContent='0';$('win').classList.remove('show');updateProgress();drawBoard()}
+function edgeMapReset(){for(const k of Object.keys(edgeMap))delete edgeMap[k]}
+$('restart').addEventListener('click',reset);$('newGame').addEventListener('click',reset);$('again').addEventListener('click',reset);$('level').addEventListener('change',reset);
+$('showPhoto').addEventListener('click',()=>{$('previewImage').src=source.src;$('preview').classList.add('open')});
+$('closePreview').addEventListener('click',()=>$('preview').classList.remove('open'));
+$('preview').addEventListener('click',e=>{if(e.target===$('preview'))$('preview').classList.remove('open')});
+source.addEventListener('load',reset);
+source.addEventListener('error',()=>{document.querySelector('.hint').textContent='No se pudo cargar la fotografía. Revisá la conexión e intentá nuevamente.'});
+if(source.complete&&source.naturalWidth)reset();
 })();
-</script></body></html>
+</script>
+</body>
+</html>
