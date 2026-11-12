@@ -1770,3 +1770,18 @@
   height:70px!important;
   border-radius:19px!important;
 }
+
+
+/* Lupa plateada: reducir un paso más y dejar margen visible dentro de la barra. */
+.app-shell .bottom-nav .nav-item::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item::before{
+  width:min(66px,46%)!important;
+  height:60px!important;
+  border-radius:17px!important;
+}
+.app-shell .bottom-nav .nav-item.active::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::before{
+  width:min(66px,46%)!important;
+  height:60px!important;
+  border-radius:17px!important;
+}
