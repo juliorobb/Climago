@@ -1749,3 +1749,24 @@
 @media(prefers-reduced-motion:reduce){
   .app-shell .bottom-nav .nav-item.active::before{animation:none!important}
 }
+
+
+/* Ajuste de proporción: la lupa queda contenida dentro de la barra inferior. */
+.app-shell .bottom-nav .nav-item::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item::before{
+  top:50%!important;
+  bottom:auto!important;
+  left:50%!important;
+  width:min(78px,54%)!important;
+  height:70px!important;
+  border-radius:19px!important;
+  transform:translate(-50%,-50%) scale(1)!important;
+}
+.app-shell .bottom-nav .nav-item.active::before,
+.app-shell:has(#page-home.active) .bottom-nav .nav-item.active::before{
+  top:50%!important;
+  bottom:auto!important;
+  width:min(78px,54%)!important;
+  height:70px!important;
+  border-radius:19px!important;
+}
