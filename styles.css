@@ -1180,3 +1180,120 @@
 @media(max-width:380px){
   #page-home .home-shortcut{aspect-ratio:1 / 1;min-height:0}
 }
+
+
+/* Navegación inferior · lente óptica activa.
+   Base negra y discreta; el efecto de lupa aparece únicamente en la opción seleccionada. */
+.bottom-nav{
+  position:fixed;
+  left:50%;
+  bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);
+  width:min(calc(100% - 24px),496px);
+  height:72px;
+  padding:6px 8px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px;
+  background:linear-gradient(180deg,rgba(12,14,17,.98),rgba(5,7,10,.985));
+  border:1px solid rgba(174,185,198,.23);
+  border-radius:24px;
+  box-shadow:0 9px 28px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.08);
+  z-index:10;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.bottom-nav .nav-item{
+  position:relative;
+  isolation:isolate;
+  min-width:0;
+  min-height:58px;
+  display:grid;
+  align-content:center;
+  justify-items:center;
+  gap:3px;
+  padding:4px 2px 7px;
+  border:1px solid transparent;
+  border-radius:18px;
+  background:transparent;
+  color:#aeb8c3;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.bottom-nav .nav-item span{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:31px;
+  height:29px;
+  font-size:20px;
+  line-height:1;
+  color:currentColor;
+  transform:scale(1);
+  transition:transform .22s ease,color .22s ease;
+}
+.bottom-nav .nav-item small{
+  position:relative;
+  z-index:1;
+  font-size:10px;
+  line-height:1.15;
+  color:currentColor;
+  letter-spacing:.1px;
+  transition:color .22s ease;
+}
+/* La lente crea volumen y refracción simulada en la superficie bajo el icono. */
+.bottom-nav .nav-item::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:1px;
+  left:50%;
+  width:43px;
+  height:38px;
+  border-radius:50%;
+  opacity:0;
+  transform:translateX(-50%) scale(.72);
+  background:
+    radial-gradient(ellipse at 34% 25%,rgba(255,255,255,.19),transparent 33%),
+    radial-gradient(ellipse at 50% 58%,rgba(207,218,229,.12),rgba(93,107,122,.075) 48%,rgba(5,8,12,.08) 72%,transparent 78%);
+  border:1px solid rgba(203,215,228,.15);
+  box-shadow:inset 0 2px 5px rgba(255,255,255,.10),inset 0 -5px 9px rgba(0,0,0,.35),0 0 12px rgba(196,211,226,.08);
+  filter:blur(.1px);
+  transition:opacity .22s ease,transform .22s ease;
+  pointer-events:none;
+}
+.bottom-nav .nav-item.active{
+  color:#f2cf59;
+  border-color:rgba(221,190,105,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008));
+}
+.bottom-nav .nav-item.active::before{
+  opacity:1;
+  transform:translateX(-50%) scale(1);
+}
+.bottom-nav .nav-item.active span{
+  color:#f3d36b;
+  transform:scale(1.10);
+  filter:drop-shadow(0 0 5px rgba(242,202,83,.24));
+}
+.bottom-nav .nav-item.active small{color:#e8c95d}
+.bottom-nav .nav-item.active::after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  bottom:3px;
+  left:34%;
+  right:34%;
+  height:2px;
+  border-radius:99px;
+  background:linear-gradient(90deg,rgba(255,255,255,.55),#f4d45c,rgba(255,255,255,.55));
+  box-shadow:0 0 7px rgba(246,211,82,.56),0 0 13px rgba(246,211,82,.20);
+  pointer-events:none;
+}
+@media(prefers-reduced-motion:reduce){
+  .bottom-nav .nav-item span,.bottom-nav .nav-item small,.bottom-nav .nav-item::before{transition:none}
+}
+@media(min-width:600px){
+  .bottom-nav{bottom:18px}
+}
