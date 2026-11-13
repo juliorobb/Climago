@@ -46,7 +46,7 @@ button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-
 <div class="controls"><label for="level">Dificultad</label><select id="level"><option value="16">Fácil · 16 piezas</option><option value="36">Intermedio · 36 piezas</option><option value="64">Avanzado · 64 piezas</option></select><label for="mode">Modo</label><select id="mode"><option value="free">Libre</option><option value="timed">Contrarreloj</option></select><button id="restart">Reiniciar</button></div>
 <div class="stats"><span id="timeLabel">Tiempo <b id="clock">00:00</b></span><span>Movimientos <b id="moves">0</b></span><span>Colocadas <b id="progress">0/16</b></span></div><p id="objective" class="hint" style="margin:0 0 9px">Modo libre · sin límite de tiempo</p>
 <div class="board-shell"><canvas id="board" width="960" height="540" aria-label="Tablero del rompecabezas"></canvas></div>
-<p class="hint">Arrastrá cada pieza hasta su lugar. Acercala a la posición correcta para que encastre.</p>
+<p class="hint">Arrastrá una pieza desde la bandeja y soltala cerca del centro de su lugar en el tablero. El encastre ahora admite un margen más cómodo para el dedo.</p>
 <div class="tray-title"><b>Piezas disponibles</b><span id="remaining">16 por colocar</span></div>
 <div id="tray" aria-label="Bandeja ordenada de piezas"></div>
 <div class="actions"><button id="showPhoto">Ver imagen completa</button><button id="newGame" class="primary">Nuevo desafío</button></div>
@@ -92,7 +92,7 @@ function drawPhotoPiece(ctx,p,x,y,scale,outline=true){
 }
 function drawBoard(){
  bctx.clearRect(0,0,W,H);bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);
- bctx.save();bctx.globalAlpha=.16;drawCover(bctx,0,0,W,H);bctx.restore();
+ bctx.save();bctx.globalAlpha=.34;drawCover(bctx,0,0,W,H);bctx.restore();
  for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true);else{bctx.save();bctx.translate(p.c*pw,p.r*ph);bctx.strokeStyle='#c6e1ed55';bctx.lineWidth=1.4;bctx.stroke(p.path);bctx.restore()}}
  if(drag&&drag.over)drawPhotoPiece(bctx,drag.p,drag.x-pw/2,drag.y-ph/2,1,true);
 }
@@ -107,7 +107,7 @@ function startDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if(!started
  drag={p,el,pointer:e.pointerId,x:0,y:0,over:false};el.classList.add('dragging');window.addEventListener('pointermove',moveDrag,{passive:false});window.addEventListener('pointerup',endDrag,{once:true});window.addEventListener('pointercancel',cancelDrag,{once:true});}
 function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const pt=boardPoint(e);drag.x=pt.x;drag.y=pt.y;drag.over=pt.inside;drawBoard()}
 function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPoint(e),p=drag.p;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointercancel',cancelDrag);drag.el.classList.remove('dragging');
- const tx=(p.c+.5)*pw,ty=(p.r+.5)*ph,dist=Math.hypot(pt.x-tx,pt.y-ty),limit=Math.min(pw,ph)*.22;
+ const tx=(p.c+.5)*pw,ty=(p.r+.5)*ph,dist=Math.hypot(pt.x-tx,pt.y-ty),limit=Math.min(pw,ph)*.48;
  moves++;$('moves').textContent=moves;
  if(pt.inside&&dist<=limit){p.done=true;placed++;drag.el.remove()}
  drag=null;updateProgress();drawBoard();if(placed===pieces.length)complete();
