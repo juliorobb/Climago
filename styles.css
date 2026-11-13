@@ -1785,12 +1785,19 @@
   height:60px!important;
   border-radius:17px!important;
 }
-\n\n/* Lluvia entre icono y temperatura, sin desplazar la descripción ni la flecha. */
+
+
+/* Pronóstico horario: lluvia entre icono y temperatura; descripción legible al costado. */
 #page-forecast .forecast-hour-main{
-  grid-template-columns:42px 30px 44px 42px minmax(0,1fr) 14px;
+  grid-template-columns:42px 30px 46px 42px minmax(76px,1fr) 14px;
   gap:4px;
 }
-#page-forecast .forecast-hour-main>small{min-width:0;overflow-wrap:anywhere}
+#page-forecast .forecast-hour-main>small{
+  min-width:0;
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:normal;
+}
 #page-forecast .forecast-rain-indicator{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;min-width:0;color:#087d9b;text-align:center;line-height:1.05;
@@ -1799,7 +1806,10 @@
 #page-forecast .forecast-rain-indicator small{font-size:9px;font-weight:700;color:#4d8299;white-space:nowrap}
 #page-forecast .forecast-rain-indicator.is-empty{visibility:hidden}
 @media(max-width:380px){
-  #page-forecast .forecast-hour-main{grid-template-columns:38px 27px 40px 38px minmax(0,1fr) 12px;gap:3px}
+  #page-forecast .forecast-hour-main{
+    grid-template-columns:38px 27px 42px 38px minmax(76px,1fr) 12px;
+    gap:3px;
+  }
   #page-forecast .forecast-rain-indicator b{font-size:11px}
   #page-forecast .forecast-rain-indicator small{font-size:8px}
 }
