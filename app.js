@@ -185,10 +185,11 @@ function setWeatherVisual(code,temperature,wind,weatherTime,isDay){
   const localHour=Number(String(weatherTime||"").slice(11,13)),hour=Number.isFinite(localHour)&&String(weatherTime||"").length>=13?localHour:new Date().getHours();
   const hasDayFlag=isDay!==undefined&&isDay!==null&&Number.isFinite(Number(isDay));
   const phase=(hasDayFlag?Number(isDay)===1:(hour>=7&&hour<19))?"day":"night";
-  const c=Number(code),storm=[95,96,99].includes(c),snow=[71,73,75,77,85,86].includes(c),rain=[51,53,55,61,63,65,66,67,80,81,82].includes(c);
-  const sky=storm?"storm":snow?"snow":rain?"rain":[3,45,48].includes(c)?"cloudy":c===2?"partly":"clear";
+  const c=Number(code),storm=[95,96,99].includes(c),intenseStorm=[96,99].includes(c),snow=[71,73,75,77,85,86].includes(c),rain=[51,53,55,61,63,65,66,67,80,81,82].includes(c);
+  const temp=Number(temperature),windSpeed=Number(wind);
+  let sky=storm?(intenseStorm?"storm-intense":"storm"):snow?"cold":rain?"rain":Number.isFinite(windSpeed)&&windSpeed>=35?"wind":Number.isFinite(temp)&&temp<=3?"cold":Number.isFinite(temp)&&temp>=30?"heat":[3,45,48].includes(c)?"cloudy":c===2?"partly":"clear";
   hero.dataset.phase=phase;hero.dataset.sky=sky;
-  if(art){art.dataset.phase=phase;art.dataset.weather=sky;art.setAttribute("aria-label",({clear:phase==="day"?"Cielo despejado":"Noche despejada",partly:phase==="day"?"Día parcialmente nublado":"Noche parcialmente nublada",cloudy:phase==="day"?"Día nublado":"Noche nublada",rain:phase==="day"?"Lluvia de día":"Lluvia de noche",storm:"Tormenta eléctrica",snow:"Nieve"})[sky]);}
+  if(art){art.dataset.phase=phase;art.dataset.weather=sky;art.setAttribute("aria-label",({clear:phase==="day"?"Cielo despejado":"Noche despejada",partly:phase==="day"?"Día parcialmente nublado":"Noche parcialmente nublada",cloudy:phase==="day"?"Día nublado":"Noche nublada",rain:phase==="day"?"Lluvia de día":"Lluvia de noche",storm:"Tormenta eléctrica", "storm-intense":"Tormenta intensa",cold:"Helada o frío",heat:"Ola de calor",wind:"Viento fuerte"})[sky]);}
 }
 
 let weatherRequestId=0;

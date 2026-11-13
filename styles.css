@@ -1813,3 +1813,25 @@
   #page-forecast .forecast-rain-indicator b{font-size:11px}
   #page-forecast .forecast-rain-indicator small{font-size:8px}
 }
+
+
+/* Ilustraciones meteorológicas individuales ClimaGo: integradas sin recuadro. */
+#page-home .home-weather-art{
+  background-color:transparent!important;
+  background-size:contain!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.22));
+}
+#page-home .home-weather-art[data-weather="clear"][data-phase="day"]{background-image:url("assets/01-despejado-dia.png")!important}
+#page-home .home-weather-art[data-weather="partly"][data-phase="day"]{background-image:url("assets/02-parcialmente-nublado-dia.png")!important}
+#page-home .home-weather-art[data-weather="cloudy"][data-phase="day"]{background-image:url("assets/03-nublado-dia.png")!important}
+#page-home .home-weather-art[data-weather="rain"]{background-image:url("assets/04-lluvia.png")!important}
+#page-home .home-weather-art[data-weather="storm"]{background-image:url("assets/05-tormenta-electrica.png")!important}
+#page-home .home-weather-art[data-weather="storm-intense"]{background-image:url("assets/06-tormenta-intensa.png")!important}
+#page-home .home-weather-art[data-weather="clear"][data-phase="night"]{background-image:url("assets/07-noche-despejada.png")!important}
+#page-home .home-weather-art[data-weather="partly"][data-phase="night"]{background-image:url("assets/08-noche-parcialmente-nublada.png")!important}
+#page-home .home-weather-art[data-weather="cloudy"][data-phase="night"]{background-image:url("assets/09-noche-nublada.png")!important}
+#page-home .home-weather-art[data-weather="cold"]{background-image:url("assets/10-helada-frio.png")!important}
+#page-home .home-weather-art[data-weather="heat"]{background-image:url("assets/11-ola-de-calor.png")!important}
+#page-home .home-weather-art[data-weather="wind"]{background-image:url("assets/12-viento-fuerte.png")!important}
