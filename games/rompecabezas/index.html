@@ -106,8 +106,7 @@ function makeTile(p){
  el.append(can);el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
 }
 function boardPoint(e){const r=board.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height,inside:e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}}
-function startDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if(!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
- if($('mode').value==='timed'&&!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
+function startDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if($('mode').value==='timed'&&!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
  drag={p,el,pointer:e.pointerId,x:0,y:0,over:false};el.classList.add('dragging');window.addEventListener('pointermove',moveDrag,{passive:false});window.addEventListener('pointerup',endDrag,{once:true});window.addEventListener('pointercancel',cancelDrag,{once:true});}
 function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const pt=boardPoint(e);drag.x=pt.x;drag.y=pt.y;drag.over=pt.inside;drawBoard()}
 function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPoint(e),p=drag.p;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointercancel',cancelDrag);drag.el.classList.remove('dragging');
