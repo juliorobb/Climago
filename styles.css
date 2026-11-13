@@ -1785,4 +1785,7 @@
   height:60px!important;
   border-radius:17px!important;
 }
-\n\n/* Indicador horario de lluvia visible sin desplegar el detalle. Solo aparece desde 30% o con precipitación prevista. */\n#page-forecast .forecast-hour-main{grid-template-columns:44px 28px 58px 42px minmax(0,1fr) 14px;gap:7px}\n#page-forecast .forecast-rain-indicator{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;color:#167da5;text-align:center;line-height:1.05}\n#page-forecast .forecast-rain-indicator b{font-size:11px;font-weight:800;color:#087d9b}\n#page-forecast .forecast-rain-indicator small{font-size:9px;font-weight:700;color:#4d8299;white-space:nowrap}\n@media(max-width:380px){#page-forecast .forecast-hour-main{grid-template-columns:39px 25px 52px 38px minmax(0,1fr) 12px;gap:5px}#page-forecast .forecast-rain-indicator b{font-size:10px}#page-forecast .forecast-rain-indicator small{font-size:8px}}\n
+\n\n/* Indicador de lluvia integrado en la descripción: conserva la grilla original de cinco columnas. */
+#page-forecast .forecast-hour-main{grid-template-columns:48px 34px 48px minmax(0,1fr) 16px;gap:8px}
+#page-forecast .forecast-rain-inline{display:inline;color:#087d9b;font-size:10px;font-weight:700;white-space:normal}
+@media(max-width:380px){#page-forecast .forecast-hour-main{grid-template-columns:42px 29px 42px minmax(0,1fr) 14px;gap:6px}#page-forecast .forecast-rain-inline{font-size:9px}}
