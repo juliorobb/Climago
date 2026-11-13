@@ -86,13 +86,13 @@ function makePiece(c,r){const p={id:r*cols+c,c,r,done:false,edges:edgesFor(c,r)}
 function drawCover(ctx,x,y,w,h){const sw=source.naturalWidth,sh=source.naturalHeight,target=w/h,ratio=sw/sh;let sx=0,sy=0,cw=sw,ch=sh;if(ratio>target){cw=sh*target;sx=(sw-cw)/2}else{ch=sw/target;sy=(sh-ch)/2}ctx.drawImage(source,sx,sy,cw,ch,x,y,w,h)}
 function drawPhotoPiece(ctx,p,x,y,scale,outline=true){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.save();ctx.clip(p.path);
- drawCover(ctx,-p.c*pw,-p.r*ph,W,H);ctx.restore();
+ ctx.filter='brightness(1.18) contrast(1.06)';drawCover(ctx,-p.c*pw,-p.r*ph,W,H);ctx.filter='none';ctx.restore();
  if(outline){ctx.strokeStyle='#effaff';ctx.lineWidth=2.1;ctx.stroke(p.path);ctx.strokeStyle='#10283a88';ctx.lineWidth=4;ctx.stroke(p.path)}
  ctx.restore();
 }
 function drawBoard(){
  bctx.clearRect(0,0,W,H);bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);
- bctx.save();bctx.globalAlpha=.34;drawCover(bctx,0,0,W,H);bctx.restore();
+ bctx.save();bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);bctx.restore();
  for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true);else{bctx.save();bctx.translate(p.c*pw,p.r*ph);bctx.strokeStyle='#c6e1ed55';bctx.lineWidth=1.4;bctx.stroke(p.path);bctx.restore()}}
  if(drag&&drag.over)drawPhotoPiece(bctx,drag.p,drag.x-pw/2,drag.y-ph/2,1,true);
 }
