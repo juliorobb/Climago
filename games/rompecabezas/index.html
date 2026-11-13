@@ -24,7 +24,7 @@ button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-
 .hint{text-align:center;color:#b1c4d1;font-size:12px;line-height:1.45;margin:10px 3px 3px}
 .tray-title{display:flex;align-items:center;justify-content:space-between;margin:16px 3px 8px}.tray-title b{font-size:14px}.tray-title span{font-size:11px;color:var(--muted)}
 #tray{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:9px;border:1px solid #29475e;border-radius:16px;background:#071b2b;min-height:100px}
-.piece{position:relative;min-width:0;aspect-ratio:1.25;border:1px solid #45657d;border-radius:10px;background:#18364e;overflow:hidden;touch-action:none;user-select:none}
+.piece{position:relative;min-width:0;aspect-ratio:1.25;border:1px solid #45657d;border-radius:10px;background:#18364e;overflow:hidden;touch-action:none;user-select:none;box-shadow:0 3px 8px #0004}
 .piece canvas{display:block;width:100%;height:100%;touch-action:none}.piece:active{border-color:var(--cyan)}
 .piece.dragging{opacity:.35}
 .actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;font-size:12px}
@@ -49,7 +49,7 @@ button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-
 <p class="hint">Arrastrá una pieza desde la bandeja y soltala cerca del centro de su lugar en el tablero. El encastre ahora admite un margen más cómodo para el dedo.</p>
 <div class="tray-title"><b>Piezas disponibles</b><span id="remaining">16 por colocar</span></div>
 <div id="tray" aria-label="Bandeja ordenada de piezas"></div>
-<div class="actions"><button id="showPhoto">Ver imagen completa</button><button id="newGame" class="primary">Nuevo desafío</button></div>
+<div class="actions"><button id="showPhoto">◉ Ver referencia</button><button id="newGame" class="primary">Nuevo desafío</button></div>
 <div class="note">Modo libre: armá a tu ritmo. El tiempo y los movimientos se registran para que puedas intentar mejorar tu propio resultado.</div>
 <div id="win"><strong>¡Desafío completado!</strong><p id="result"></p><button id="again" class="primary">Volver a jugar</button></div>
 </section>
@@ -92,18 +92,22 @@ function drawPhotoPiece(ctx,p,x,y,scale,outline=true){
 }
 function drawBoard(){
  bctx.clearRect(0,0,W,H);bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);
- bctx.save();bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);bctx.restore();
- for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true);else{bctx.save();bctx.translate(p.c*pw,p.r*ph);bctx.strokeStyle='#c6e1ed55';bctx.lineWidth=1.4;bctx.stroke(p.path);bctx.restore()}}
+ for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true)}
  if(drag&&drag.over)drawPhotoPiece(bctx,drag.p,drag.x-pw/2,drag.y-ph/2,1,true);
 }
 function makeTile(p){
  const el=document.createElement('div');el.className='piece';el.dataset.id=p.id;
- const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d'),scale=Math.min(300/(pw+tab*2),180/(ph+tab*2));
- drawPhotoPiece(c,p,(300-pw*scale)/2,(180-ph*scale)/2,scale,true);el.append(can);
- el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
+ const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d');
+ const scale=Math.min(300/pw,180/ph),ox=(300-W*scale)/2,oy=(180-H*scale)/2;
+ c.fillStyle='#18364e';c.fillRect(0,0,300,180);
+ c.save();c.beginPath();c.rect(0,0,300,180);c.clip();
+ drawCover(c,ox-p.c*pw*scale,oy-p.r*ph*scale,W*scale,H*scale);
+ c.restore();c.strokeStyle='#effaff99';c.lineWidth=3;c.strokeRect(1.5,1.5,297,177);
+ el.append(can);el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
 }
 function boardPoint(e){const r=board.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height,inside:e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}}
 function startDrag(e,p,el){if(p.done||drag)return;e.preventDefault();if(!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
+ if($('mode').value==='timed'&&!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
  drag={p,el,pointer:e.pointerId,x:0,y:0,over:false};el.classList.add('dragging');window.addEventListener('pointermove',moveDrag,{passive:false});window.addEventListener('pointerup',endDrag,{once:true});window.addEventListener('pointercancel',cancelDrag,{once:true});}
 function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const pt=boardPoint(e);drag.x=pt.x;drag.y=pt.y;drag.over=pt.inside;drawBoard()}
 function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPoint(e),p=drag.p;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointercancel',cancelDrag);drag.el.classList.remove('dragging');
@@ -114,11 +118,11 @@ function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPo
 }
 function cancelDrag(){if(!drag)return;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointerup',endDrag);drag.el.classList.remove('dragging');drag=null;drawBoard()}
 function updateProgress(){$('progress').textContent=placed+'/'+pieces.length;$('remaining').textContent=(pieces.length-placed)+' por colocar'}
-function updateClock(){if(!started)return;elapsed=Math.floor((Date.now()-startedAt)/1000);const timed=$('mode').value==='timed',target=targetFor(Number($('level').value));if(timed){const left=Math.max(0,target-elapsed);$('clock').textContent=left>0?fmt(left):'00:00 +'+fmt(elapsed-target);if(left===0&&!timeExpired){timeExpired=true;$('objective').textContent='Tiempo superado. Podés terminar el armado y ver cuánto te excediste.'}}else $('clock').textContent=fmt(elapsed)}
+function updateClock(){if(!started||$('mode').value!=='timed')return;elapsed=Math.floor((Date.now()-startedAt)/1000);const timed=$('mode').value==='timed',target=targetFor(Number($('level').value));if(timed){const left=Math.max(0,target-elapsed);$('clock').textContent=left>0?fmt(left):'00:00 +'+fmt(elapsed-target);if(left===0&&!timeExpired){timeExpired=true;$('objective').textContent='Tiempo superado. Podés terminar el armado y ver cuánto te excediste.'}}else $('clock').textContent=fmt(elapsed)}
 function targetFor(n){return n===16?180:n===36?480:900}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function complete(){clearInterval(timer);timer=null;updateClock();const timed=$('mode').value==='timed',target=targetFor(Number($('level').value)),success=!timed||elapsed<=target;const key='climago-jigsaw-best-'+$('level').value+'-'+$('mode').value;let best=null;try{best=Number(localStorage.getItem(key))||null;if(success&&(!best||elapsed<best)){localStorage.setItem(key,String(elapsed));best=elapsed}}catch(e){}const medal=success?(timed?'🏅 Objetivo cumplido':'⭐ Partida completada'):'⏱️ Fuera del tiempo objetivo';$('result').textContent=medal+' · '+(timed?'Tiempo empleado: '+fmt(elapsed):'Tiempo: '+fmt(elapsed))+' · Movimientos: '+moves+(best?' · Tu mejor marca: '+fmt(best):'');$('win').classList.add('show')}
-function reset(){clearInterval(timer);timer=null;started=false;startedAt=0;elapsed=0;timeExpired=false;placed=0;moves=0;drag=null;edgeMapReset();const count=Number($('level').value);cols=rows=Math.sqrt(count);pw=W/cols;ph=H/rows;tab=Math.min(pw,ph)*.19;pieces=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)pieces.push(makePiece(c,r));pieces.sort(()=>Math.random()-.5);tray.innerHTML='';pieces.forEach(p=>tray.append(makeTile(p)));$('clock').textContent=$('mode').value==='timed'?fmt(targetFor(count)):'00:00';$('timeLabel').firstChild.textContent=$('mode').value==='timed'?'Restante ':'Tiempo ';$('objective').textContent=$('mode').value==='timed'?'Contrarreloj · objetivo: '+fmt(targetFor(count))+' · tiempos orientativos para esta primera prueba':'Modo libre · sin límite de tiempo';$('moves').textContent='0';$('win').classList.remove('show');updateProgress();drawBoard()}
+function complete(){clearInterval(timer);timer=null;updateClock();const timed=$('mode').value==='timed',target=targetFor(Number($('level').value)),success=!timed||elapsed<=target;const key='climago-jigsaw-best-'+$('level').value+'-'+$('mode').value;let best=null;try{if(timed){best=Number(localStorage.getItem(key))||null;if(success&&(!best||elapsed<best)){localStorage.setItem(key,String(elapsed));best=elapsed}}}catch(e){}const medal=success?(timed?'🏅 Objetivo cumplido':'⭐ Partida completada'):'⏱️ Tiempo objetivo superado';$('result').textContent=medal+' · '+(timed?'Tiempo empleado: '+fmt(elapsed)+' · Movimientos: '+moves+(best?' · Mejor marca: '+fmt(best):''):'Modo libre · Movimientos: '+moves);$('win').classList.add('show')}
+function reset(){clearInterval(timer);timer=null;started=false;startedAt=0;elapsed=0;timeExpired=false;placed=0;moves=0;drag=null;edgeMapReset();const count=Number($('level').value);cols=rows=Math.sqrt(count);pw=W/cols;ph=H/rows;tab=Math.min(pw,ph)*.19;pieces=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)pieces.push(makePiece(c,r));pieces.sort(()=>Math.random()-.5);tray.innerHTML='';pieces.forEach(p=>tray.append(makeTile(p)));$('clock').textContent=$('mode').value==='timed'?fmt(targetFor(count)):'—';$('timeLabel').firstChild.textContent=$('mode').value==='timed'?'Restante ':'Tiempo ';$('objective').textContent=$('mode').value==='timed'?'Contrarreloj · el reloj comienza al tocar la primera pieza · objetivo: '+fmt(targetFor(count)):'Modo libre · sin cronómetro ni límite de tiempo';$('moves').textContent='0';$('win').classList.remove('show');updateProgress();drawBoard()}
 function edgeMapReset(){for(const k of Object.keys(edgeMap))delete edgeMap[k]}
 $('restart').addEventListener('click',reset);$('newGame').addEventListener('click',reset);$('again').addEventListener('click',reset);$('level').addEventListener('change',reset);$('mode').addEventListener('change',reset);
 $('showPhoto').addEventListener('click',()=>{$('previewImage').src=source.src;$('preview').classList.add('open')});
