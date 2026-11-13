@@ -182,7 +182,7 @@ function recommendationFor(current,hourly,currentTime,uv,wind){
   const currentTemp=Number(current?.temperature_2m),valid=future.filter(x=>Number.isFinite(x.temp)),min=valid.length?Math.min(...valid.map(x=>x.temp)):currentTemp,max=valid.length?Math.max(...valid.map(x=>x.temp)):currentTemp;
   if(Number.isFinite(currentTemp)&&currentTemp-min>=3){return {title:"Va a refrescar",description:`En las próximas horas la temperatura puede bajar de ${Math.round(currentTemp)} °C a unos ${Math.round(min)} °C. Si salís, llevá un abrigo.`,iconClass:"thermometer"};}
   if(Number.isFinite(currentTemp)&&max-currentTemp>=3){return {title:"Sube la temperatura",description:`En las próximas horas puede llegar a unos ${Math.round(max)} °C. Si aumenta el calor, hidratate y buscá sombra.`,iconClass:"thermometer"};}
-  return {title:"Sin cambios importantes",description:"No se esperan lluvias, tormentas, ráfagas fuertes ni cambios marcados de temperatura durante las próximas 3 horas.",icon:"🌤️"};
+  return {title:"Sin señales de tormenta en el pronóstico",description:"El pronóstico inmediato no marca lluvias ni tormentas. Si el cielo se oscurece o cambia el viento, mantenete atento: el tiempo puede cambiar rápido.",icon:"🌤️"};
 }
 function getSelectedCoordinates(){
   try{const list=readLocations(),id=primaryId(list),place=list.find(x=>x.id===id);if(place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon))return {lat:place.lat,lon:place.lon,name:place.name};}catch{}
