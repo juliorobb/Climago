@@ -1785,10 +1785,21 @@
   height:60px!important;
   border-radius:17px!important;
 }
-\n\n/* Lluvia en columna propia entre el icono y la temperatura; descripción y flecha conservan su lugar. */
-#page-forecast .forecast-hour-main{grid-template-columns:42px 30px 58px 42px minmax(0,1fr) 14px;gap:6px}
-#page-forecast .forecast-rain-indicator{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;color:#087d9b;text-align:center;line-height:1.05}
-#page-forecast .forecast-rain-indicator b{font-size:13px;font-weight:800;color:#087d9b;white-space:nowrap}
-#page-forecast .forecast-rain-indicator small{font-size:10px;font-weight:700;color:#4d8299;white-space:nowrap}
+\n\n/* Lluvia entre icono y temperatura, sin desplazar la descripción ni la flecha. */
+#page-forecast .forecast-hour-main{
+  grid-template-columns:42px 30px 44px 42px minmax(0,1fr) 14px;
+  gap:4px;
+}
+#page-forecast .forecast-hour-main>small{min-width:0;overflow-wrap:anywhere}
+#page-forecast .forecast-rain-indicator{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;min-width:0;color:#087d9b;text-align:center;line-height:1.05;
+}
+#page-forecast .forecast-rain-indicator b{font-size:12px;font-weight:800;color:#087d9b;white-space:nowrap}
+#page-forecast .forecast-rain-indicator small{font-size:9px;font-weight:700;color:#4d8299;white-space:nowrap}
 #page-forecast .forecast-rain-indicator.is-empty{visibility:hidden}
-@media(max-width:380px){#page-forecast .forecast-hour-main{grid-template-columns:39px 27px 52px 39px minmax(0,1fr) 12px;gap:5px}#page-forecast .forecast-rain-indicator b{font-size:12px}#page-forecast .forecast-rain-indicator small{font-size:9px}}
+@media(max-width:380px){
+  #page-forecast .forecast-hour-main{grid-template-columns:38px 27px 40px 38px minmax(0,1fr) 12px;gap:3px}
+  #page-forecast .forecast-rain-indicator b{font-size:11px}
+  #page-forecast .forecast-rain-indicator small{font-size:8px}
+}
