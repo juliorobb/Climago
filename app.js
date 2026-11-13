@@ -152,13 +152,13 @@ const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublad
 function weatherEmoji(code,isDay=1){
   if(code==null||!Number.isFinite(Number(code)))return "—";
   code=Number(code);const night=Number(isDay)===0;
-  if([0,1].includes(code))return night?'<span class="weather-moon">🌙</span>':"☀️";
-  if(code===2)return night?'<span class="weather-composite weather-night-partly"><span class="weather-moon">🌙</span><span class="weather-cloud">☁️</span></span>':"🌤️";
+  if([0,1].includes(code))return night?'<span class="moon-weather-icon">🌙</span>':"☀️";
+  if(code===2)return night?'<span class="weather-composite weather-night-partly"><span class="moon-weather-icon">🌙</span><span class="weather-cloud">☁️</span></span>':"🌤️";
   if([3,45,48].includes(code))return "☁️";
   if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return "🌧️";
   if([71,73,75,77,85,86].includes(code))return "❄️";
   if([95,96,99].includes(code))return "⛈️";
-  return night?'<span class="weather-moon">🌙</span>':"🌤️";
+  return night?'<span class="moon-weather-icon">🌙</span>':"🌤️";
 }
 function recommendationFor(current,hourly,currentTime,uv,wind){
   const rainCodes=[51,53,55,61,63,65,66,67,80,81,82,85,86],stormCodes=[95,96,99],times=hourly?.time||[];
@@ -363,7 +363,7 @@ function renderDaily(daily){
     const rainMm=rainAmountRaw,rainProbability=rain==null?null:Number(rain);
     const hasRainData=(rainProbability!==null&&Number.isFinite(rainProbability))||(rainMm!==null&&Number.isFinite(Number(rainMm)));
     const rainIndicator=hasRainData?`<span class="forecast-rain-indicator"><b>${rainProbability===null?"—":Math.round(rainProbability)+"%"}</b><small>${rainMm===null?"":Number(rainMm).toFixed(1)+" mm"}</small></span>`:`<span class="forecast-rain-indicator is-empty" aria-hidden="true"></span>`;
-    return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isDay)}</span>${rainIndicator}<strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
+    return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji((rainProbability!==null&&rainProbability>=50&&![95,96,99].includes(code)?61:code),isDay)}</span>${rainIndicator}<strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
   }).join("");
   host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
   strip.querySelector(".forecast-date.selected")?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
