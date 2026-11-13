@@ -349,7 +349,7 @@ function renderDaily(daily){
     const details=[
       detail("🧍‍♂️🌡️","Sensación térmica",forecastValue(val("apparent_temperature"))),
       detail("🧑‍🦱💧","Humedad",forecastValue(val("relative_humidity_2m"),"%")),
-      detail("🌧️","Lluvia próxima hora",`${rainValue} · ${rainAmountRaw==null?"—":Number(rainAmountRaw).toFixed(1)+" mm"`),
+      detail("🌧️","Lluvia próxima hora",`${rainValue} · ${rainAmountRaw==null?"—":Number(rainAmountRaw).toFixed(1)+" mm"}`),
       detail("🧭","Viento",`${windDirection(val("wind_direction_10m"))} · ${forecastValue(val("wind_speed_10m")," km/h")}`),
       detail("🌬️","Ráfagas",gust==null?"—":Math.round(gust)+" km/h"),
       detail("☀️","Índice UV",uv==null?"—":Number(uv).toFixed(1)),
