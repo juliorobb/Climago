@@ -342,14 +342,14 @@ function renderDaily(daily){
   const rows=hourly.time.slice(displayStart,stop).map((time,j)=>{
     const i=displayStart+j,hour=time.slice(11,16),val=key=>hourly[key]?.[i];
     const code=val("weather_code"),isDay=Number(val("is_day")??1);
-    const rain=val("precipitation_probability"),uv=val("uv_index"),gust=val("wind_gusts_10m"),pressure=val("surface_pressure");
+    const rainIndex=Math.min(i+1,hourly.time.length-1),rainProbabilityRaw=hourly.precipitation_probability?.[rainIndex],rainAmountRaw=hourly.precipitation?.[rainIndex],rain=rainProbabilityRaw,uv=val("uv_index"),gust=val("wind_gusts_10m"),pressure=val("surface_pressure");
     const summary=weatherText[code]||"Condiciones variables";
     const detail=(icon,label,value)=>`<span class="forecast-detail-item"><i>${icon}</i><span>${label}<b>${value}</b></span></span>`;
     const rainValue=rain==null?"—":Math.round(rain)+"%";
     const details=[
       detail("🧍‍♂️🌡️","Sensación térmica",forecastValue(val("apparent_temperature"))),
       detail("🧑‍🦱💧","Humedad",forecastValue(val("relative_humidity_2m"),"%")),
-      detail("🌧️","Lluvia",`${rainValue} · ${val("precipitation")==null?"—":Number(val("precipitation")).toFixed(1)+" mm"}`),
+      detail("🌧️","Lluvia próxima hora",`${rainValue} · ${rainAmountRaw==null?"—":Number(rainAmountRaw).toFixed(1)+" mm"`),
       detail("🧭","Viento",`${windDirection(val("wind_direction_10m"))} · ${forecastValue(val("wind_speed_10m")," km/h")}`),
       detail("🌬️","Ráfagas",gust==null?"—":Math.round(gust)+" km/h"),
       detail("☀️","Índice UV",uv==null?"—":Number(uv).toFixed(1)),
@@ -360,7 +360,7 @@ function renderDaily(daily){
       detail("◉","Presión",pressure==null?"—":Math.round(pressure)+" hPa")
     ].join("");
     const previousTime=hourly.time[i-1]||"";const sun=(sunrise&&time>=sunrise&&previousTime<sunrise?sunCard("Salida del sol",sunrise,"🌅"):"")+(sunset&&time>=sunset&&previousTime<sunset?sunCard("Puesta del sol",sunset,"🌇"):"");
-    const rainMm=val("precipitation"),rainProbability=rain==null?null:Number(rain);
+    const rainMm=rainAmountRaw,rainProbability=rain==null?null:Number(rain);
     const hasRainData=(rainProbability!==null&&Number.isFinite(rainProbability))||(rainMm!==null&&Number.isFinite(Number(rainMm)));
     const rainIndicator=hasRainData?`<span class="forecast-rain-indicator"><b>${rainProbability===null?"—":Math.round(rainProbability)+"%"}</b><small>${rainMm===null?"":Number(rainMm).toFixed(1)+" mm"}</small></span>`:`<span class="forecast-rain-indicator is-empty" aria-hidden="true"></span>`;
     return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isDay)}</span>${rainIndicator}<strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
