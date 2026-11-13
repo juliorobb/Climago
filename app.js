@@ -148,8 +148,18 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.
 // Datos meteorológicos reales: Open-Meteo. Si no hay conexión, la app conserva una indicación clara.
 const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
 let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
-const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
-function weatherEmoji(code,isDay=1){if(code==null||!Number.isFinite(Number(code)))return "—";code=Number(code);const night=Number(isDay)===0;const moon='<span class="moon-weather-icon">🌙</span>';if([0,1].includes(code))return night?moon:"☀️";if([2].includes(code))return night?`☁️${moon}`:"🌤️";if([3,45,48].includes(code))return "☁️";if([51,53,55,61,63,65,80,81,82].includes(code))return "🌧️";if([71,73,75].includes(code))return "❄️";if([95,96,99].includes(code))return "⛈️";return night?moon:"🌤️";}
+const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",56:"Llovizna engelante",57:"Llovizna engelante intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",66:"Lluvia engelante",67:"Lluvia engelante intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",77:"Granulado de nieve",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",85:"Chubascos de nieve",86:"Chubascos de nieve intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
+function weatherEmoji(code,isDay=1){
+  if(code==null||!Number.isFinite(Number(code)))return "—";
+  code=Number(code);const night=Number(isDay)===0;
+  if([0,1].includes(code))return night?'<span class="weather-moon">🌙</span>':"☀️";
+  if(code===2)return night?'<span class="weather-composite weather-night-partly"><span class="weather-moon">🌙</span><span class="weather-cloud">☁️</span></span>':"🌤️";
+  if([3,45,48].includes(code))return "☁️";
+  if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return "🌧️";
+  if([71,73,75,77,85,86].includes(code))return "❄️";
+  if([95,96,99].includes(code))return "⛈️";
+  return night?'<span class="weather-moon">🌙</span>':"🌤️";
+}
 function recommendationFor(current,hourly,currentTime,uv,wind){
   const rainCodes=[51,53,55,61,63,65,66,67,80,81,82,85,86],stormCodes=[95,96,99],times=hourly?.time||[];
   const codes=hourly?.weather_code||[],temps=hourly?.temperature_2m||[],rain=hourly?.precipitation_probability||[],winds=hourly?.wind_speed_10m||[],gusts=hourly?.wind_gusts_10m||[],daylight=hourly?.is_day||[];
@@ -350,8 +360,9 @@ function renderDaily(daily){
       detail("◉","Presión",pressure==null?"—":Math.round(pressure)+" hPa")
     ].join("");
     const previousTime=hourly.time[i-1]||"";const sun=(sunrise&&time>=sunrise&&previousTime<sunrise?sunCard("Salida del sol",sunrise,"🌅"):"")+(sunset&&time>=sunset&&previousTime<sunset?sunCard("Puesta del sol",sunset,"🌇"):"");
-    const rainMm=val("precipitation"),rainProbability=rain==null?null:Number(rain),hasRelevantRain=(rainProbability!==null&&Number.isFinite(rainProbability)&&rainProbability>=30)||(rainMm!==null&&Number(rainMm)>0);
-    const rainIndicator=hasRelevantRain?`<span class="forecast-rain-indicator"><b>${rainProbability===null?"—":Math.round(rainProbability)+"%"}</b><small>${rainMm===null?"":Number(rainMm).toFixed(1)+" mm"}</small></span>`:`<span class="forecast-rain-indicator is-empty" aria-hidden="true"></span>`;
+    const rainMm=val("precipitation"),rainProbability=rain==null?null:Number(rain);
+    const hasRainData=(rainProbability!==null&&Number.isFinite(rainProbability))||(rainMm!==null&&Number.isFinite(Number(rainMm)));
+    const rainIndicator=hasRainData?`<span class="forecast-rain-indicator"><b>${rainProbability===null?"—":Math.round(rainProbability)+"%"}</b><small>${rainMm===null?"":Number(rainMm).toFixed(1)+" mm"}</small></span>`:`<span class="forecast-rain-indicator is-empty" aria-hidden="true"></span>`;
     return `${sun}<details class="forecast-hour"><summary class="forecast-hour-main"><b>${hour}</b><span class="forecast-hour-icon ${isDay===0&&[0,1,2].includes(code)?"moon-icon":""}">${weatherEmoji(code,isDay)}</span>${rainIndicator}<strong>${forecastValue(val("temperature_2m"))}</strong><small>${summary} · Sens. ${forecastValue(val("apparent_temperature"))}</small><span class="forecast-hour-chevron">⌄</span></summary><div class="forecast-hour-details">${details}</div></details>`;
   }).join("");
   host.innerHTML=rows||'<p class="muted-note">No hay detalle horario disponible para este día.</p>';
