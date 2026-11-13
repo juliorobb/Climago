@@ -1835,3 +1835,16 @@
 #page-home .home-weather-art[data-weather="cold"]{background-image:url("assets/10-helada-frio.png")!important}
 #page-home .home-weather-art[data-weather="heat"]{background-image:url("assets/11-ola-de-calor.png")!important}
 #page-home .home-weather-art[data-weather="wind"]{background-image:url("assets/12-viento-fuerte.png")!important}
+
+
+/* Pronóstico horario: luna y nube superpuestas, no concatenadas. */
+#page-forecast .weather-composite{
+  position:relative;display:inline-block;width:1.55em;height:1.35em;vertical-align:middle;
+}
+#page-forecast .weather-composite .weather-moon{
+  position:absolute;right:0;top:-.08em;z-index:0;font-size:.95em;line-height:1;
+}
+#page-forecast .weather-composite .weather-cloud{
+  position:absolute;left:-.12em;bottom:-.08em;z-index:1;font-size:1em;line-height:1;
+}
+#page-forecast .forecast-hour-icon .weather-composite{font-size:25px}
