@@ -1841,7 +1841,7 @@
 #page-forecast .weather-composite{
   position:relative;display:inline-block;width:1.55em;height:1.35em;vertical-align:middle;
 }
-#page-forecast .weather-composite .weather-moon{
+#page-forecast .weather-composite .moon-weather-icon{
   position:absolute;right:0;top:-.08em;z-index:0;font-size:.95em;line-height:1;
 }
 #page-forecast .weather-composite .weather-cloud{
