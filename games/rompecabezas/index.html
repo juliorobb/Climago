@@ -98,11 +98,9 @@ function drawBoard(){
 function makeTile(p){
  const el=document.createElement('div');el.className='piece';el.dataset.id=p.id;
  const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d');
- const scale=Math.min(300/pw,180/ph),ox=(300-W*scale)/2,oy=(180-H*scale)/2;
+ const scale=Math.min(300/pw,180/ph),ox=(300-pw*scale)/2,oy=(180-ph*scale)/2;
  c.fillStyle='#18364e';c.fillRect(0,0,300,180);
- c.save();c.beginPath();c.rect(0,0,300,180);c.clip();
- drawCover(c,ox-p.c*pw*scale,oy-p.r*ph*scale,W*scale,H*scale);
- c.restore();c.strokeStyle='#effaff99';c.lineWidth=3;c.strokeRect(1.5,1.5,297,177);
+ drawPhotoPiece(c,p,ox,oy,scale,true);
  el.append(can);el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
 }
 function boardPoint(e){const r=board.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height,inside:e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}}
