@@ -20,7 +20,7 @@ FEEDS = [
 ]
 INDEX_URL = ROOT + "/CAP/AR.php"
 OUTPUT = "data/smn-alerts.json"
-MAX_DOCUMENTS = 6
+REQUEST_DELAY_SECONDS = 1.25
 HISTORY_HOURS = 48
 USER_AGENT = "Mozilla/5.0 (compatible; ClimaGo/1.0; +https://github.com/juliorobb/Climago)"
 
@@ -237,24 +237,16 @@ def main():
 
     # Priorizar el índice vivo del SMN: el RSS general puede incluir rutas archivadas.
     unique_urls = list(dict.fromkeys(index_urls + rss_discovered))
-    previous_coverage = previous.get("coverage", {}) if isinstance(previous.get("coverage"), dict) else {}
-    try:
-        cursor = int(previous_coverage.get("nextCursor", 0) or 0)
-    except (TypeError, ValueError):
-        cursor = 0
-    start_index = (cursor % len(unique_urls)) if unique_urls else 0
-    selected_count = min(MAX_DOCUMENTS, len(unique_urls))
-    selected_urls = [
-        unique_urls[(start_index + offset) % len(unique_urls)]
-        for offset in range(selected_count)
-    ] if unique_urls else []
-    next_cursor = (start_index + selected_count) % len(unique_urls) if unique_urls else 0
-    truncated = len(unique_urls) > len(selected_urls)
+    # Leer el catálogo completo en cada ejecución. La pausa entre documentos
+    # limita la frecuencia de solicitudes sin dejar avisos fuera por rotación.
+    selected_urls = list(unique_urls)
+    next_cursor = 0
+    truncated = False
     parsed_records = []
     failures = []
     for index, url in enumerate(selected_urls):
         if index:
-            time.sleep(1.0)
+            time.sleep(REQUEST_DELAY_SECONDS)
         try:
             status, content_type, body = request_text(url, "application/cap+xml, application/xml, text/xml, */*")
             parsed_records.append(cap_record(body, url, stamp))
@@ -327,9 +319,8 @@ def main():
     all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
 
     downloaded = len(parsed_records)
-    # Se procesan hasta seis documentos por hora para no provocar bloqueos del SMN.
-    # La cobertura se considera completa cuando todo el catálogo vivo fue leído
-    # durante la ventana reciente, combinando las pasadas horarias.
+    # La cobertura solo es completa cuando todos los documentos del catálogo
+    # fueron descargados y procesados correctamente en esta ejecución.
     fresh_cutoff = stamp - timedelta(hours=14)
     fresh_urls = {item.get("url") for item in parsed_records if item.get("url")}
     for old in previous_alerts:
