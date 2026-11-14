@@ -1314,7 +1314,7 @@
   min-height:72px!important;
   padding:6px 8px!important;
   display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
   gap:5px!important;
   overflow:visible!important;
   background:linear-gradient(180deg,rgba(28,32,37,.82),rgba(7,9,12,.91))!important;
