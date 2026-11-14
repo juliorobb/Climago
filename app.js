@@ -11,7 +11,7 @@ document.addEventListener("click",e=>{
   const nav=e.target.closest("[data-page]");
   if(nav){e.preventDefault();showPage(nav.dataset.page);}
 });
-document.getElementById("location-shortcut").addEventListener("click",()=>showPage("alerts"));
+document.getElementById("location-shortcut").addEventListener("click",()=>showPage("radar"));
 document.addEventListener("click",event=>{
   const shortcut=event.target.closest("[data-myday-action]");if(!shortcut)return;
   const action=shortcut.dataset.mydayAction;
