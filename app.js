@@ -471,32 +471,68 @@ function createSmnAlertCard(alert){
   }
   const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean):[];
   const areaText=areas.length?areas.join(" · "):(alert.areaDesc||"Zona no especificada en los datos recibidos");
+  if(alert.relatedCount>1)card.append(smnElement("small","smn-alert-area",alert.relatedCount+" documentos CAP agrupados por fenómeno, nivel y zona informada."));
   card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
   const validity=[];
-  if(alert.effective)validity.push("Desde "+formatSmnDate(alert.effective));
-  else if(alert.onset)validity.push("Desde "+formatSmnDate(alert.onset));
-  if(alert.expires)validity.push("Hasta "+formatSmnDate(alert.expires));
+  const start=alert.periodStart||alert.effective||alert.onset;
+  const end=alert.periodEnd||alert.expires;
+  if(start)validity.push("Desde "+formatSmnDate(start));
+  if(end)validity.push("Hasta "+formatSmnDate(end));
   else validity.push("Vencimiento no informado");
   card.append(smnElement("small","smn-alert-validity","Vigencia: "+validity.join(" · ")));
   card.append(smnElement("small","smn-alert-source","Fuente: Servicio Meteorológico Nacional · CAP"));
   if(alert.lastSeen)card.append(smnElement("small","smn-alert-checked","Último chequeo: "+formatSmnDate(alert.lastSeen)));
-  const url=alert.url||alert.documentUrl;
-  if(url){
-    try{
-      const parsed=new URL(url);
-      if(parsed.protocol==="https:"&&parsed.hostname==="ssl.smn.gob.ar"){
-        const link=smnElement("a","","Documento CAP del SMN ↗");
-        link.href=parsed.href;link.target="_blank";link.rel="noopener noreferrer";
-        card.append(link);
-      }
-    }catch{}
+  const documents=Array.isArray(alert.relatedDocuments)&&alert.relatedDocuments.length?alert.relatedDocuments:[alert];
+  const safeDocuments=documents.filter(item=>{
+    try{const parsed=new URL(item.url||item.documentUrl);return parsed.protocol==="https:"&&parsed.hostname==="ssl.smn.gob.ar";}
+    catch{return false;}
+  });
+  if(safeDocuments.length===1){
+    const link=smnElement("a","","Documento CAP del SMN ↗");
+    link.href=safeDocuments[0].url||safeDocuments[0].documentUrl;link.target="_blank";link.rel="noopener noreferrer";
+    card.append(link);
+  }else if(safeDocuments.length>1){
+    const details=smnElement("details","smn-alert-documents");
+    details.append(smnElement("summary","","Ver "+safeDocuments.length+" documentos CAP del SMN"));
+    for(const item of safeDocuments){
+      const link=smnElement("a","","Abrir documento CAP · "+(item.sent?formatSmnDate(item.sent):"fecha no informada"));
+      link.href=item.url||item.documentUrl;link.target="_blank";link.rel="noopener noreferrer";
+      details.append(link);
+    }
+    card.append(details);
   }
   return card;
+}
+function groupSmnAlerts(alerts){
+  const groups=new Map();
+  for(const alert of alerts){
+    const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean).sort():[];
+    const key=JSON.stringify([
+      alert.event||alert.headline||alert.title||"Aviso meteorológico",
+      alert.severity||"",alert.urgency||"",alert.certainty||"",getSmnAlertState(alert),
+      alert.description||"",alert.instruction||"",areas
+    ]);
+    let group=groups.get(key);
+    if(!group){
+      group={...alert,areas,relatedDocuments:[],relatedCount:0,periodStart:"",periodEnd:""};
+      groups.set(key,group);
+    }
+    group.relatedDocuments.push(alert);
+    group.relatedCount++;
+    const start=alert.effective||alert.onset||"";
+    const end=alert.expires||"";
+    if(start&&(!group.periodStart||Date.parse(start)<Date.parse(group.periodStart)))group.periodStart=start;
+    if(end&&(!group.periodEnd||Date.parse(end)>Date.parse(group.periodEnd)))group.periodEnd=end;
+  }
+  return [...groups.values()].sort((a,b)=>{
+    const rank={Severe:0,Moderate:1,Minor:2,Unknown:3};
+    return (rank[a.severity]??4)-(rank[b.severity]??4)||String(a.event).localeCompare(String(b.event));
+  });
 }
 function renderSmnAlerts(host,alerts,emptyText){
   host.replaceChildren();
   if(!alerts.length){host.append(smnElement("div","empty-state",emptyText));return;}
-  for(const alert of alerts)host.append(createSmnAlertCard(alert));
+  for(const alert of groupSmnAlerts(alerts))host.append(createSmnAlertCard(alert));
 }
 let smnAlertsRequest=0;
 async function loadOfficialAlerts(){
@@ -530,9 +566,9 @@ async function loadOfficialAlerts(){
     renderSmnAlerts(historyHost,history,"No hay avisos vencidos o cancelados conservados en el historial.");
     const coverage=data.coverage||{};
     const complete=coverage.complete===true||data.status==="ok";
-    const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
-    const scheduledAlerts=alerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
-    const unconfirmedAlerts=alerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
+    const currentAlerts=groupSmnAlerts(alerts.filter(a=>getSmnAlertState(a)==="active")).length;
+    const scheduledAlerts=groupSmnAlerts(alerts.filter(a=>getSmnAlertState(a)==="scheduled")).length;
+    const unconfirmedAlerts=groupSmnAlerts(alerts.filter(a=>getSmnAlertState(a)==="unconfirmed")).length;
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
@@ -559,8 +595,8 @@ async function loadOfficialAlerts(){
     if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
     const activeCount=document.getElementById("smn-active-count");
     const historyCount=document.getElementById("smn-history-count");
-    if(activeCount)activeCount.textContent=String(active.length);
-    if(historyCount)historyCount.textContent=String(history.length);
+    if(activeCount)activeCount.textContent=String(groupSmnAlerts(active).length);
+    if(historyCount)historyCount.textContent=String(groupSmnAlerts(history).length);
   }catch(error){
     if(requestId!==smnAlertsRequest)return;
     if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
