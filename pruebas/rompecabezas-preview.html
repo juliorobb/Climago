@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a2b">
+<title>ClimaGo · Desafío · Rompecabezas</title>
+<style>
+:root{color-scheme:dark;--bg:#071827;--panel:#102b40;--line:#31516a;--muted:#a9bdcc;--cyan:#65d9e9;--gold:#e6c77b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#24445c 0,#0a2032 48%,#061522 100%);color:#f3f8fc;font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:700px;margin:auto;padding:18px 14px 34px}
+.top{display:flex;justify-content:space-between;align-items:center;color:#b9dce8;font-size:11px;letter-spacing:1.8px;font-weight:800}
+.top small{font-size:11px;letter-spacing:0;color:var(--muted);font-weight:500}
+h1{font-size:27px;margin:17px 0 3px;letter-spacing:-.5px}.sub{color:var(--muted);font-size:13px;margin:0 0 17px}
+.panel{background:linear-gradient(145deg,#102c42ed,#0b2032ed);border:1px solid #35536a;border-radius:20px;padding:12px;box-shadow:0 12px 28px #0003}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:11px}
+label{font-size:12px;color:var(--muted)}select,button{font:inherit;color:#f5f9fc;background:#18354c;border:1px solid #3c5b72;border-radius:12px;padding:9px 12px}
+button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.primary{background:linear-gradient(110deg,#087e9e,#176db3);border:0;font-weight:700}
+.stats{display:flex;justify-content:space-between;gap:8px;margin:3px 2px 10px;color:var(--muted);font-size:12px}.stats b{color:#fff;font-variant-numeric:tabular-nums}
+.board-shell{position:relative;padding:8px;border-radius:17px;background:#061522;border:1px solid #36546b}
+#board{display:block;width:100%;aspect-ratio:16/9;border-radius:10px;background:#10283a;touch-action:none}
+.hint{text-align:center;color:#b1c4d1;font-size:12px;line-height:1.45;margin:10px 3px 3px}
+.tray-title{display:flex;align-items:center;justify-content:space-between;margin:16px 3px 8px}.tray-title b{font-size:14px}.tray-title span{font-size:11px;color:var(--muted)}
+#tray{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:9px;border:1px solid #29475e;border-radius:16px;background:#071b2b;min-height:100px}
+.piece{position:relative;min-width:0;aspect-ratio:1.25;border:1px solid #45657d;border-radius:10px;background:#18364e;overflow:hidden;touch-action:none;user-select:none;box-shadow:0 3px 8px #0004}
+.piece canvas{display:block;width:100%;height:100%;touch-action:none}.piece:active{border-color:var(--cyan)}
+.piece.dragging{opacity:.35}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;font-size:12px}
+.note{font-size:11px;color:#a9bdcc;line-height:1.5;margin:12px 2px 0}
+#preview{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#020a12eF;z-index:10}
+#preview.open{display:flex}#preview .preview-card{width:min(100%,620px);background:#102a3f;border:1px solid #45657c;border-radius:18px;padding:12px}
+#preview img{display:block;width:100%;height:auto;border-radius:11px}#preview button{width:100%;margin-top:10px}
+#win{display:none;text-align:center;margin-top:12px;padding:18px;background:linear-gradient(140deg,#153e3a,#102f35);border:1px solid #4c9584;border-radius:17px}
+#win.show{display:block}#win strong{display:block;font-size:20px;margin-bottom:5px;color:#e4fff5}#win p{font-size:12px;color:#c2ddd6;margin:0 0 12px}
+@media(max-width:390px){main{padding:14px 10px 28px}.panel{padding:9px}#tray{gap:6px;padding:7px}.piece{border-radius:8px}.controls{gap:6px}select,button{padding:8px 10px}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><span>CLIMAGO · DESAFÍO</span><small>Rompecabezas · versión de prueba</small></div>
+<h1>Un momento para desconectar</h1>
+<p class="sub">Armá la fotografía pieza por pieza. Cada nivel suma un nuevo desafío.</p>
+<section class="panel">
+<div class="controls"><label for="level">Dificultad</label><select id="level"><option value="16">Fácil · 16 piezas</option><option value="36">Intermedio · 36 piezas</option><option value="64">Avanzado · 64 piezas</option></select><label for="mode">Modo</label><select id="mode"><option value="free">Libre</option><option value="timed">Contrarreloj</option></select><button id="restart">Reiniciar</button></div>
+<div class="stats"><span id="timeLabel">Tiempo <b id="clock">00:00</b></span><span>Movimientos <b id="moves">0</b></span><span>Colocadas <b id="progress">0/16</b></span></div><p id="objective" class="hint" style="margin:0 0 9px">Modo libre · sin límite de tiempo</p>
+<div class="board-shell"><div id="looseLayer" style="position:absolute;inset:8px;pointer-events:none;overflow:hidden;border-radius:10px"></div><canvas id="board" width="960" height="540" aria-label="Tablero del rompecabezas"></canvas></div>
+<p class="hint">Arrastrá una pieza desde la bandeja y soltala cerca del centro de su lugar en el tablero. El encastre ahora admite un margen más cómodo para el dedo.</p>
+<div class="tray-title"><b>Piezas disponibles</b><span id="remaining">16 por colocar</span></div>
+<div id="tray" aria-label="Bandeja ordenada de piezas"></div>
+<div class="actions"><button id="showPhoto">◉ Ver referencia</button><button id="newGame" class="primary">Nuevo desafío</button></div>
+<div class="note">Modo libre: armá a tu ritmo. El tiempo y los movimientos se registran para que puedas intentar mejorar tu propio resultado.</div>
+<div id="win"><strong>¡Desafío completado!</strong><p id="result"></p><button id="again" class="primary">Volver a jugar</button></div>
+</section>
+</main>
+<div id="preview" role="dialog" aria-modal="true" aria-label="Imagen de referencia"><div class="preview-card"><img id="previewImage" alt="Fotografía completa de referencia"><button id="closePreview">Volver al rompecabezas</button></div></div>
+<img id="source" alt="" hidden crossorigin="anonymous" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Lake_Mountain_Landscape.jpg/1280px-Lake_Mountain_Landscape.jpg">
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id), board=$('board'), bctx=board.getContext('2d'), tray=$('tray'), source=$('source');
+const W=960,H=540;
+let cols=4,rows=4,pw=W/4,ph=H/4,tab=18,pieces=[],placed=0,moves=0,startedAt=0,timer=null,started=false,drag=null,elapsed=0,timeExpired=false;const looseLayer=$('looseLayer');
+const edgeMap={};
+function edgeKey(x,y,side){return side==='h'?'h'+x+','+y:'v'+x+','+y}
+function edgeValue(key){if(!(key in edgeMap))edgeMap[key]=Math.random()<.5?-1:1;return edgeMap[key]}
+function edgesFor(c,r){return {top:r===0?0:-edgeValue(edgeKey(c,r,'h')),right:c===cols-1?0:edgeValue(edgeKey(c+1,r,'v')),bottom:r===rows-1?0:edgeValue(edgeKey(c,r+1,'h')),left:c===0?0:-edgeValue(edgeKey(c,r,'v'))}}
+function makePath(e){
+ const p=new Path2D(),w=pw,h=ph,t=tab;
+ p.moveTo(0,0);lineH(p,0,w,e.top,-1,t);lineV(p,w,0,h,e.right,1,t);lineH(p,w, 0, e.bottom,1,t);lineV(p,0,h,0,e.left,-1,t);p.closePath();return p;
+}
+function lineH(p,x1,x2,sign,out,t){
+ if(!sign){p.lineTo(x2,out===-1?0:out===1?ph:0);return}
+ const y=out===-1?0:ph,dir=out*sign,span=x2-x1,a=x1+span*.36,b=x1+span*.64;
+ p.lineTo(a,y);p.bezierCurveTo(a+span*.035,y,a+span*.055,y+dir*t*.95,(x1+x2)/2,y+dir*t);
+ p.bezierCurveTo(b-span*.055,y+dir*t*.95,b-span*.035,y,b,y);p.lineTo(x2,y);
+}
+function lineV(p,x1,y1,y2,sign,out,t){
+ if(!sign){p.lineTo(out===-1?0:pw,y2);return}
+ const x=out===-1?0:pw,dir=out*sign,span=y2-y1,a=y1+span*.36,b=y1+span*.64;
+ p.lineTo(x,a);p.bezierCurveTo(x,a+span*.035,x+dir*t*.95,a+span*.055,x+dir*t,(y1+y2)/2);
+ p.bezierCurveTo(x+dir*t*.95,b-span*.055,x,b-span*.035,x,b);p.lineTo(x,y2);
+}
+function makePiece(c,r){const p={id:r*cols+c,c,r,done:false,edges:edgesFor(c,r)};p.path=makePath(p.edges);return p}
+function drawCover(ctx,x,y,w,h){const sw=source.naturalWidth,sh=source.naturalHeight,target=w/h,ratio=sw/sh;let sx=0,sy=0,cw=sw,ch=sh;if(ratio>target){cw=sh*target;sx=(sw-cw)/2}else{ch=sw/target;sy=(sh-ch)/2}ctx.drawImage(source,sx,sy,cw,ch,x,y,w,h)}
+function drawPhotoPiece(ctx,p,x,y,scale,outline=true){
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.save();ctx.clip(p.path);
+ ctx.filter='brightness(1.18) contrast(1.06)';drawCover(ctx,-p.c*pw,-p.r*ph,W,H);ctx.filter='none';ctx.restore();
+ if(outline){ctx.strokeStyle='#effaff';ctx.lineWidth=2.1;ctx.stroke(p.path);ctx.strokeStyle='#10283a88';ctx.lineWidth=4;ctx.stroke(p.path)}
+ ctx.restore();
+}
+function drawBoard(){
+ bctx.clearRect(0,0,W,H);bctx.fillStyle='#10283a';bctx.fillRect(0,0,W,H);
+ for(const p of pieces){if(p.done)drawPhotoPiece(bctx,p,p.c*pw,p.r*ph,1,true)}
+}
+function makeTile(p){
+ const el=document.createElement('div');el.className='piece';el.dataset.id=p.id;
+ const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d');
+ const scale=Math.min(300/pw,180/ph),ox=(300-pw*scale)/2,oy=(180-ph*scale)/2;
+ c.fillStyle='#18364e';c.fillRect(0,0,300,180);
+ drawPhotoPiece(c,p,ox,oy,scale,true);
+ el.append(can);el.addEventListener('pointerdown',e=>startDrag(e,p,el));return el;
+}
+function boardPoint(e){const r=board.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height,inside:e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}}
+function startDrag(e,p,el,fromLoose=false){if(p.done||drag)return;e.preventDefault();if($('mode').value==='timed'&&!started){started=true;startedAt=Date.now()-elapsed*1000;timer=setInterval(updateClock,250)}
+ const preview=makeFloatingPiece(p);document.body.append(preview);drag={p,el,pointer:e.pointerId,x:e.clientX,y:e.clientY,preview,fromLoose,over:false};if(fromLoose)el.style.visibility='hidden';else el.classList.add('dragging');positionPreview(e.clientX,e.clientY);window.addEventListener('pointermove',moveDrag,{passive:false});window.addEventListener('pointerup',endDrag,{once:true});window.addEventListener('pointercancel',cancelDrag,{once:true});}
+function makeFloatingPiece(p){const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d');const scale=Math.min(300/pw,180/ph),ox=(300-pw*scale)/2,oy=(180-ph*scale)/2;drawPhotoPiece(c,p,ox,oy,scale,true);can.style.cssText='position:fixed;width:min(30vw,118px);height:auto;pointer-events:none;z-index:99999;filter:drop-shadow(0 8px 12px #0009)';return can}
+function positionPreview(x,y){if(!drag)return;drag.preview.style.left=(x-58)+'px';drag.preview.style.top=(y-48)+'px'}
+function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();const pt=boardPoint(e);drag.x=pt.x;drag.y=pt.y;drag.over=pt.inside;positionPreview(e.clientX,e.clientY)}
+function endDrag(e){if(!drag||e.pointerId!==drag.pointer)return;const pt=boardPoint(e),p=drag.p,d=drag;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointercancel',cancelDrag);d.preview.remove();d.el.classList.remove('dragging');d.el.style.visibility='';
+ const tx=(p.c+.5)*pw,ty=(p.r+.5)*ph,dist=Math.hypot(pt.x-tx,pt.y-ty),limit=Math.min(pw,ph)*.48;moves++;$('moves').textContent=moves;
+ if(pt.inside){if(dist<=limit){p.done=true;p.loose=false;placed++;if(d.fromLoose)d.el.remove();else d.el.remove()}else{p.loose=true;p.x=pt.x;p.y=pt.y;if(!d.fromLoose){d.el.remove();createLoosePiece(p)}}}else if(d.fromLoose){p.x=pt.x;p.y=pt.y;d.el.style.visibility='visible'}
+ drag=null;updateProgress();drawBoard();if(placed===pieces.length)complete();
+}
+function cancelDrag(){if(!drag)return;window.removeEventListener('pointermove',moveDrag);window.removeEventListener('pointerup',endDrag);drag.preview.remove();drag.el.classList.remove('dragging');drag.el.style.visibility='';drag=null}
+function createLoosePiece(p){const el=document.createElement('div');el.style.cssText='position:absolute;pointer-events:auto;touch-action:none;width:min(28%,118px);aspect-ratio:5/3;transform:translate(-50%,-50%);filter:drop-shadow(0 5px 8px #0008)';const can=document.createElement('canvas');can.width=300;can.height=180;const c=can.getContext('2d'),scale=Math.min(300/pw,180/ph),ox=(300-pw*scale)/2,oy=(180-ph*scale)/2;drawPhotoPiece(c,p,ox,oy,scale,true);can.style.cssText='width:100%;height:100%';el.append(can);looseLayer.append(el);const place=()=>{const r=board.getBoundingClientRect();el.style.left=(p.x/W*r.width)+'px';el.style.top=(p.y/H*r.height)+'px'};place();el.addEventListener('pointerdown',e=>startDrag(e,p,el,true));p.looseEl=el}
+function updateProgress(){$('progress').textContent=placed+'/'+pieces.length;$('remaining').textContent=(pieces.length-placed)+' por colocar'}
+function updateClock(){if(!started||$('mode').value!=='timed')return;elapsed=Math.floor((Date.now()-startedAt)/1000);const timed=$('mode').value==='timed',target=targetFor(Number($('level').value));if(timed){const left=Math.max(0,target-elapsed);$('clock').textContent=left>0?fmt(left):'00:00 +'+fmt(elapsed-target);if(left===0&&!timeExpired){timeExpired=true;$('objective').textContent='Tiempo superado. Podés terminar el armado y ver cuánto te excediste.'}}else $('clock').textContent=fmt(elapsed)}
+function targetFor(n){return n===16?180:n===36?480:900}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function complete(){clearInterval(timer);timer=null;updateClock();const timed=$('mode').value==='timed',target=targetFor(Number($('level').value)),success=!timed||elapsed<=target;const key='climago-jigsaw-best-'+$('level').value+'-'+$('mode').value;let best=null;try{if(timed){best=Number(localStorage.getItem(key))||null;if(success&&(!best||elapsed<best)){localStorage.setItem(key,String(elapsed));best=elapsed}}}catch(e){}const medal=success?(timed?'🏅 Objetivo cumplido':'⭐ Partida completada'):'⏱️ Tiempo objetivo superado';$('result').textContent=medal+' · '+(timed?'Tiempo empleado: '+fmt(elapsed)+' · Movimientos: '+moves+(best?' · Mejor marca: '+fmt(best):''):'Modo libre · Movimientos: '+moves);$('win').classList.add('show')}
+function reset(){clearInterval(timer);timer=null;started=false;startedAt=0;elapsed=0;timeExpired=false;placed=0;moves=0;drag=null;looseLayer.innerHTML='';edgeMapReset();const count=Number($('level').value);cols=rows=Math.sqrt(count);pw=W/cols;ph=H/rows;tab=Math.min(pw,ph)*.19;pieces=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)pieces.push(makePiece(c,r));pieces.sort(()=>Math.random()-.5);tray.innerHTML='';pieces.forEach(p=>tray.append(makeTile(p)));$('clock').textContent=$('mode').value==='timed'?fmt(targetFor(count)):'—';$('timeLabel').firstChild.textContent=$('mode').value==='timed'?'Restante ':'Tiempo ';$('objective').textContent=$('mode').value==='timed'?'Contrarreloj · el reloj comienza al tocar la primera pieza · objetivo: '+fmt(targetFor(count)):'Modo libre · sin cronómetro ni límite de tiempo';$('moves').textContent='0';$('win').classList.remove('show');updateProgress();drawBoard()}
+function edgeMapReset(){for(const k of Object.keys(edgeMap))delete edgeMap[k]}
+$('restart').addEventListener('click',reset);$('newGame').addEventListener('click',reset);$('again').addEventListener('click',reset);$('level').addEventListener('change',reset);$('mode').addEventListener('change',reset);
+$('showPhoto').addEventListener('click',()=>{$('previewImage').src=source.src;$('preview').classList.add('open')});
+$('closePreview').addEventListener('click',()=>$('preview').classList.remove('open'));
+$('preview').addEventListener('click',e=>{if(e.target===$('preview'))$('preview').classList.remove('open')});
+source.addEventListener('load',reset);
+source.addEventListener('error',()=>{document.querySelector('.hint').textContent='No se pudo cargar la fotografía. Revisá la conexión e intentá nuevamente.'});
+if(source.complete&&source.naturalWidth)reset();
+})();
+</script>
+</body>
+</html>
