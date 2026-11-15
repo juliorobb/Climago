@@ -178,7 +178,7 @@ async function enablePushNotifications(){
     const saved=await saveResponse.json().catch(()=>({}));
     if(!saveResponse.ok||!saved.ok)throw new Error(saved.error||"No se pudo guardar la suscripción (HTTP "+saveResponse.status+").");
     setPushStatus("Notificaciones activadas para "+(activeCoords.name||"tu ubicación")+". Este teléfono quedó registrado.");
-    const testButton=document.getElementById("push-test-button");if(testButton)testButton.hidden=false;
+    const testButton=document.getElementById("push-test-button");if(testButton)testButton.disabled=false;
     button.textContent="Notificaciones activadas";
   }catch(error){
     setPushStatus("No se pudieron activar las notificaciones: "+String(error?.message||error));
@@ -200,7 +200,7 @@ async function restorePushSubscriptionStatus(){
     }
     setPushStatus("Notificaciones activadas para este teléfono. La suscripción existente fue recuperada.");
     if(button)button.textContent="Notificaciones activadas";
-    if(testButton)testButton.hidden=false;
+    if(testButton)testButton.disabled=false;
   }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
 }
 async function sendPushTest(){
