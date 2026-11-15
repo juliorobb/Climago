@@ -144,6 +144,48 @@ document.getElementById("use-location").addEventListener("click",()=>{
 });
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}
 
+const PUSH_WORKER_URL="https://push-notifications-infra-climago-smn.juliorobbles01.workers.dev";
+function setPushStatus(message){const el=document.getElementById("push-subscription-status");if(el)el.textContent=message;}
+function base64UrlToBytes(value){
+  const padding="=".repeat((4-value.length%4)%4);
+  const base64=(value+padding).replace(/-/g,"+").replace(/_/g,"/");
+  const raw=atob(base64),bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+  return bytes;
+}
+async function enablePushNotifications(){
+  const button=document.getElementById("push-enable-button");
+  if(!("Notification" in window)){setPushStatus("Este navegador no admite notificaciones web.");return;}
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)){setPushStatus("Este navegador no admite notificaciones Push.");return;}
+  button.disabled=true;button.textContent="Configurando…";
+  try{
+    let permission=Notification.permission;
+    if(permission==="default")permission=await Notification.requestPermission();
+    if(permission!=="granted"){setPushStatus(permission==="denied"?"El permiso fue bloqueado. Habilitalo en los ajustes del navegador.":"No se concedió el permiso para notificaciones.");return;}
+    const registration=await navigator.serviceWorker.ready;
+    if(!registration.pushManager)throw new Error("El servicio Push no está disponible en este dispositivo.");
+    const keyResponse=await fetch(PUSH_WORKER_URL+"/?resource=push-public-key",{headers:{Accept:"application/json"},cache:"no-store"});
+    if(!keyResponse.ok)throw new Error("No se pudo obtener la clave pública del servidor (HTTP "+keyResponse.status+").");
+    const keyData=await keyResponse.json();
+    if(!keyData.publicKey)throw new Error("El servidor no devolvió la clave pública VAPID.");
+    let subscription=await registration.pushManager.getSubscription();
+    if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64UrlToBytes(keyData.publicKey)});
+    if(!Number.isFinite(activeCoords.lat)||!Number.isFinite(activeCoords.lon))throw new Error("No hay coordenadas válidas para la ubicación seleccionada.");
+    const saveResponse=await fetch(PUSH_WORKER_URL+"/?resource=subscribe",{
+      method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify({subscription:subscription.toJSON(),lat:activeCoords.lat,lon:activeCoords.lon,locationName:activeCoords.name||"Ubicación seleccionada"})
+    });
+    const saved=await saveResponse.json().catch(()=>({}));
+    if(!saveResponse.ok||!saved.ok)throw new Error(saved.error||"No se pudo guardar la suscripción (HTTP "+saveResponse.status+").");
+    setPushStatus("Notificaciones activadas para "+(activeCoords.name||"tu ubicación")+". Este teléfono quedó registrado.");
+    button.textContent="Notificaciones activadas";
+  }catch(error){
+    setPushStatus("No se pudieron activar las notificaciones: "+String(error?.message||error));
+    button.textContent="Reintentar activación";
+  }finally{button.disabled=false;}
+}
+document.getElementById("push-enable-button")?.addEventListener("click",enablePushNotifications);
+
 
 // Datos meteorológicos reales: Open-Meteo. Si no hay conexión, la app conserva una indicación clara.
 const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
@@ -620,6 +662,8 @@ function updateMoonPhase(){
   moon.textContent=["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"][phase];
 }
 updateMoonPhase();
+const requestedPage=new URLSearchParams(location.search).get("page");
+if(requestedPage&&pages.includes(requestedPage))showPage(requestedPage);
 
 /* Selector de paisajes de Inicio: utiliza las fotografías aprobadas. */
 (()=>{
