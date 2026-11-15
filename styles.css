@@ -1857,6 +1857,3 @@
 .push-optin-card .primary-button{margin:0}
 .push-optin-card button:disabled{opacity:.65}
 
-
-/* Evita que el botón de prueba aparezca antes de recuperar una suscripción. */
-#push-test-button[hidden]{display:none!important;}
