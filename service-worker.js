@@ -1,4 +1,4 @@
-const CACHE_NAME="climago-shell-v70-nav-four-fix";
+const CACHE_NAME="climago-shell-v71-push-notifications";
 const DATA_CACHE="climago-data-v1";
 const APP_SHELL=["./","./index.html","./styles.css","./app.js","./manifest.json","./assets/icon.svg","./assets/landscapes/sierras.jpg","./assets/landscapes/ciudad.jpg","./assets/landscapes/mar.jpg","./assets/landscapes/new-york.svg","./assets/weather-scenes.svg","./assets/recommendations/water-bottle.svg","./assets/recommendations/umbrella.svg","./assets/recommendations/storm.svg","./assets/recommendations/wind.svg","./assets/recommendations/check.svg","./assets/mascot-sun.png","./assets/mascot-cloud.png","./assets/mascot-rain.png","./assets/mascot-storm.png","./assets/mascot-cold.png","./assets/mascot-wind.png","./assets/mascot-heat.png","./rutinas-card.webp","./agenda-card.webp","./desafios-card.webp","./assets/01-despejado-dia.png","./assets/02-parcialmente-nublado-dia.png","./assets/03-nublado-dia.png","./assets/04-lluvia.png","./assets/05-tormenta-electrica.png","./assets/06-tormenta-intensa.png","./assets/07-noche-despejada.png","./assets/08-noche-parcialmente-nublada.png","./assets/09-noche-nublada.png","./assets/10-helada-frio.png","./assets/11-ola-de-calor.png","./assets/12-viento-fuerte.png"];
 const ALERTS_PATH="/data/smn-alerts.json";
@@ -67,5 +67,34 @@ self.addEventListener("fetch",event=>{
       }
       return Response.error();
     }
+  })());
+});
+
+
+self.addEventListener("push",event=>{
+  let payload={};
+  try{payload=event.data?event.data.json():{};}catch{payload={body:event.data?.text()||""};}
+  const title=payload.title||"Alerta meteorológica · ClimaGo";
+  const options={
+    body:payload.body||"El SMN emitió un aviso para una zona que tenés guardada.",
+    icon:"./assets/icon.svg",
+    badge:"./assets/icon.svg",
+    tag:payload.tag||"climago-smn-alert",
+    data:{url:payload.url||"/?page=alerts"}
+  };
+  event.waitUntil(self.registration.showNotification(title,options));
+});
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url||"/?page=alerts",self.location.origin).href;
+  event.waitUntil((async()=>{
+    const windows=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    for(const client of windows){
+      if(new URL(client.url).origin===self.location.origin){
+        await client.navigate(target);
+        return client.focus();
+      }
+    }
+    return self.clients.openWindow(target);
   })());
 });
