@@ -178,6 +178,7 @@ async function enablePushNotifications(){
     const saved=await saveResponse.json().catch(()=>({}));
     if(!saveResponse.ok||!saved.ok)throw new Error(saved.error||"No se pudo guardar la suscripción (HTTP "+saveResponse.status+").");
     setPushStatus("Notificaciones activadas para "+(activeCoords.name||"tu ubicación")+". Este teléfono quedó registrado.");
+    const testButton=document.getElementById("push-test-button");if(testButton)testButton.hidden=false;
     button.textContent="Notificaciones activadas";
   }catch(error){
     setPushStatus("No se pudieron activar las notificaciones: "+String(error?.message||error));
