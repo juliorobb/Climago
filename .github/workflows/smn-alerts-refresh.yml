@@ -10,7 +10,7 @@ on:
       - "index.html"
       - "styles.css"
   workflow_dispatch:
-  # GitHub schedules run from the default branch (main).
+  # GitHub schedules run from the default branch (main). Keep the hourly cadence to limit load on the SMN.
   schedule:
     - cron: "17 * * * *"
 permissions:
