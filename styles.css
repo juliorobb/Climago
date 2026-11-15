@@ -1856,3 +1856,7 @@
 .push-optin-copy p,.push-optin-status{font-size:11px;line-height:1.5;color:#bdcbd6;margin:5px 0 0}
 .push-optin-card .primary-button{margin:0}
 .push-optin-card button:disabled{opacity:.65}
+
+
+/* Evita que el botón de prueba aparezca antes de recuperar una suscripción. */
+#push-test-button[hidden]{display:none!important;}
