@@ -89,6 +89,11 @@
       <section class="page" id="page-alerts">
         <div class="page-heading"><div><small>SISTEMA DE ALERTA TEMPRANA</small><h1>Alertas oficiales</h1></div><span class="pill">SMN · Argentina</span></div>
         <div class="radar-sourcebar"><span>Datos oficiales del Servicio Meteorológico Nacional · CAP</span><button class="secondary-button map-gps" id="alerts-refresh" type="button">↻ Actualizar</button></div>
+        <article class="panel push-optin-card">
+          <div class="push-optin-copy"><b>Recibir alertas en este teléfono</b><p>Activá las notificaciones para recibir avisos oficiales del SMN sobre tu ubicación guardada.</p></div>
+          <button class="primary-button" id="push-enable-button" type="button">Activar notificaciones</button>
+          <p class="push-optin-status" id="push-subscription-status" role="status" aria-live="polite">Todavía no activaste las notificaciones.</p>
+        </article>
         <article class="panel alerts-unavailable" id="smn-alerts-status" role="status" aria-live="polite"><span>△</span><div><b id="smn-alerts-status-title">Consultando avisos oficiales…</b><p id="smn-alerts-status-detail">La aplicación comprobará la fecha y la cobertura de los datos recibidos.</p></div></article>
         <div class="section-heading"><h2>Avisos vigentes y próximos</h2><span class="muted-note" id="smn-active-count">—</span></div>
         <div id="smn-alerts-active" class="smn-alerts-list panel"><div class="empty-state">Cargando avisos oficiales…</div></div>
