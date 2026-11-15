@@ -632,34 +632,16 @@ async function loadOfficialAlerts(){
   const button=document.getElementById("alerts-refresh");
   if(button){button.disabled=true;button.textContent="Consultando…";}
   try{
-    const liveUrl=PUSH_WORKER_URL+"/?resource=alerts&lat="+encodeURIComponent(activeCoords.lat)+"&lon="+encodeURIComponent(activeCoords.lon);
-    const response=await fetch(liveUrl,{method:"GET",cache:"no-store",headers:{"Accept":"application/json"}});
-    if(!response.ok)throw new Error("La consulta en vivo al SMN respondió HTTP "+response.status);
-    const live=await response.json();
-    const cap=live.cap||{};
-    const liveAlerts=Array.isArray(cap.activeForLocation)?cap.activeForLocation:[];
-    let historyAlerts=[];
-    try{
-      const historyResponse=await fetch("./data/smn-alerts.json?history="+Date.now(),{method:"GET",cache:"no-store",headers:{"Accept":"application/json"}});
-      if(historyResponse.ok){
-        const historyData=await historyResponse.json();
-        if(Array.isArray(historyData.alerts))historyAlerts=historyData.alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
-      }
-    }catch(error){console.warn("No se pudo actualizar el historial CAP:",error);}
-    const data={
-      alerts:[...liveAlerts,...historyAlerts],
-      generatedAt:cap.generatedAt||live.testedAt||"",
-      status:cap.dataStatus||cap.status||"unavailable",
-      coverage:{
-        complete:cap.coverageComplete===true,
-        discovered:cap.feedItemsFound||0,
-        downloaded:cap.downloadedDocuments||0,
-        freshWindowHours:0
-      }
-    };
-    const staleCache=false;
+    const response=await fetch("./data/smn-alerts.json?refresh="+Date.now(),{
+      method:"GET",cache:"no-store",headers:{"Accept":"application/json"}
+    });
+    if(!response.ok)throw new Error("El archivo de alertas respondió HTTP "+response.status);
+    const contentType=response.headers.get("content-type")||"";
+    const staleCache=response.headers.get("X-ClimaGo-Data-Status")==="stale-cache";
+    if(contentType&&!contentType.toLowerCase().includes("json"))throw new Error("El servidor no devolvió JSON (Content-Type: "+contentType+").");
+    const data=await response.json();
     if(requestId!==smnAlertsRequest)return;
-    if(!Array.isArray(data.alerts))throw new Error("La consulta del SMN no devolvió una lista de avisos válida.");
+    if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const alerts=data.alerts;
     const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
     const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
