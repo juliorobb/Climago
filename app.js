@@ -172,7 +172,7 @@ async function enablePushNotifications(){
     if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64UrlToBytes(keyData.publicKey)});
     if(!Number.isFinite(activeCoords.lat)||!Number.isFinite(activeCoords.lon))throw new Error("No hay coordenadas válidas para la ubicación seleccionada.");
     const saveResponse=await fetch(PUSH_WORKER_URL+"/?resource=subscribe",{
-      method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},
+      method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8","Accept":"application/json"},
       body:JSON.stringify({subscription:subscription.toJSON(),lat:activeCoords.lat,lon:activeCoords.lon,locationName:activeCoords.name||"Ubicación seleccionada"})
     });
     const saved=await saveResponse.json().catch(()=>({}));
