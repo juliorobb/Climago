@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "source": "Servicio Meteorológico Nacional · CAP",
-  "generatedAt": "2026-11-15T01:54:38.356619Z",
+  "generatedAt": "2026-11-15T05:03:49.938228Z",
   "status": "ok",
   "coverage": {
     "complete": true,
@@ -52,7 +52,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_58.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "active"
     },
     {
@@ -74,7 +74,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_59.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "active"
     },
     {
@@ -96,7 +96,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_57.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "active"
     },
     {
@@ -118,7 +118,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_56.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "active"
     },
     {
@@ -140,7 +140,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_21.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -162,7 +162,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_22.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -184,7 +184,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_20.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -206,7 +206,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_19.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -228,7 +228,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_17.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -250,7 +250,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_18.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -272,7 +272,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_23.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -294,7 +294,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_24.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -316,7 +316,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_28.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -338,7 +338,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_29.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -360,7 +360,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_27.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -382,7 +382,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_26.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -404,7 +404,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_25.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -426,7 +426,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_16.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -448,7 +448,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_15.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -470,7 +470,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_6.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -492,7 +492,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_7.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -514,7 +514,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_5.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -536,7 +536,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_4.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -558,7 +558,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_2.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -580,7 +580,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_3.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -602,7 +602,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_8.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -624,7 +624,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_9.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -646,7 +646,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_13.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -668,7 +668,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_14.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -690,7 +690,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_12.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -712,7 +712,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_11.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -734,7 +734,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_10.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -756,7 +756,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_30.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -778,7 +778,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_31.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -800,7 +800,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_51.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -822,7 +822,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_52.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -844,7 +844,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_50.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -866,7 +866,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_49.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -888,7 +888,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_47.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -910,7 +910,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_48.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -932,7 +932,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_53.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -954,7 +954,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_54.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -976,7 +976,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_55.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -998,7 +998,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_46.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1020,7 +1020,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_45.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1042,7 +1042,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_36.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1064,7 +1064,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_37.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1086,7 +1086,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_35.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1108,7 +1108,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_34.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1130,7 +1130,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_32.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1152,7 +1152,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_33.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1174,7 +1174,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_38.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1196,7 +1196,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_39.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1218,7 +1218,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_43.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1240,7 +1240,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_44.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1262,7 +1262,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_42.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1284,7 +1284,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_41.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1306,7 +1306,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_40.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
@@ -1328,7 +1328,7 @@
       "areas": [],
       "url": "https://ssl.smn.gob.ar/feeds/CAP/xml_generados/CAP_20261114210648_Tormenta_Llanura_alertas_alertas_1.xml",
       "source": "Servicio Meteorológico Nacional · CAP",
-      "lastSeen": "2026-11-15T01:54:38.356619Z",
+      "lastSeen": "2026-11-15T05:03:49.938228Z",
       "state": "scheduled"
     },
     {
