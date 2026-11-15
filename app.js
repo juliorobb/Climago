@@ -185,11 +185,51 @@ async function enablePushNotifications(){
   }finally{button.disabled=false;}
 }
 document.getElementById("push-enable-button")?.addEventListener("click",enablePushNotifications);
+async function restorePushSubscriptionStatus(){
+  const button=document.getElementById("push-enable-button");
+  const testButton=document.getElementById("push-test-button");
+  if(!("serviceWorker" in navigator)||!("Notification" in window))return;
+  try{
+    const registration=await navigator.serviceWorker.ready;
+    const subscription=await registration.pushManager?.getSubscription();
+    if(!subscription)return;
+    if(Notification.permission!=="granted"){
+      setPushStatus("Hay una suscripción anterior, pero el permiso de notificaciones no está concedido.");
+      return;
+    }
+    setPushStatus("Notificaciones activadas para este teléfono. La suscripción existente fue recuperada.");
+    if(button)button.textContent="Notificaciones activadas";
+    if(testButton)testButton.hidden=false;
+  }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
+}
+async function sendPushTest(){
+  const button=document.getElementById("push-test-button");
+  if(button){button.disabled=true;button.textContent="Enviando prueba…";}
+  try{
+    const registration=await navigator.serviceWorker.ready;
+    const subscription=await registration.pushManager.getSubscription();
+    if(!subscription)throw new Error("No hay una suscripción activa en este teléfono.");
+    const response=await fetch(PUSH_WORKER_URL+"/?resource=push-test",{
+      method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8","Accept":"application/json"},
+      body:JSON.stringify({endpoint:subscription.endpoint})
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok)throw new Error(result.error||"El servidor respondió HTTP "+response.status+".");
+    setPushStatus("Prueba enviada al servicio de notificaciones. Revisá si aparece en el teléfono.");
+    if(button)button.textContent="Enviar otra prueba";
+  }catch(error){
+    setPushStatus("No se pudo enviar la prueba: "+String(error?.message||error));
+    if(button)button.textContent="Reintentar prueba";
+  }finally{if(button)button.disabled=false;}
+}
+document.getElementById("push-test-button")?.addEventListener("click",sendPushTest);
+
 
 
 // Datos meteorológicos reales: Open-Meteo. Si no hay conexión, la app conserva una indicación clara.
 const DEFAULT_COORDS={lat:-31.4167,lon:-64.1833,name:"Córdoba, Argentina"};
 let activeCoords={...DEFAULT_COORDS},weatherMap=null,mapMarker=null;
+window.addEventListener("load",restorePushSubscriptionStatus);
 const weatherText={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla con escarcha",51:"Llovizna ligera",53:"Llovizna",55:"Llovizna intensa",56:"Llovizna engelante",57:"Llovizna engelante intensa",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia intensa",66:"Lluvia engelante",67:"Lluvia engelante intensa",71:"Nieve ligera",73:"Nieve",75:"Nieve intensa",77:"Granulado de nieve",80:"Chaparrones",81:"Chaparrones",82:"Chaparrones intensos",85:"Chubascos de nieve",86:"Chubascos de nieve intensos",95:"Tormenta",96:"Tormenta con granizo",99:"Tormenta fuerte con granizo"};
 function weatherEmoji(code,isDay=1){
   if(code==null||!Number.isFinite(Number(code)))return "—";
