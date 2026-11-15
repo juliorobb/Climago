@@ -1848,3 +1848,11 @@
   position:absolute;left:-.12em;bottom:-.08em;z-index:1;font-size:1em;line-height:1;
 }
 #page-forecast .forecast-hour-icon .weather-composite{font-size:25px}
+
+
+/* Activación de notificaciones Push en Alertas */
+.push-optin-card{padding:15px;margin:12px 0 14px;border:1px solid #31536b;border-radius:16px;background:linear-gradient(145deg,#111f2c,#0b151e);display:grid;gap:10px}
+.push-optin-copy b{font-size:13px;color:#f3f7fb}
+.push-optin-copy p,.push-optin-status{font-size:11px;line-height:1.5;color:#bdcbd6;margin:5px 0 0}
+.push-optin-card .primary-button{margin:0}
+.push-optin-card button:disabled{opacity:.65}
