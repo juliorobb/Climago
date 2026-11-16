@@ -377,6 +377,14 @@ function renderSmnAlerts(host,alerts,emptyText,geography="local"){
 }
 let smnAlertsRequest=0;
 let lastAlertsLocationKey="";
+function setHomeAlertStatus(title,detail,state){
+  const text=document.getElementById("home-alert-text");
+  const note=document.getElementById("home-alert-detail");
+  const card=document.getElementById("home-alert-status");
+  if(text)text.textContent=title;
+  if(note)note.textContent=detail;
+  if(card)card.dataset.state=state||"unknown";
+}
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
@@ -446,6 +454,24 @@ async function loadOfficialAlerts(){
     if(staleCache){
       if(statusDetail)statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono porque no fue posible consultar el servidor.";
     }
+    if(staleCache){
+      setHomeAlertStatus("Mostrando la última copia guardada","No se pudo consultar el servidor ahora. Revisá la fecha de actualización antes de tomar decisiones.","stale");
+    }else if(stale){
+      setHomeAlertStatus("Datos oficiales desactualizados","La fecha del catálogo supera los 90 minutos o no es verificable. No confirma ausencia de riesgo.","stale");
+    }else if(!complete){
+      const title=currentAlerts?"Avisos vigentes detectados · cobertura parcial":unverified.length?"Avisos sin ubicación verificable":"Cobertura parcial del SMN";
+      setHomeAlertStatus(title,"Se procesaron "+downloaded+" de "+(discovered||"una cantidad no informada")+" documentos. Una consulta parcial no confirma ausencia de riesgo.","partial");
+    }else if(currentAlerts){
+      setHomeAlertStatus("Avisos oficiales vigentes en tu zona",currentAlerts+" aviso(s) vigente(s) según geometría CAP del SMN.","complete");
+    }else if(scheduledAlerts){
+      setHomeAlertStatus("Avisos programados en tu zona",scheduledAlerts+" aviso(s) con inicio futuro según el CAP del SMN.","complete");
+    }else if(unconfirmedAlerts){
+      setHomeAlertStatus("Avisos con vigencia a confirmar",unconfirmedAlerts+" aviso(s) locales sin vigencia temporal confirmada.","partial");
+    }else if(unverified.length){
+      setHomeAlertStatus("Avisos sin ubicación verificable",unverified.length+" aviso(s) no tienen geometría suficiente para confirmar si alcanzan tu ubicación.","partial");
+    }else{
+      setHomeAlertStatus("Sin avisos vigentes confirmados","La cobertura CAP se procesó completa para esta consulta. Revisá el detalle y la hora de actualización.","complete");
+    }
     if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
     const activeCount=document.getElementById("smn-active-count");
     const historyCount=document.getElementById("smn-history-count");
@@ -458,6 +484,7 @@ async function loadOfficialAlerts(){
     if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
     if(statusDetail)statusDetail.textContent=String(error?.message||error)+" Revisá la conexión; esta falla no significa que no haya alertas.";
     if(statusPanel)statusPanel.dataset.state="error";
+    setHomeAlertStatus("No se pudieron verificar los avisos","La consulta falló. Esto no significa que no haya alertas; comprobá la conexión y volvé a actualizar.","error");
     renderSmnAlerts(activeHost,[],"No hay datos vigentes verificables disponibles.");
     renderSmnAlerts(historyHost,[],"No se pudo cargar el historial de avisos.");
     if(unverifiedHost)renderSmnAlerts(unverifiedHost,[],"No se pudieron cargar los avisos sin ubicación verificable.");
