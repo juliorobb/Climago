@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [main]
+    branches: [main, work/smn-cap-parser-geo-complete-2026-11-16]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
   refresh:
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
