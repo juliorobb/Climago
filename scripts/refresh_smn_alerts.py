@@ -325,17 +325,33 @@ def load_previous():
 
 
 def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stamp, previous_generated_at=""):
-    """Reconcile CAP Alert, Update and Cancel messages with retained history."""
-    current_keys = {item["identifier"] for item in parsed_records}
-    parsed_urls = {item["url"] for item in parsed_records}
-    cancelled_identifiers = referenced_ids_for(parsed_records, "cancel")
-    updated_identifiers = referenced_ids_for(parsed_records, "update")
+    """Reconcile CAP lifecycle messages, including messages found in one batch."""
+    records = [dict(item) for item in parsed_records if isinstance(item, dict)]
+    cancelled_by = {}
+    updated_identifiers = referenced_ids_for(records, "update")
+    for item in records:
+        if str(item.get("messageType", "")).lower() == "cancel":
+            for identifier in item.get("referencedIdentifiers", []):
+                cancelled_by[identifier] = item.get("identifier", "")
+    reconciled_records = []
+    for item in records:
+        identifier = item.get("identifier")
+        msg_type = str(item.get("messageType", "")).lower()
+        if identifier in updated_identifiers and msg_type != "update":
+            continue
+        if identifier in cancelled_by:
+            item["state"] = "cancelled"
+            item["cancelledBy"] = cancelled_by[identifier]
+        reconciled_records.append(item)
+
+    current_keys = {item.get("identifier") for item in reconciled_records}
+    parsed_urls = {item.get("url") for item in reconciled_records}
     retained = []
     cutoff = stamp - timedelta(hours=HISTORY_HOURS)
-    for old in previous_alerts:
-        if not isinstance(old, dict):
+    for original in previous_alerts:
+        if not isinstance(original, dict):
             continue
-        old = dict(old)
+        old = dict(original)
         identifier = old.get("identifier")
         old_url = old.get("url") or old.get("documentUrl") or ""
         last_seen = parse_time(old.get("lastSeen") or previous_generated_at)
@@ -352,9 +368,10 @@ def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stam
             effective = parse_time(old.get("effective") or old.get("onset"))
             status = str(old.get("status", "")).lower()
             msg_type = str(old.get("messageType", "")).lower()
-            if identifier in cancelled_identifiers or status == "cancel" or msg_type == "cancel":
+            if old.get("state") == "cancelled" or identifier in cancelled_by or status == "cancel" or msg_type == "cancel":
                 old["state"] = "cancelled"
-                old["cancelledBy"] = next((item["identifier"] for item in parsed_records if identifier in item.get("referencedIdentifiers", []) and str(item.get("messageType", "")).lower() == "cancel"), "")
+                if identifier in cancelled_by:
+                    old["cancelledBy"] = cancelled_by[identifier]
             elif expiry and expiry < stamp:
                 old["state"] = "expired"
             elif old_url in current_catalog_urls:
@@ -382,11 +399,10 @@ def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stam
                 "lastSeen": iso(last_seen or stamp),
             }
         retained.append(old)
-    all_alerts = merge_alert_records(retained, parsed_records)
+    all_alerts = merge_alert_records(retained, reconciled_records)
     order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
     all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
     return all_alerts
-
 
 def main():
     stamp = now_utc()
