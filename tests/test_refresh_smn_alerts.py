@@ -196,6 +196,17 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(result[0]["state"], "cancelled")
         self.assertEqual(result[0]["cancelledBy"], "cancel-456")
 
+    def test_cancelled_previous_alert_is_not_reactivated_if_old_xml_remains_in_feed(self):
+        stamp = datetime.datetime(2026, 11, 16, 14, 0, tzinfo=datetime.timezone.utc)
+        previous = [{"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "state": "cancelled", "lastSeen": "2026-11-16T13:00:00Z",
+            "cancelledBy": "cancel-456"}]
+        still_listed = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "state": "active", "headline": "Versión anterior"}
+        result = smn.reconcile_alerts(previous, [still_listed], {"https://ssl.smn.gob.ar/alert.xml"}, stamp)
+        self.assertEqual(result[0]["state"], "cancelled")
+        self.assertEqual(result[0]["cancelledBy"], "cancel-456")
+
 
 if __name__ == "__main__":
     unittest.main()
