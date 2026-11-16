@@ -323,16 +323,17 @@ function getSmnGeographicStatus(alert,coords){
 function createSmnAlertCard(alert,geography="local"){
   const card=smnElement("article","smn-alert-card");
   card.dataset.severity=String(alert.severity||"unknown").toLowerCase();
+  card.dataset.geography=geography;
   const top=smnElement("div","smn-alert-top");
   const title=smnElement("b","",alert.headline||alert.event||alert.title||"Aviso meteorológico");
   const state=getSmnAlertState(alert);
   const labels={active:"VIGENTE",scheduled:"PRÓXIMO",expired:"VENCIDO",cancelled:"CANCELADO",unconfirmed:"VIGENCIA A CONFIRMAR",not_currently_listed:"YA NO FIGURA EN EL FEED"};
   const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
-  badge.dataset.state=state;
+  badge.dataset.state=geography==="unverifiable"?"unconfirmed":state;
   if(geography==="unverifiable")badge.textContent="UBICACIÓN NO VERIFICABLE";
   top.append(title,badge);
-  if(geography==="unverifiable")card.append(smnElement("p","smn-alert-location-note","El CAP no aporta un polígono o círculo para confirmar si este aviso alcanza la ubicación seleccionada."));
   card.append(top);
+  if(geography==="unverifiable")card.append(smnElement("p","smn-alert-location-note","El CAP no aporta un polígono o círculo para confirmar si este aviso alcanza la ubicación seleccionada."));
   const severity=[
     localizeSmnValue(alert.severity,"severity"),
     localizeSmnValue(alert.urgency,"urgency"),
