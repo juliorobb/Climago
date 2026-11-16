@@ -20,7 +20,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: climago-smn-alerts-feature
+  group: climago-smn-alerts-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   validate:
