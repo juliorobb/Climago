@@ -87,7 +87,12 @@
 
 /* Alertas SMN integradas: estilos limitados al módulo Alertas */
 .smn-alerts-list{display:grid;gap:10px;padding:12px;min-height:58px}
-.smn-alert-card{padding:13px;border:1px solid #244761;border-radius:14px;background:#102b40;display:grid;gap:7px}
+.smn-alert-card{padding:13px;border:1px solid #244761;border-left:4px solid #7d91a3;border-radius:14px;background:#102b40;display:grid;gap:7px}
+.smn-alert-card[data-severity="extreme"]{border-left-color:#ef4444}
+.smn-alert-card[data-severity="severe"]{border-left-color:#f97316}
+.smn-alert-card[data-severity="moderate"]{border-left-color:#eab308}
+.smn-alert-card[data-severity="minor"]{border-left-color:#38bdf8}
+.smn-alert-card[data-severity="unknown"]{border-left-color:#7d91a3}
 .smn-alert-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .smn-alert-top b{font-size:13px;line-height:1.4;color:#f3f7fb}
 .smn-alert-badge{font-size:9px;color:#66d4e5;white-space:normal;text-align:right;border:1px solid #32647b;border-radius:20px;padding:4px 7px;flex:0 0 auto}
@@ -95,6 +100,7 @@
 .smn-alert-badge[data-state="unconfirmed"],.smn-alert-badge[data-state="not_currently_listed"]{color:#ffd27b;border-color:#8d6a28}
 .smn-alert-card p{font-size:11px;line-height:1.5;color:#c1cfdb;margin:0}
 .smn-alert-card .smn-alert-severity{font-weight:700;color:#ffd27b}
+.smn-alert-card .smn-alert-location-note{padding:7px 9px;border-left:3px solid #eab308;background:#3a321d;color:#ffe4a3;border-radius:6px}
 .smn-alert-card .smn-alert-instruction{color:#f0e3cb}
 .smn-alert-card small{display:block;font-size:10px;line-height:1.5;color:#93aabd}
 .smn-alert-card a{display:inline-block;margin-top:2px;color:#55cfe2;font-size:11px;text-decoration:none}

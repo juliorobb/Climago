@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05]
+    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, work/smn-cap-parser-geo-complete-2026-11-16]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -9,6 +9,9 @@ on:
       - "service-worker.js"
       - "index.html"
       - "styles.css"
+      - "tests/test_refresh_smn_alerts.py"
+  pull_request:
+    branches: [main]
   workflow_dispatch:
   # GitHub schedules run from the default branch (main). Keep the hourly cadence to limit load on the SMN.
 # Do not use this workflow as per-commit validation on app preview branches.
@@ -17,12 +20,27 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: climago-smn-alerts-feature
+  group: climago-smn-alerts-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  refresh:
+  validate:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate JavaScript, Python and CAP regression tests
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          python -m py_compile scripts/refresh_smn_alerts.py
+          python -m unittest discover -s tests -v
+  refresh:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +53,7 @@ jobs:
           node --check app.js
           node --check service-worker.js
           python -m py_compile scripts/refresh_smn_alerts.py
+          python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
       - name: Commit refreshed data only when it changes
