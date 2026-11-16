@@ -87,7 +87,12 @@
 
 /* Alertas SMN integradas: estilos limitados al módulo Alertas */
 .smn-alerts-list{display:grid;gap:10px;padding:12px;min-height:58px}
-.smn-alert-card{padding:13px;border:1px solid #244761;border-radius:14px;background:#102b40;display:grid;gap:7px}
+.smn-alert-card{padding:13px;border:1px solid #244761;border-left:4px solid #7d91a3;border-radius:14px;background:#102b40;display:grid;gap:7px}
+.smn-alert-card[data-severity="extreme"]{border-left-color:#ef4444}
+.smn-alert-card[data-severity="severe"]{border-left-color:#f97316}
+.smn-alert-card[data-severity="moderate"]{border-left-color:#eab308}
+.smn-alert-card[data-severity="minor"]{border-left-color:#38bdf8}
+.smn-alert-card[data-severity="unknown"]{border-left-color:#7d91a3}
 .smn-alert-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .smn-alert-top b{font-size:13px;line-height:1.4;color:#f3f7fb}
 .smn-alert-badge{font-size:9px;color:#66d4e5;white-space:normal;text-align:right;border:1px solid #32647b;border-radius:20px;padding:4px 7px;flex:0 0 auto}
