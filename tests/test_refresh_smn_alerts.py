@@ -29,7 +29,7 @@ class CapGeometryTests(unittest.TestCase):
         self.assertIsNone(smn.parse_circle("91,0 10"))
 
     def test_cap_record_preserves_areas_geometry_geocodes_and_info_blocks(self):
-        xml = b"""<?xml version="1.0" encoding="UTF-8"?>
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
         <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
           <identifier>test-123</identifier><sender>smn@smn.gob.ar</sender>
           <sent>2026-11-16T08:00:00-03:00</sent><status>Actual</status>
@@ -45,7 +45,7 @@ class CapGeometryTests(unittest.TestCase):
             </area>
           </info>
           <info><language>en-US</language><event>Storms</event><headline>Test alert</headline></info>
-        </alert>"""
+        </alert>""".encode("utf-8")
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
         record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
         self.assertEqual(record["identifier"], "test-123")
