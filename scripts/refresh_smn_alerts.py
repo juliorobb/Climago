@@ -303,6 +303,26 @@ def cap_record(payload, url, stamp):
     return record
 
 
+def download_cap_catalog(selected_urls, stamp):
+    """Download CAP documents sequentially and stop immediately when SMN rate-limits."""
+    parsed_records = []
+    failures = []
+    for index, url in enumerate(selected_urls):
+        if index:
+            time.sleep(REQUEST_DELAY_SECONDS)
+        try:
+            status, content_type, body = fetch_cap_document(url)
+            parsed_records.append(cap_record(body, url, stamp))
+        except urllib.error.HTTPError as error:
+            failures.append({"url": url, "error": f"HTTP {error.code}", "attempts": 1})
+            if error.code == 429:
+                print("HTTP 429 del SMN: se detiene la descarga del catálogo para respetar el límite y conservar los documentos ya procesados.")
+                break
+        except Exception as error:
+            failures.append({"url": url, "error": str(error)[:240], "attempts": 1})
+    return parsed_records, failures
+
+
 def load_previous():
     try:
         with open(OUTPUT, "r", encoding="utf-8") as file:
@@ -443,21 +463,7 @@ def main():
     selected_urls = list(unique_urls)
     next_cursor = 0
     truncated = False
-    parsed_records = []
-    failures = []
-    for index, url in enumerate(selected_urls):
-        if index:
-            time.sleep(REQUEST_DELAY_SECONDS)
-        try:
-            status, content_type, body = fetch_cap_document(url)
-            parsed_records.append(cap_record(body, url, stamp))
-        except urllib.error.HTTPError as error:
-            failures.append({"url": url, "error": f"HTTP {error.code}", "attempts": 1})
-            if error.code == 429:
-                print("HTTP 429 del SMN: se detiene la descarga del catálogo para respetar el límite y conservar los documentos ya procesados.")
-                break
-        except Exception as error:
-            failures.append({"url": url, "error": str(error)[:240], "attempts": 1})
+    parsed_records, failures = download_cap_catalog(selected_urls, stamp)
 
     # Reconcile lifecycle messages and preserve relevant recent history.
     current_catalog_urls = set(unique_urls)
