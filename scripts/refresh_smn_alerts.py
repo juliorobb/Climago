@@ -131,6 +131,63 @@ def index_links(payload):
     return out
 
 
+def parse_polygon(value):
+    """Convert CAP 'lat,lon lat,lon ...' into GeoJSON-order [lon, lat] pairs."""
+    points = []
+    for pair in (value or "").strip().split():
+        parts = pair.split(",")
+        if len(parts) != 2:
+            continue
+        try:
+            lat, lon = float(parts[0]), float(parts[1])
+        except ValueError:
+            continue
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            points.append([lon, lat])
+    if len(points) < 3:
+        return []
+    if points[0] != points[-1]:
+        points.append(points[0])
+    return points
+
+
+def parse_circle(value):
+    parts = (value or "").strip().split()
+    if len(parts) != 2:
+        return None
+    coords = parts[0].split(",")
+    if len(coords) != 2:
+        return None
+    try:
+        lat, lon, radius_km = float(coords[0]), float(coords[1]), float(parts[1])
+    except ValueError:
+        return None
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180 and radius_km > 0):
+        return None
+    return {"lat": lat, "lon": lon, "radiusKm": radius_km}
+
+
+def cap_area(area):
+    description = first_text(area, "areadesc")
+    polygons = [ring for node in children(area, "polygon")
+                if (ring := parse_polygon("".join(node.itertext()))) ]
+    circles = [circle for node in children(area, "circle")
+               if (circle := parse_circle("".join(node.itertext()))) ]
+    geocodes = []
+    for node in children(area, "geocode"):
+        name = first_text(node, "valuename")
+        value = first_text(node, "value")
+        if name or value:
+            geocodes.append({"valueName": name, "value": value})
+    result = {
+        "description": description,
+        "polygons": polygons,
+        "circles": circles,
+        "geocodes": geocodes,
+    }
+    return result
+
+
 def cap_record(payload, url, stamp):
     try:
         root = ET.fromstring(payload)
@@ -139,12 +196,12 @@ def cap_record(payload, url, stamp):
     info_nodes = children(root, "info")
     if not info_nodes:
         raise ValueError("El documento no contiene bloques CAP <info>.")
-    info = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0])
+    preferred = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0])
     areas = []
-    for area in children(info, "area"):
-        area_name = first_text(area, "areadesc")
-        if area_name and area_name not in areas:
-            areas.append(area_name)
+    for area in children(preferred, "area"):
+        parsed = cap_area(area)
+        if parsed not in areas:
+            areas.append(parsed)
     identifier = first_text(root, "identifier")
     if not identifier:
         raise ValueError("Documento CAP sin identifier.")
@@ -154,19 +211,35 @@ def cap_record(payload, url, stamp):
         "sent": first_text(root, "sent"),
         "messageType": first_text(root, "msgtype"),
         "status": first_text(root, "status"),
-        "event": first_text(info, "event"),
-        "headline": first_text(info, "headline"),
-        "description": first_text(info, "description"),
-        "instruction": first_text(info, "instruction"),
-        "severity": first_text(info, "severity"),
-        "urgency": first_text(info, "urgency"),
-        "certainty": first_text(info, "certainty"),
-        "effective": first_text(info, "effective"),
-        "onset": first_text(info, "onset"),
-        "expires": first_text(info, "expires"),
+        "scope": first_text(root, "scope"),
+        "source": first_text(root, "source"),
+        "references": [v for v in (first_text(root, "references") or "").split() if v],
+        "event": first_text(preferred, "event"),
+        "headline": first_text(preferred, "headline"),
+        "description": first_text(preferred, "description"),
+        "instruction": first_text(preferred, "instruction"),
+        "severity": first_text(preferred, "severity"),
+        "urgency": first_text(preferred, "urgency"),
+        "certainty": first_text(preferred, "certainty"),
+        "effective": first_text(preferred, "effective"),
+        "onset": first_text(preferred, "onset"),
+        "expires": first_text(preferred, "expires"),
         "areas": areas,
+        "infoBlocks": [{
+            "language": first_text(info, "language"),
+            "event": first_text(info, "event"),
+            "headline": first_text(info, "headline"),
+            "description": first_text(info, "description"),
+            "instruction": first_text(info, "instruction"),
+            "severity": first_text(info, "severity"),
+            "urgency": first_text(info, "urgency"),
+            "certainty": first_text(info, "certainty"),
+            "effective": first_text(info, "effective"),
+            "onset": first_text(info, "onset"),
+            "expires": first_text(info, "expires"),
+        } for info in info_nodes],
         "url": url,
-        "source": "Servicio Meteorológico Nacional · CAP",
+        "sourceLabel": "Servicio Meteorológico Nacional · CAP",
         "lastSeen": iso(stamp),
     }
     expiry = parse_time(record["expires"])
@@ -247,15 +320,26 @@ def main():
     for index, url in enumerate(selected_urls):
         if index:
             time.sleep(REQUEST_DELAY_SECONDS)
-        try:
-            status, content_type, body = request_text(url, "application/cap+xml, application/xml, text/xml, */*")
-            parsed_records.append(cap_record(body, url, stamp))
-        except urllib.error.HTTPError as error:
-            failures.append({"url": url, "error": f"HTTP {error.code}"})
-            if error.code == 429:
+        for attempt in range(4):
+            try:
+                status, content_type, body = request_text(url, "application/cap+xml, application/xml, text/xml, */*")
+                parsed_records.append(cap_record(body, url, stamp))
                 break
-        except Exception as error:
-            failures.append({"url": url, "error": str(error)[:240]})
+            except urllib.error.HTTPError as error:
+                if error.code == 429 and attempt < 3:
+                    retry_after = error.headers.get("Retry-After", "") if error.headers else ""
+                    try:
+                        wait_seconds = max(REQUEST_DELAY_SECONDS, min(60, float(retry_after)))
+                    except (TypeError, ValueError):
+                        wait_seconds = min(60, REQUEST_DELAY_SECONDS * (2 ** (attempt + 1)))
+                    print(f"HTTP 429 en documento {index + 1}/{len(selected_urls)}; reintento {attempt + 1}/3 en {wait_seconds:.1f}s")
+                    time.sleep(wait_seconds)
+                    continue
+                failures.append({"url": url, "error": f"HTTP {error.code}", "attempts": attempt + 1})
+                break
+            except Exception as error:
+                failures.append({"url": url, "error": str(error)[:240], "attempts": attempt + 1})
+                break
 
     # Keep recently seen notices after they disappear from the source index.
     # The old MVP RSS format is kept only as unverified legacy history, never as a confirmed live warning.
@@ -321,15 +405,8 @@ def main():
     downloaded = len(parsed_records)
     # La cobertura solo es completa cuando todos los documentos del catálogo
     # fueron descargados y procesados correctamente en esta ejecución.
-    fresh_cutoff = stamp - timedelta(hours=14)
+    # Solo cuentan como frescos los documentos descargados y parseados en esta ejecución.
     fresh_urls = {item.get("url") for item in parsed_records if item.get("url")}
-    for old in previous_alerts:
-        if not isinstance(old, dict):
-            continue
-        old_url = old.get("url") or old.get("documentUrl")
-        old_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
-        if old_url in unique_urls and old_seen and old_seen >= fresh_cutoff:
-            fresh_urls.add(old_url)
     catalog_fresh = bool(unique_urls) and all(url in fresh_urls for url in unique_urls)
     complete = (
         not feed_failures and catalog_fresh
@@ -352,7 +429,9 @@ def main():
             "catalogFresh": catalog_fresh,
             "feedSources": feed_status,
             "feedErrors": feed_failures,
-            "documentErrors": failures[:10],
+            "documentErrors": failures[:20],
+            "failedCount": len(failures),
+            "unattemptedCount": max(0, len(selected_urls) - downloaded - len(failures)),
             "historyHours": HISTORY_HOURS,
         },
         "alerts": all_alerts,
