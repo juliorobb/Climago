@@ -287,6 +287,14 @@ function pointInCapCircle(lon,lat,circle){
   const distance=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
   return distance<=radius;
 }
+function getSmnAlertLocation(){
+  const list=readLocations(),id=primaryId(list),primary=list.find(place=>place.id===id);
+  if(primary&&Number.isFinite(primary.lat)&&Number.isFinite(primary.lon))
+    return {lat:primary.lat,lon:primary.lon,name:primary.name};
+  if(activeCoords&&Number.isFinite(activeCoords.lat)&&Number.isFinite(activeCoords.lon))
+    return activeCoords;
+  return getSelectedCoordinates();
+}
 function getSmnGeographicStatus(alert,coords){
   const lat=Number(coords?.lat),lon=Number(coords?.lon);
   if(!Number.isFinite(lat)||!Number.isFinite(lon))return "unverifiable";
@@ -389,8 +397,7 @@ async function loadOfficialAlerts(){
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const alerts=data.alerts;
-    const selectedCoords=(activeCoords&&Number.isFinite(Number(activeCoords.lat))&&Number.isFinite(Number(activeCoords.lon)))
-      ?activeCoords:getSelectedCoordinates();
+    const selectedCoords=getSmnAlertLocation();
     const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
     const localAlerts=classified.filter(item=>item.geo==="local").map(item=>item.alert);
     const otherRegionCount=classified.filter(item=>item.geo==="other").length;
