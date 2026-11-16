@@ -109,6 +109,41 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(by_id["alert-123"]["headline"], "Texto actualizado")
         self.assertEqual(by_id["alert-456"]["headline"], "Duplicado del mismo CAP")
 
+    def test_integrated_cancel_marks_previous_alert_cancelled_and_keeps_history(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        previous = [{"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "status": "Actual", "expires": "2026-11-16T15:00:00Z",
+            "lastSeen": "2026-11-16T11:00:00Z", "headline": "Tormentas"}]
+        cancel = {"identifier": "cancel-456", "url": "https://ssl.smn.gob.ar/cancel.xml",
+            "messageType": "Cancel", "referencedIdentifiers": ["alert-123"],
+            "state": "cancelled", "sent": "2026-11-16T11:30:00Z"}
+        result = smn.reconcile_alerts(previous, [cancel], set(), stamp)
+        old = next(item for item in result if item.get("identifier") == "alert-123")
+        self.assertEqual(old["state"], "cancelled")
+        self.assertEqual(old["cancelledBy"], "cancel-456")
+        self.assertIn("cancel-456", {item.get("identifier") for item in result})
+
+    def test_integrated_update_replaces_previous_alert_without_duplicate_history(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        previous = [{"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "lastSeen": "2026-11-16T11:00:00Z", "headline": "Texto anterior"}]
+        update = {"identifier": "update-789", "url": "https://ssl.smn.gob.ar/update.xml",
+            "messageType": "Update", "referencedIdentifiers": ["alert-123"],
+            "state": "active", "headline": "Texto actualizado"}
+        result = smn.reconcile_alerts(previous, [update], set(), stamp)
+        ids = [item.get("identifier") for item in result]
+        self.assertNotIn("alert-123", ids)
+        self.assertEqual(ids.count("update-789"), 1)
+        self.assertEqual(next(item for item in result if item.get("identifier") == "update-789")["headline"], "Texto actualizado")
+
+    def test_integrated_duplicate_documents_keep_single_latest_record(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        first = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml", "headline": "Primera versión", "state": "active"}
+        duplicate = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml", "headline": "Última versión", "state": "active"}
+        result = smn.reconcile_alerts([], [first, duplicate], set(), stamp)
+        self.assertEqual(len([item for item in result if item.get("identifier") == "alert-123"]), 1)
+        self.assertEqual(result[0]["headline"], "Última versión")
+
     def test_429_retries_then_continues_successfully(self):
         rate_limited = urllib.error.HTTPError(
             "https://ssl.smn.gob.ar/test.xml", 429, "Too Many Requests",
