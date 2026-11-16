@@ -215,6 +215,30 @@ def referenced_identifiers(references):
     return list(dict.fromkeys(identifiers))
 
 
+def referenced_ids_for(records, message_type):
+    wanted = str(message_type or "").lower()
+    return {
+        identifier
+        for item in records
+        if str(item.get("messageType", "")).lower() == wanted
+        for identifier in item.get("referencedIdentifiers", [])
+    }
+
+
+def merge_alert_records(retained, parsed_records):
+    """Keep one current record per CAP identifier; the newest parsed record wins."""
+    merged = {}
+    for item in retained:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    for item in parsed_records:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    return list(merged.values())
+
+
 def cap_record(payload, url, stamp):
     try:
         root = ET.fromstring(payload)
@@ -364,16 +388,8 @@ def main():
     current_keys = {item["identifier"] for item in parsed_records}
     parsed_urls = {item["url"] for item in parsed_records}
     current_catalog_urls = set(unique_urls)
-    cancelled_identifiers = {
-        identifier for item in parsed_records
-        if str(item.get("messageType", "")).lower() == "cancel"
-        for identifier in item.get("referencedIdentifiers", [])
-    }
-    updated_identifiers = {
-        identifier for item in parsed_records
-        if str(item.get("messageType", "")).lower() == "update"
-        for identifier in item.get("referencedIdentifiers", [])
-    }
+    cancelled_identifiers = referenced_ids_for(parsed_records, "cancel")
+    updated_identifiers = referenced_ids_for(parsed_records, "update")
     retained = []
     cutoff = stamp - timedelta(hours=HISTORY_HOURS)
     for old in previous_alerts:
@@ -426,10 +442,7 @@ def main():
             }
         retained.append(old)
 
-    merged = {item.get("identifier") or item.get("url") or item.get("headline"): item for item in retained}
-    for item in parsed_records:
-        merged[item["identifier"]] = item
-    all_alerts = list(merged.values())
+    all_alerts = merge_alert_records(retained, parsed_records)
     order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
     all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
 
