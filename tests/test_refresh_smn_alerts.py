@@ -144,26 +144,16 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(len([item for item in result if item.get("identifier") == "alert-123"]), 1)
         self.assertEqual(result[0]["headline"], "Última versión")
 
-    def test_429_retries_then_continues_successfully(self):
+    def test_429_is_not_retried(self):
         rate_limited = urllib.error.HTTPError(
             "https://ssl.smn.gob.ar/test.xml", 429, "Too Many Requests",
-            {"Retry-After": "0"}, None
+            {"Retry-After": "30"}, None
         )
-        with patch.object(smn, "request_text", side_effect=[rate_limited, (200, "application/xml", b"<alert/>")]) as request, patch.object(smn.time, "sleep") as sleep:
-            result = smn.fetch_cap_document("https://ssl.smn.gob.ar/test.xml")
-        self.assertEqual(result[0], 200)
-        self.assertEqual(request.call_count, 2)
-        sleep.assert_called_once()
-
-    def test_429_exhaustion_raises_for_current_document_only(self):
-        rate_limited = urllib.error.HTTPError(
-            "https://ssl.smn.gob.ar/test.xml", 429, "Too Many Requests",
-            {"Retry-After": "0"}, None
-        )
-        with patch.object(smn, "request_text", side_effect=rate_limited) as request, patch.object(smn.time, "sleep"):
+        with patch.object(smn, "request_text", side_effect=rate_limited) as request, patch.object(smn.time, "sleep") as sleep:
             with self.assertRaises(urllib.error.HTTPError):
                 smn.fetch_cap_document("https://ssl.smn.gob.ar/test.xml")
-        self.assertEqual(request.call_count, 4)
+        self.assertEqual(request.call_count, 1)
+        sleep.assert_not_called()
 
     def test_cancel_in_same_batch_marks_referenced_alert_cancelled(self):
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
