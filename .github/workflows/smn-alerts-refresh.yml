@@ -22,7 +22,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +35,7 @@ jobs:
           node --check app.js
           node --check service-worker.js
           python -m py_compile scripts/refresh_smn_alerts.py
+          python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
       - name: Commit refreshed data only when it changes
