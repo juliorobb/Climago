@@ -80,6 +80,35 @@ class CapGeometryTests(unittest.TestCase):
         ]
         self.assertEqual(smn.referenced_identifiers(values), ["alert-123", "alert-456"])
 
+    def test_update_message_extracts_referenced_alert_identifier(self):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+          <identifier>update-789</identifier><sender>smn@smn.gob.ar</sender>
+          <sent>2026-11-16T09:30:00-03:00</sent><status>Actual</status>
+          <msgType>Update</msgType><scope>Public</scope>
+          <references>smn@smn.gob.ar,alert-123,2026-11-16T08:00:00-03:00</references>
+          <info><language>es-AR</language><event>Tormentas</event>
+            <headline>Aviso actualizado</headline><expires>2026-11-16T14:00:00-03:00</expires></info>
+        </alert>""".encode("utf-8")
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        record = smn.cap_record(xml, "https://ssl.smn.gob.ar/update.xml", stamp)
+        self.assertEqual(record["messageType"], "Update")
+        self.assertEqual(record["referencedIdentifiers"], ["alert-123"])
+        self.assertEqual(smn.referenced_ids_for([record], "update"), {"alert-123"})
+
+    def test_merge_keeps_one_record_per_identifier_and_prefers_new_parse(self):
+        previous = [{"identifier": "alert-123", "headline": "Texto anterior"}]
+        current = [
+            {"identifier": "alert-123", "headline": "Texto actualizado"},
+            {"identifier": "alert-456", "headline": "Otro aviso"},
+            {"identifier": "alert-456", "headline": "Duplicado del mismo CAP"},
+        ]
+        merged = smn.merge_alert_records(previous, current)
+        by_id = {item["identifier"]: item for item in merged}
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(by_id["alert-123"]["headline"], "Texto actualizado")
+        self.assertEqual(by_id["alert-456"]["headline"], "Duplicado del mismo CAP")
+
     def test_429_retries_then_continues_successfully(self):
         rate_limited = urllib.error.HTTPError(
             "https://ssl.smn.gob.ar/test.xml", 429, "Too Many Requests",
