@@ -77,6 +77,23 @@ def request_text(url, accept):
     return status, content_type, body
 
 
+def fetch_cap_document(url):
+    """Retry rate-limited CAP documents without abandoning the remaining catalog."""
+    for attempt in range(4):
+        try:
+            return request_text(url, "application/cap+xml, application/xml, text/xml, */*")
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt == 3:
+                raise
+            retry_after = error.headers.get("Retry-After", "") if error.headers else ""
+            try:
+                wait_seconds = max(REQUEST_DELAY_SECONDS, min(60, float(retry_after)))
+            except (TypeError, ValueError):
+                wait_seconds = min(60, REQUEST_DELAY_SECONDS * (2 ** (attempt + 1)))
+            print(f"HTTP 429; reintento {attempt + 1}/3 en {wait_seconds:.1f}s: {url}")
+            time.sleep(wait_seconds)
+
+
 def valid_cap_url(raw, base):
     if not raw:
         return None
@@ -320,26 +337,13 @@ def main():
     for index, url in enumerate(selected_urls):
         if index:
             time.sleep(REQUEST_DELAY_SECONDS)
-        for attempt in range(4):
-            try:
-                status, content_type, body = request_text(url, "application/cap+xml, application/xml, text/xml, */*")
-                parsed_records.append(cap_record(body, url, stamp))
-                break
-            except urllib.error.HTTPError as error:
-                if error.code == 429 and attempt < 3:
-                    retry_after = error.headers.get("Retry-After", "") if error.headers else ""
-                    try:
-                        wait_seconds = max(REQUEST_DELAY_SECONDS, min(60, float(retry_after)))
-                    except (TypeError, ValueError):
-                        wait_seconds = min(60, REQUEST_DELAY_SECONDS * (2 ** (attempt + 1)))
-                    print(f"HTTP 429 en documento {index + 1}/{len(selected_urls)}; reintento {attempt + 1}/3 en {wait_seconds:.1f}s")
-                    time.sleep(wait_seconds)
-                    continue
-                failures.append({"url": url, "error": f"HTTP {error.code}", "attempts": attempt + 1})
-                break
-            except Exception as error:
-                failures.append({"url": url, "error": str(error)[:240], "attempts": attempt + 1})
-                break
+        try:
+            status, content_type, body = fetch_cap_document(url)
+            parsed_records.append(cap_record(body, url, stamp))
+        except urllib.error.HTTPError as error:
+            failures.append({"url": url, "error": f"HTTP {error.code}", "attempts": 4 if error.code == 429 else 1})
+        except Exception as error:
+            failures.append({"url": url, "error": str(error)[:240], "attempts": 1})
 
     # Keep recently seen notices after they disappear from the source index.
     # The old MVP RSS format is kept only as unverified legacy history, never as a confirmed live warning.
