@@ -58,7 +58,7 @@ function readLocations(){
 }
 function saveLocations(list){localStorage.setItem(LOCATIONS_KEY,JSON.stringify(list));}
 function primaryId(list){const stored=localStorage.getItem(PRIMARY_KEY);return list.some(l=>l.id===stored)?stored:(list[0]?.id||"");}
-function setPrimary(id){localStorage.setItem(PRIMARY_KEY,id);renderLocations();}
+function setPrimary(id){localStorage.setItem(PRIMARY_KEY,id);renderLocations();document.dispatchEvent(new Event("climago-location-updated"));}
 function updateCurrentLocationLabel(list){
   const primary=list.find(l=>l.id===primaryId(list));
   document.getElementById("current-location-label").textContent=primary?`${primary.name} ▾`:"Agregar ubicación ▾";
@@ -161,6 +161,7 @@ let lastWeatherRefresh=0;
 async function loadWeather(lat,lon,name){
   const requestId=++weatherRequestId;
   activeCoords={lat,lon,name:name||"Ubicación seleccionada"};
+  document.dispatchEvent(new Event("climago-location-updated"));
   const label=document.getElementById("current-location-label");if(label&&name)label.textContent=`${name} ▾`;
   const source=document.getElementById("weather-updated");if(source)source.textContent="Actualizando datos meteorológicos…";
   const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&forecast_days=7&timezone=auto`;
@@ -374,6 +375,7 @@ function renderSmnAlerts(host,alerts,emptyText,geography="local"){
   for(const alert of alerts)host.append(createSmnAlertCard(alert,geography));
 }
 let smnAlertsRequest=0;
+let lastAlertsLocationKey="";
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
@@ -400,6 +402,7 @@ async function loadOfficialAlerts(){
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const alerts=data.alerts;
     const selectedCoords=getSmnAlertLocation();
+    lastAlertsLocationKey=String(selectedCoords.lat)+","+String(selectedCoords.lon);
     const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
     const localAlerts=classified.filter(item=>item.geo==="local").map(item=>item.alert);
     const otherRegionCount=classified.filter(item=>item.geo==="other").length;
@@ -462,6 +465,11 @@ async function loadOfficialAlerts(){
   }
 }
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
+document.addEventListener("climago-location-updated",()=>{
+  const coords=getSmnAlertLocation();
+  const key=String(coords.lat)+","+String(coords.lon);
+  if(key!==lastAlertsLocationKey)loadOfficialAlerts();
+});
 loadOfficialAlerts();
 
 /* Selector de paisajes de Inicio: usa recursos locales del repositorio. */
