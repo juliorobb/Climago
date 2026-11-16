@@ -205,15 +205,27 @@ def cap_area(area):
     return result
 
 
+def referenced_identifiers(references):
+    """Extract the identifier from CAP reference triples: sender,identifier,sent."""
+    identifiers = []
+    for reference in references or []:
+        parts = str(reference).split(",")
+        if len(parts) == 3 and parts[1].strip():
+            identifiers.append(parts[1].strip())
+    return list(dict.fromkeys(identifiers))
+
+
 def cap_record(payload, url, stamp):
     try:
         root = ET.fromstring(payload)
     except ET.ParseError as error:
         raise ValueError("XML CAP inválido: " + str(error))
     info_nodes = children(root, "info")
-    if not info_nodes:
+    message_type = first_text(root, "msgtype")
+    # CAP cancellation messages may legitimately contain no <info> block.
+    if not info_nodes and message_type.lower() != "cancel":
         raise ValueError("El documento no contiene bloques CAP <info>.")
-    preferred = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0])
+    preferred = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0] if info_nodes else None)
     areas = []
     for area in children(preferred, "area"):
         parsed = cap_area(area)
@@ -222,15 +234,17 @@ def cap_record(payload, url, stamp):
     identifier = first_text(root, "identifier")
     if not identifier:
         raise ValueError("Documento CAP sin identifier.")
+    references = [v for v in (first_text(root, "references") or "").split() if v]
     record = {
         "identifier": identifier,
         "sender": first_text(root, "sender"),
         "sent": first_text(root, "sent"),
-        "messageType": first_text(root, "msgtype"),
+        "messageType": message_type,
         "status": first_text(root, "status"),
+        "references": references,
+        "referencedIdentifiers": referenced_identifiers(references),
         "scope": first_text(root, "scope"),
         "source": first_text(root, "source"),
-        "references": [v for v in (first_text(root, "references") or "").split() if v],
         "event": first_text(preferred, "event"),
         "headline": first_text(preferred, "headline"),
         "description": first_text(preferred, "description"),
@@ -350,6 +364,16 @@ def main():
     current_keys = {item["identifier"] for item in parsed_records}
     parsed_urls = {item["url"] for item in parsed_records}
     current_catalog_urls = set(unique_urls)
+    cancelled_identifiers = {
+        identifier for item in parsed_records
+        if str(item.get("messageType", "")).lower() == "cancel"
+        for identifier in item.get("referencedIdentifiers", [])
+    }
+    updated_identifiers = {
+        identifier for item in parsed_records
+        if str(item.get("messageType", "")).lower() == "update"
+        for identifier in item.get("referencedIdentifiers", [])
+    }
     retained = []
     cutoff = stamp - timedelta(hours=HISTORY_HOURS)
     for old in previous_alerts:
@@ -360,6 +384,8 @@ def main():
         last_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
         if identifier and identifier in current_keys:
             continue
+        if identifier and identifier in updated_identifiers:
+            continue
         if old_url and old_url in parsed_urls:
             continue
         if last_seen and last_seen < cutoff:
@@ -369,8 +395,9 @@ def main():
             effective = parse_time(old.get("effective") or old.get("onset"))
             status = str(old.get("status", "")).lower()
             msg_type = str(old.get("messageType", "")).lower()
-            if status == "cancel" or msg_type == "cancel":
+            if identifier in cancelled_identifiers or status == "cancel" or msg_type == "cancel":
                 old["state"] = "cancelled"
+                old["cancelledBy"] = next((item["identifier"] for item in parsed_records if identifier in item.get("referencedIdentifiers", []) and str(item.get("messageType", "")).lower() == "cancel"), "")
             elif expiry and expiry < stamp:
                 old["state"] = "expired"
             elif old_url in current_catalog_urls:
