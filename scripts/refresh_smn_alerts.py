@@ -327,6 +327,11 @@ def load_previous():
 def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stamp, previous_generated_at=""):
     """Reconcile CAP lifecycle messages, including messages found in one batch."""
     records = [dict(item) for item in parsed_records if isinstance(item, dict)]
+    previously_cancelled = {
+        item.get("identifier"): item.get("cancelledBy", "")
+        for item in previous_alerts
+        if isinstance(item, dict) and item.get("identifier") and item.get("state") == "cancelled"
+    }
     cancelled_by = {}
     updated_identifiers = referenced_ids_for(records, "update")
     for item in records:
@@ -339,9 +344,9 @@ def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stam
         msg_type = str(item.get("messageType", "")).lower()
         if identifier in updated_identifiers and msg_type != "update":
             continue
-        if identifier in cancelled_by:
+        if identifier in cancelled_by or identifier in previously_cancelled:
             item["state"] = "cancelled"
-            item["cancelledBy"] = cancelled_by[identifier]
+            item["cancelledBy"] = cancelled_by.get(identifier) or previously_cancelled.get(identifier, "")
         reconciled_records.append(item)
 
     current_keys = {item.get("identifier") for item in reconciled_records}
