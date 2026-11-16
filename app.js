@@ -265,8 +265,55 @@ function getSmnAlertState(alert){
   if(start&&!Number.isNaN(start.getTime())&&start.getTime()>Date.now())return "scheduled";
   return current;
 }
+function pointInCapPolygon(lon,lat,ring){
+  if(!Array.isArray(ring)||ring.length<4)return false;
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const a=ring[i],b=ring[j];
+    if(!Array.isArray(a)||!Array.isArray(b))continue;
+    const xi=Number(a[0]),yi=Number(a[1]),xj=Number(b[0]),yj=Number(b[1]);
+    if(![xi,yi,xj,yj].every(Number.isFinite))continue;
+    const intersects=((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi+Number.EPSILON)+xi);
+    if(intersects)inside=!inside;
+  }
+  return inside;
+}
+function pointInCapCircle(lon,lat,circle){
+  const circleLat=Number(circle?.lat),circleLon=Number(circle?.lon),radius=Number(circle?.radiusKm);
+  if(![circleLat,circleLon,radius].every(Number.isFinite)||radius<=0)return false;
+  const rad=value=>value*Math.PI/180;
+  const dLat=rad(circleLat-lat),dLon=rad(circleLon-lon);
+  const a=Math.sin(dLat/2)**2+Math.cos(rad(lat))*Math.cos(rad(circleLat))*Math.sin(dLon/2)**2;
+  const distance=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
+  return distance<=radius;
+}
+function getSmnGeographicStatus(alert,coords){
+  const lat=Number(coords?.lat),lon=Number(coords?.lon);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon))return "unverifiable";
+  const areas=Array.isArray(alert.areas)?alert.areas:[];
+  let hasGeometry=false;
+  for(const area of areas){
+    if(!area||typeof area!=="object")continue;
+    const polygons=Array.isArray(area.polygons)?area.polygons:[];
+    for(const ring of polygons){
+      if(Array.isArray(ring)&&ring.length>=4){
+        hasGeometry=true;
+        if(pointInCapPolygon(lon,lat,ring))return "local";
+      }
+    }
+    const circles=Array.isArray(area.circles)?area.circles:[];
+    for(const circle of circles){
+      if(circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))){
+        hasGeometry=true;
+        if(pointInCapCircle(lon,lat,circle))return "local";
+      }
+    }
+  }
+  return hasGeometry?"other":"unverifiable";
+}
 function createSmnAlertCard(alert){
   const card=smnElement("article","smn-alert-card");
+  card.dataset.severity=String(alert.severity||"unknown").toLowerCase();
   const top=smnElement("div","smn-alert-top");
   const title=smnElement("b","",alert.headline||alert.event||alert.title||"Aviso meteorológico");
   const state=getSmnAlertState(alert);
@@ -342,10 +389,16 @@ async function loadOfficialAlerts(){
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const alerts=data.alerts;
-    const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
-    const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
-    renderSmnAlerts(activeHost,active,"No se identificaron avisos vigentes entre los documentos consultados.");
-    renderSmnAlerts(historyHost,history,"No hay avisos vencidos o cancelados conservados en el historial.");
+    const selectedCoords=(activeCoords&&Number.isFinite(Number(activeCoords.lat))&&Number.isFinite(Number(activeCoords.lon)))
+      ?activeCoords:getSelectedCoordinates();
+    const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
+    const localAlerts=classified.filter(item=>item.geo==="local").map(item=>item.alert);
+    const otherRegionCount=classified.filter(item=>item.geo==="other").length;
+    const unverifiableCount=classified.filter(item=>item.geo==="unverifiable").length;
+    const active=localAlerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
+    const history=localAlerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
+    renderSmnAlerts(activeHost,active,"No se identificaron avisos con geometría oficial que alcance esta ubicación.");
+    renderSmnAlerts(historyHost,history,"No hay avisos históricos correspondientes a esta ubicación.");
     const coverage=data.coverage||{};
     const complete=coverage.complete===true||data.status==="ok";
     const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
@@ -354,16 +407,19 @@ async function loadOfficialAlerts(){
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
+    const locationSummary=" Ubicación evaluada: "+(selectedCoords.name||"seleccionada")+". "+
+      otherRegionCount+" avisos de otras regiones no se muestran; "+
+      unverifiableCount+" no tienen geometría suficiente para confirmar si alcanzan esta ubicación.";
     const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
     // Una fecha ausente o inválida nunca debe presentarse como información reciente.
     const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
     if(complete){
       if(statusTitle)statusTitle.textContent=currentAlerts?"Se encontraron avisos oficiales vigentes":scheduledAlerts?"Se encontraron avisos oficiales programados":unconfirmedAlerts?"Hay avisos cuya vigencia debe confirmarse":"Sin avisos vigentes en la cobertura consultada";
-      if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||14)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados.";
+      if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||14)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados."+locationSummary;
       if(statusPanel)statusPanel.dataset.state="complete";
     }else{
       if(statusTitle)statusTitle.textContent=active.length?"Avisos encontrados · cobertura parcial":"No se pudo confirmar la ausencia de avisos";
-      if(statusDetail)statusDetail.textContent="Consulta parcial: "+downloaded+" documentos procesados de "+(discovered||"cantidad no informada")+" detectados. No interpretes una lista vacía como ausencia de riesgo.";
+      if(statusDetail)statusDetail.textContent="Consulta parcial: "+downloaded+" documentos procesados de "+(discovered||"cantidad no informada")+" detectados. No interpretes una lista vacía como ausencia de riesgo."+locationSummary;
       if(statusPanel)statusPanel.dataset.state="partial";
     }
     if(stale){
