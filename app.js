@@ -380,6 +380,7 @@ let lastAlertsLocationKey="";
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
+  const unverifiedHost=document.getElementById("smn-alerts-unverified");
   const statusTitle=document.getElementById("smn-alerts-status-title");
   const statusDetail=document.getElementById("smn-alerts-status-detail");
   const statusPanel=document.getElementById("smn-alerts-status");
