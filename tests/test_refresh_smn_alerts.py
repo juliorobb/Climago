@@ -165,6 +165,37 @@ class CapGeometryTests(unittest.TestCase):
                 smn.fetch_cap_document("https://ssl.smn.gob.ar/test.xml")
         self.assertEqual(request.call_count, 4)
 
+    def test_cancel_in_same_batch_marks_referenced_alert_cancelled(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        alert = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "state": "active", "headline": "Tormentas"}
+        cancel = {"identifier": "cancel-456", "url": "https://ssl.smn.gob.ar/cancel.xml",
+            "messageType": "Cancel", "referencedIdentifiers": ["alert-123"], "state": "cancelled"}
+        result = smn.reconcile_alerts([], [alert, cancel], set(), stamp)
+        old = next(item for item in result if item.get("identifier") == "alert-123")
+        self.assertEqual(old["state"], "cancelled")
+        self.assertEqual(old["cancelledBy"], "cancel-456")
+
+    def test_update_in_same_batch_removes_referenced_old_alert(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        alert = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "state": "active"}
+        update = {"identifier": "update-789", "url": "https://ssl.smn.gob.ar/update.xml",
+            "messageType": "Update", "referencedIdentifiers": ["alert-123"], "state": "active"}
+        result = smn.reconcile_alerts([], [alert, update], set(), stamp)
+        ids = [item.get("identifier") for item in result]
+        self.assertNotIn("alert-123", ids)
+        self.assertIn("update-789", ids)
+
+    def test_cancelled_history_stays_cancelled_after_cancel_document_disappears(self):
+        stamp = datetime.datetime(2026, 11, 16, 13, 0, tzinfo=datetime.timezone.utc)
+        previous = [{"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
+            "messageType": "Alert", "state": "cancelled", "expires": "2026-11-16T18:00:00Z",
+            "lastSeen": "2026-11-16T12:00:00Z", "cancelledBy": "cancel-456"}]
+        result = smn.reconcile_alerts(previous, [], {"https://ssl.smn.gob.ar/alert.xml"}, stamp)
+        self.assertEqual(result[0]["state"], "cancelled")
+        self.assertEqual(result[0]["cancelledBy"], "cancel-456")
+
 
 if __name__ == "__main__":
     unittest.main()
