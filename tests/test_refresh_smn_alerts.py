@@ -56,6 +56,30 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(len(record["areas"][0]["circles"]), 1)
         self.assertEqual(record["areas"][0]["geocodes"][0]["value"], "001")
 
+    def test_cancel_message_without_info_is_parsed_and_links_previous_identifier(self):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+          <identifier>cancel-456</identifier><sender>smn@smn.gob.ar</sender>
+          <sent>2026-11-16T09:00:00-03:00</sent><status>Actual</status>
+          <msgType>Cancel</msgType><scope>Public</scope>
+          <references>smn@smn.gob.ar,alert-123,2026-11-16T08:00:00-03:00</references>
+        </alert>""".encode("utf-8")
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        record = smn.cap_record(xml, "https://ssl.smn.gob.ar/cancel.xml", stamp)
+        self.assertEqual(record["state"], "cancelled")
+        self.assertEqual(record["referencedIdentifiers"], ["alert-123"])
+        self.assertEqual(record["areas"], [])
+        self.assertEqual(record["infoBlocks"], [])
+
+    def test_referenced_identifiers_ignore_malformed_entries_and_deduplicate(self):
+        values = [
+            "smn@smn.gob.ar,alert-123,2026-11-16T08:00:00-03:00",
+            "bad-reference",
+            "smn@smn.gob.ar,alert-123,2026-11-16T08:00:00-03:00",
+            "smn@smn.gob.ar,alert-456,2026-11-16T08:30:00-03:00",
+        ]
+        self.assertEqual(smn.referenced_identifiers(values), ["alert-123", "alert-456"])
+
     def test_429_retries_then_continues_successfully(self):
         rate_limited = urllib.error.HTTPError(
             "https://ssl.smn.gob.ar/test.xml", 429, "Too Many Requests",
