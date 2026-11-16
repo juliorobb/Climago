@@ -319,7 +319,7 @@ function getSmnGeographicStatus(alert,coords){
   }
   return hasGeometry?"other":"unverifiable";
 }
-function createSmnAlertCard(alert){
+function createSmnAlertCard(alert,geography="local"){
   const card=smnElement("article","smn-alert-card");
   card.dataset.severity=String(alert.severity||"unknown").toLowerCase();
   const top=smnElement("div","smn-alert-top");
@@ -328,7 +328,9 @@ function createSmnAlertCard(alert){
   const labels={active:"VIGENTE",scheduled:"PRÓXIMO",expired:"VENCIDO",cancelled:"CANCELADO",unconfirmed:"VIGENCIA A CONFIRMAR",not_currently_listed:"YA NO FIGURA EN EL FEED"};
   const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
   badge.dataset.state=state;
+  if(geography==="unverifiable")badge.textContent="UBICACIÓN NO VERIFICABLE";
   top.append(title,badge);
+  if(geography==="unverifiable")card.append(smnElement("p","smn-alert-location-note","El CAP no aporta un polígono o círculo para confirmar si este aviso alcanza la ubicación seleccionada."));
   card.append(top);
   const severity=[
     localizeSmnValue(alert.severity,"severity"),
@@ -366,10 +368,10 @@ function createSmnAlertCard(alert){
   }
   return card;
 }
-function renderSmnAlerts(host,alerts,emptyText){
+function renderSmnAlerts(host,alerts,emptyText,geography="local"){
   host.replaceChildren();
   if(!alerts.length){host.append(smnElement("div","empty-state",emptyText));return;}
-  for(const alert of alerts)host.append(createSmnAlertCard(alert));
+  for(const alert of alerts)host.append(createSmnAlertCard(alert,geography));
 }
 let smnAlertsRequest=0;
 async function loadOfficialAlerts(){
@@ -404,13 +406,15 @@ async function loadOfficialAlerts(){
     const unverifiableCount=classified.filter(item=>item.geo==="unverifiable").length;
     const active=localAlerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
     const history=localAlerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
+    const unverified=classified.filter(item=>item.geo==="unverifiable"&&["active","scheduled","unconfirmed"].includes(getSmnAlertState(item.alert))).map(item=>item.alert);
     renderSmnAlerts(activeHost,active,"No se identificaron avisos con geometría oficial que alcance esta ubicación.");
     renderSmnAlerts(historyHost,history,"No hay avisos históricos correspondientes a esta ubicación.");
+    if(unverifiedHost)renderSmnAlerts(unverifiedHost,unverified,"No hay avisos activos cuya ubicación pueda verificarse.", "unverifiable");
     const coverage=data.coverage||{};
     const complete=coverage.complete===true||data.status==="ok";
-    const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
-    const scheduledAlerts=alerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
-    const unconfirmedAlerts=alerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
+    const currentAlerts=localAlerts.filter(a=>getSmnAlertState(a)==="active").length;
+    const scheduledAlerts=localAlerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
+    const unconfirmedAlerts=localAlerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
@@ -442,6 +446,8 @@ async function loadOfficialAlerts(){
     const historyCount=document.getElementById("smn-history-count");
     if(activeCount)activeCount.textContent=String(active.length);
     if(historyCount)historyCount.textContent=String(history.length);
+    const unverifiedCount=document.getElementById("smn-unverified-count");
+    if(unverifiedCount)unverifiedCount.textContent=String(unverified.length);
   }catch(error){
     if(requestId!==smnAlertsRequest)return;
     if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
@@ -449,6 +455,7 @@ async function loadOfficialAlerts(){
     if(statusPanel)statusPanel.dataset.state="error";
     renderSmnAlerts(activeHost,[],"No hay datos vigentes verificables disponibles.");
     renderSmnAlerts(historyHost,[],"No se pudo cargar el historial de avisos.");
+    if(unverifiedHost)renderSmnAlerts(unverifiedHost,[],"No se pudieron cargar los avisos sin ubicación verificable.");
     if(updated)updated.textContent="No se pudo verificar la última actualización. Fuente prevista: Servicio Meteorológico Nacional · CAP.";
   }finally{
     if(button){button.disabled=false;button.textContent="↻ Actualizar";}
