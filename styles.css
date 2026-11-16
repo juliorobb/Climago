@@ -100,6 +100,7 @@
 .smn-alert-badge[data-state="unconfirmed"],.smn-alert-badge[data-state="not_currently_listed"]{color:#ffd27b;border-color:#8d6a28}
 .smn-alert-card p{font-size:11px;line-height:1.5;color:#c1cfdb;margin:0}
 .smn-alert-card .smn-alert-severity{font-weight:700;color:#ffd27b}
+.smn-alert-card .smn-alert-location-note{padding:7px 9px;border-left:3px solid #eab308;background:#3a321d;color:#ffe4a3;border-radius:6px}
 .smn-alert-card .smn-alert-instruction{color:#f0e3cb}
 .smn-alert-card small{display:block;font-size:10px;line-height:1.5;color:#93aabd}
 .smn-alert-card a{display:inline-block;margin-top:2px;color:#55cfe2;font-size:11px;text-decoration:none}
