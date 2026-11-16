@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [main]
+    branches: [main, work/smn-cap-refresh-once-2026-11-16]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
