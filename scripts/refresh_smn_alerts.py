@@ -324,6 +324,70 @@ def load_previous():
         return {}
 
 
+def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stamp, previous_generated_at=""):
+    """Reconcile CAP Alert, Update and Cancel messages with retained history."""
+    current_keys = {item["identifier"] for item in parsed_records}
+    parsed_urls = {item["url"] for item in parsed_records}
+    cancelled_identifiers = referenced_ids_for(parsed_records, "cancel")
+    updated_identifiers = referenced_ids_for(parsed_records, "update")
+    retained = []
+    cutoff = stamp - timedelta(hours=HISTORY_HOURS)
+    for old in previous_alerts:
+        if not isinstance(old, dict):
+            continue
+        old = dict(old)
+        identifier = old.get("identifier")
+        old_url = old.get("url") or old.get("documentUrl") or ""
+        last_seen = parse_time(old.get("lastSeen") or previous_generated_at)
+        if identifier and identifier in current_keys:
+            continue
+        if identifier and identifier in updated_identifiers:
+            continue
+        if old_url and old_url in parsed_urls:
+            continue
+        if last_seen and last_seen < cutoff:
+            continue
+        if identifier:
+            expiry = parse_time(old.get("expires"))
+            effective = parse_time(old.get("effective") or old.get("onset"))
+            status = str(old.get("status", "")).lower()
+            msg_type = str(old.get("messageType", "")).lower()
+            if identifier in cancelled_identifiers or status == "cancel" or msg_type == "cancel":
+                old["state"] = "cancelled"
+                old["cancelledBy"] = next((item["identifier"] for item in parsed_records if identifier in item.get("referencedIdentifiers", []) and str(item.get("messageType", "")).lower() == "cancel"), "")
+            elif expiry and expiry < stamp:
+                old["state"] = "expired"
+            elif old_url in current_catalog_urls:
+                if effective and effective > stamp:
+                    old["state"] = "scheduled"
+                elif expiry:
+                    old["state"] = "active"
+                else:
+                    old["state"] = "unconfirmed"
+            elif expiry:
+                old["state"] = "not_currently_listed"
+            else:
+                old["state"] = "unconfirmed"
+            old["lastSeen"] = iso(last_seen or stamp)
+        else:
+            old = {
+                "headline": old.get("title") or "Aviso CAP anterior (formato histórico)",
+                "description": old.get("description") or "",
+                "areas": old.get("areas") or [],
+                "url": old.get("url") or "",
+                "sent": old.get("sent") or "",
+                "severity": old.get("severity") or "",
+                "source": "Servicio Meteorológico Nacional · CAP (registro anterior sin vigencia verificable)",
+                "state": "unconfirmed",
+                "lastSeen": iso(last_seen or stamp),
+            }
+        retained.append(old)
+    all_alerts = merge_alert_records(retained, parsed_records)
+    order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
+    all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
+    return all_alerts
+
+
 def main():
     stamp = now_utc()
     previous = load_previous()
@@ -383,68 +447,12 @@ def main():
         except Exception as error:
             failures.append({"url": url, "error": str(error)[:240], "attempts": 1})
 
-    # Keep recently seen notices after they disappear from the source index.
-    # The old MVP RSS format is kept only as unverified legacy history, never as a confirmed live warning.
-    current_keys = {item["identifier"] for item in parsed_records}
-    parsed_urls = {item["url"] for item in parsed_records}
+    # Reconcile lifecycle messages and preserve relevant recent history.
     current_catalog_urls = set(unique_urls)
-    cancelled_identifiers = referenced_ids_for(parsed_records, "cancel")
-    updated_identifiers = referenced_ids_for(parsed_records, "update")
-    retained = []
-    cutoff = stamp - timedelta(hours=HISTORY_HOURS)
-    for old in previous_alerts:
-        if not isinstance(old, dict):
-            continue
-        identifier = old.get("identifier")
-        old_url = old.get("url") or old.get("documentUrl") or ""
-        last_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
-        if identifier and identifier in current_keys:
-            continue
-        if identifier and identifier in updated_identifiers:
-            continue
-        if old_url and old_url in parsed_urls:
-            continue
-        if last_seen and last_seen < cutoff:
-            continue
-        if identifier:
-            expiry = parse_time(old.get("expires"))
-            effective = parse_time(old.get("effective") or old.get("onset"))
-            status = str(old.get("status", "")).lower()
-            msg_type = str(old.get("messageType", "")).lower()
-            if identifier in cancelled_identifiers or status == "cancel" or msg_type == "cancel":
-                old["state"] = "cancelled"
-                old["cancelledBy"] = next((item["identifier"] for item in parsed_records if identifier in item.get("referencedIdentifiers", []) and str(item.get("messageType", "")).lower() == "cancel"), "")
-            elif expiry and expiry < stamp:
-                old["state"] = "expired"
-            elif old_url in current_catalog_urls:
-                if effective and effective > stamp:
-                    old["state"] = "scheduled"
-                elif expiry:
-                    old["state"] = "active"
-                else:
-                    old["state"] = "unconfirmed"
-            elif expiry:
-                old["state"] = "not_currently_listed"
-            else:
-                old["state"] = "unconfirmed"
-            old["lastSeen"] = iso(last_seen or stamp)
-        else:
-            old = {
-                "headline": old.get("title") or "Aviso CAP anterior (formato histórico)",
-                "description": old.get("description") or "",
-                "areas": old.get("areas") or [],
-                "url": old.get("url") or "",
-                "sent": old.get("sent") or "",
-                "severity": old.get("severity") or "",
-                "source": "Servicio Meteorológico Nacional · CAP (registro anterior sin vigencia verificable)",
-                "state": "unconfirmed",
-                "lastSeen": iso(last_seen or stamp),
-            }
-        retained.append(old)
-
-    all_alerts = merge_alert_records(retained, parsed_records)
-    order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
-    all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
+    all_alerts = reconcile_alerts(
+        previous_alerts, parsed_records, current_catalog_urls, stamp,
+        previous.get("generatedAt", "")
+    )
 
     downloaded = len(parsed_records)
     # La cobertura solo es completa cuando todos los documentos del catálogo
