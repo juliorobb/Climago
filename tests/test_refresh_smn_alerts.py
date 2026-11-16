@@ -155,6 +155,26 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(request.call_count, 1)
         sleep.assert_not_called()
 
+    def test_catalog_download_stops_after_first_429_and_keeps_prior_records(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        urls = [
+            "https://ssl.smn.gob.ar/one.xml",
+            "https://ssl.smn.gob.ar/two.xml",
+            "https://ssl.smn.gob.ar/three.xml",
+        ]
+        record = {"identifier": "alert-1", "url": urls[0], "headline": "Aviso", "state": "active"}
+        limited = urllib.error.HTTPError(urls[1], 429, "Too Many Requests", {}, None)
+        with patch.object(smn, "fetch_cap_document", side_effect=[
+            (200, "application/xml", b"<unused/>"), limited
+        ]) as fetch, patch.object(smn, "cap_record", return_value=record), patch.object(smn.time, "sleep"):
+            parsed, failures = smn.download_cap_catalog(urls, stamp)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["identifier"], "alert-1")
+        self.assertEqual(len(failures), 1)
+        self.assertEqual(failures[0]["error"], "HTTP 429")
+        self.assertEqual(failures[0]["attempts"], 1)
+        self.assertEqual(fetch.call_count, 2)
+
     def test_cancel_in_same_batch_marks_referenced_alert_cancelled(self):
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
         alert = {"identifier": "alert-123", "url": "https://ssl.smn.gob.ar/alert.xml",
