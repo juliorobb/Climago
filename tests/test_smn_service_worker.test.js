@@ -52,6 +52,11 @@ test("HTTP 200 with invalid JSON uses cached data", async()=>{
   const response=await networkFirstAlerts(request,url);
   assert.equal(response.headers.get("X-ClimaGo-Data-Status"),"stale-cache");
 });
+test("HTTP 200 without alert schema does not replace cached data", async()=>{
+  fetchResult=new Response(JSON.stringify({status:"unavailable"}),{status:200,headers:{"Content-Type":"application/json"}});
+  const response=await networkFirstAlerts(request,url);
+  assert.equal(response.headers.get("X-ClimaGo-Data-Status"),"stale-cache");
+});
 test("network failure uses cached data and marks it stale", async()=>{
   fetchError=new Error("offline");
   const response=await networkFirstAlerts(request,url);
