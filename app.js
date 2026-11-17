@@ -192,13 +192,18 @@ document.getElementById("push-enable-button")?.addEventListener("click",enablePu
 async function restorePushSubscriptionStatus(){
   const button=document.getElementById("push-enable-button");
   const testButton=document.getElementById("push-test-button");
+  if(testButton)testButton.disabled=true;
   if(!("serviceWorker" in navigator)||!("Notification" in window))return;
   try{
     const registration=await navigator.serviceWorker.ready;
     const subscription=await registration.pushManager?.getSubscription();
-    if(!subscription)return;
+    if(!subscription){
+      if(button)button.textContent="Activar notificaciones";
+      return;
+    }
     if(Notification.permission!=="granted"){
       setPushStatus("Hay una suscripción anterior, pero el permiso de notificaciones no está concedido.");
+      if(button)button.textContent="Revisar permisos";
       return;
     }
     const alertLocation=getSmnAlertLocation();
