@@ -60,6 +60,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -68,6 +71,7 @@ jobs:
           node --check app.js
           node --check service-worker.js
           node --test tests/test_smn_geography.test.js
+          node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
