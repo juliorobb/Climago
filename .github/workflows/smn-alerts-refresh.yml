@@ -34,6 +34,7 @@ jobs:
         run: |
           node --check app.js
           node --check service-worker.js
+          node --test tests/test_smn_geography.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
