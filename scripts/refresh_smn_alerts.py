@@ -260,6 +260,7 @@ def cap_record(payload, url, stamp):
     references = [v for v in (first_text(root, "references") or "").split() if v]
     record = {
         "identifier": identifier,
+        "geometrySchemaVersion": 1,
         "sender": first_text(root, "sender"),
         "sent": first_text(root, "sent"),
         "messageType": message_type,
@@ -315,6 +316,19 @@ def cap_record(payload, url, stamp):
         state = "unconfirmed"
     record["state"] = state
     return record
+
+
+def recently_processed_catalog_urls(alerts, parsed_records, freshness_cutoff):
+    """Only count URLs parsed with the current geometry-aware CAP schema."""
+    fresh = set()
+    for item in list(alerts or []) + list(parsed_records or []):
+        if not isinstance(item, dict) or item.get("geometrySchemaVersion") != 1:
+            continue
+        seen = parse_time(item.get("lastSeen"))
+        url = item.get("url")
+        if url and seen and seen >= freshness_cutoff:
+            fresh.add(url)
+    return fresh
 
 
 def select_catalog_batch(urls, previous_coverage, batch_size=MAX_DOCUMENTS):
@@ -510,11 +524,7 @@ def main():
     # fueron descargados y procesados correctamente en esta ejecución.
     # La cobertura se mide en una ventana móvil, porque el catálogo se consulta por lotes.
     freshness_cutoff = stamp - timedelta(hours=24)
-    recently_seen_urls = {
-        item.get("url") for item in all_alerts
-        if item.get("url") and parse_time(item.get("lastSeen")) and parse_time(item.get("lastSeen")) >= freshness_cutoff
-    }
-    recently_seen_urls.update(item.get("url") for item in parsed_records if item.get("url"))
+    recently_seen_urls = recently_processed_catalog_urls(all_alerts, parsed_records, freshness_cutoff)
     catalog_fresh = bool(unique_urls) and all(url in recently_seen_urls for url in unique_urls)
     complete = (
         not feed_failures and catalog_fresh
