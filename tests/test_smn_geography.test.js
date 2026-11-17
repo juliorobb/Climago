@@ -51,9 +51,13 @@ test("malformed geometry and missing coordinates never become non-local certaint
 });
 test("old or missing per-alert checks downgrade active alerts to unconfirmed", () => {
   const expires = new Date(Date.now()+60*60*1000).toISOString();
-  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date(Date.now()-60*60*1000).toISOString()}), "active");
-  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date(Date.now()-25*60*60*1000).toISOString()}), "unconfirmed");
-  assert.equal(getSmnAlertState({state:"active",expires}), "unconfirmed");
-  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),dataStale:true}), "unconfirmed");
+  const publicAlert = {status:"Actual",scope:"Public"};
+  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date(Date.now()-60*60*1000).toISOString(),...publicAlert}), "active");
+  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date(Date.now()-25*60*60*1000).toISOString(),...publicAlert}), "unconfirmed");
+  assert.equal(getSmnAlertState({state:"active",expires,...publicAlert}), "unconfirmed");
+  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),dataStale:true,...publicAlert}), "unconfirmed");
+  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),status:"Test",scope:"Public"}), "unconfirmed");
+  assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),status:"Actual",scope:"Restricted"}), "unconfirmed");
   assert.equal(getSmnAlertState({state:"cancelled",expires}), "cancelled");
+  assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()-60*60*1000).toISOString(),onset:new Date(Date.now()+60*60*1000).toISOString(),lastSeen:new Date().toISOString(),...publicAlert}), "scheduled");
 });
