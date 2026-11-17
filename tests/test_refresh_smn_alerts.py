@@ -12,6 +12,19 @@ SPEC.loader.exec_module(smn)
 
 
 class CapGeometryTests(unittest.TestCase):
+    def test_legacy_records_do_not_count_as_current_geometry_coverage(self):
+        cutoff = datetime.datetime(2026, 11, 17, 12, 0, tzinfo=datetime.timezone.utc)
+        legacy = {"url": "https://ssl.smn.gob.ar/legacy.xml", "lastSeen": "2026-11-17T13:00:00Z"}
+        current = {"url": "https://ssl.smn.gob.ar/current.xml", "lastSeen": "2026-11-17T13:00:00Z", "geometrySchemaVersion": 1}
+        stale_current = {"url": "https://ssl.smn.gob.ar/stale.xml", "lastSeen": "2026-11-16T10:00:00Z", "geometrySchemaVersion": 1}
+        fresh = smn.recently_processed_catalog_urls([legacy, current, stale_current], [], cutoff)
+        self.assertEqual(fresh, {"https://ssl.smn.gob.ar/current.xml"})
+
+    def test_newly_parsed_records_count_as_current_geometry_coverage(self):
+        cutoff = datetime.datetime(2026, 11, 17, 12, 0, tzinfo=datetime.timezone.utc)
+        parsed = {"url": "https://ssl.smn.gob.ar/new.xml", "lastSeen": "2026-11-17T13:00:00Z", "geometrySchemaVersion": 1}
+        self.assertEqual(smn.recently_processed_catalog_urls([], [parsed], cutoff), {parsed["url"]})
+
     def test_polygon_converts_cap_lat_lon_to_geojson_lon_lat(self):
         ring = smn.parse_polygon("-31.40,-64.20 -31.40,-64.10 -31.50,-64.10 -31.50,-64.20")
         self.assertEqual(ring[0], [-64.2, -31.4])
