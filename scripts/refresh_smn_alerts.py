@@ -65,6 +65,15 @@ def parse_time(value):
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
 
+def cap_event_start(record):
+    """Use the later CAP effective/onset time as the earliest confirmed event start."""
+    candidates = [
+        parse_time(record.get("effective")),
+        parse_time(record.get("onset")),
+    ]
+    valid = [value for value in candidates if value is not None]
+    return max(valid) if valid else None
+
 
 def request_text(url, accept):
     request = urllib.request.Request(url, headers={
@@ -288,7 +297,7 @@ def cap_record(payload, url, stamp):
         "lastSeen": iso(stamp),
     }
     expiry = parse_time(record["expires"])
-    event_start = parse_time(record["onset"] or record["effective"])
+    event_start = cap_event_start(record)
     status = (record["status"] or "").lower()
     scope = (record["scope"] or "").lower()
     message_type = (record["messageType"] or "").lower()
@@ -403,7 +412,7 @@ def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stam
             continue
         if identifier:
             expiry = parse_time(old.get("expires"))
-            effective = parse_time(old.get("onset") or old.get("effective"))
+            effective = cap_event_start(old)
             status = str(old.get("status", "")).lower()
             msg_type = str(old.get("messageType", "")).lower()
             if old.get("state") == "cancelled" or identifier in cancelled_by or status == "cancel" or msg_type == "cancel":
