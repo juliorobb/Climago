@@ -1,5 +1,6 @@
 name: Refresh official SMN CAP alerts
 on:
+  # Pull-request validation is enabled in the integration base branch too.
   push:
     branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, work/alertas-geografia-integracion-2026-11-17]
     paths:
