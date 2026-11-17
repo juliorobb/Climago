@@ -71,7 +71,7 @@ test("network failure without cache returns explicit unavailable data", async()=
 test("successful JSON response refreshes the alert cache", async()=>{
   cached=null;
   fetchError=null;
-  fetchResult=new Response(JSON.stringify({alerts:[]}),{
+  fetchResult=new Response(JSON.stringify({status:"partial",generatedAt:new Date().toISOString(),alerts:[]}),{
     status:200,headers:{"Content-Type":"application/json"}
   });
   const before=putCount;
