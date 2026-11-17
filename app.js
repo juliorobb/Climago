@@ -751,6 +751,7 @@ async function loadOfficialAlerts(){
   const statusPanel=document.getElementById("smn-alerts-status");
   const updated=document.getElementById("alerts-updated");
   if(!activeHost||!historyHost)return;
+  restorePushSubscriptionStatus();
   const requestId=++smnAlertsRequest;
   if(statusTitle)statusTitle.textContent="Consultando los últimos avisos oficiales del SMN…";
   if(statusDetail)statusDetail.textContent="Solicitando el archivo CAP actualizado.";
