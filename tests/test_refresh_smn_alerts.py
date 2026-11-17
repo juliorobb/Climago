@@ -75,7 +75,7 @@ class CapGeometryTests(unittest.TestCase):
             record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
             self.assertEqual(record["state"], "unconfirmed")
 
-    def test_onset_takes_priority_over_effective_for_event_timing(self):
+    def test_later_effective_or_onset_controls_event_timing(self):
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
         xml = b"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
           <identifier>scheduled-onset</identifier><sender>smn@smn.gob.ar</sender>
