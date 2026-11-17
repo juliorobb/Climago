@@ -307,7 +307,7 @@ def cap_record(payload, url, stamp):
         state = "expired"
     elif status != "actual" or scope != "public":
         state = "unconfirmed"
-    elif event_start and event_start > stamp:
+    elif event_start and event_start > stamp and expiry:
         state = "scheduled"
     elif expiry and expiry >= stamp:
         state = "active"
