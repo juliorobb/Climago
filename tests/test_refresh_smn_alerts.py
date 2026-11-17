@@ -61,6 +61,35 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(len(record["areas"][0]["circles"]), 1)
         self.assertEqual(record["areas"][0]["geocodes"][0]["value"], "001")
 
+    def test_non_actual_or_non_public_cap_is_not_marked_active(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        for status, scope in [("Test", "Public"), ("Actual", "Restricted")]:
+            xml = f"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+              <identifier>test-{status}-{scope}</identifier><sender>smn@smn.gob.ar</sender>
+              <sent>2026-11-16T08:00:00-03:00</sent><status>{status}</status>
+              <msgType>Alert</msgType><scope>{scope}</scope>
+              <info><language>es-AR</language><event>Tormentas</event>
+                <expires>2026-11-16T18:00:00-03:00</expires>
+                <area><areaDesc>Córdoba</areaDesc><polygon>-31.40,-64.20 -31.40,-64.10 -31.50,-64.10</polygon></area>
+              </info></alert>""".encode("utf-8")
+            record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
+            self.assertEqual(record["state"], "unconfirmed")
+
+    def test_onset_takes_priority_over_effective_for_event_timing(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        xml = b"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+          <identifier>scheduled-onset</identifier><sender>smn@smn.gob.ar</sender>
+          <sent>2026-11-16T08:00:00-03:00</sent><status>Actual</status>
+          <msgType>Alert</msgType><scope>Public</scope>
+          <info><language>es-AR</language><event>Tormentas</event>
+            <effective>2026-11-16T08:00:00-03:00</effective>
+            <onset>2026-11-16T15:00:00-03:00</onset>
+            <expires>2026-11-16T18:00:00-03:00</expires>
+            <area><areaDesc>Córdoba</areaDesc><polygon>-31.40,-64.20 -31.40,-64.10 -31.50,-64.10</polygon></area>
+          </info></alert>"""
+        record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
+        self.assertEqual(record["state"], "scheduled")
+
     def test_cancel_message_without_info_is_parsed_and_links_previous_identifier(self):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
         <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
