@@ -238,6 +238,16 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(selected[0], urls[5])
         self.assertEqual(selected[-1], urls[16])
 
+
+    def test_cursor_advances_past_a_first_document_rate_limit(self):
+        self.assertEqual(smn.next_catalog_cursor(0, 1, 110), 1)
+
+    def test_cursor_advances_by_all_attempts_not_only_successes(self):
+        self.assertEqual(smn.next_catalog_cursor(10, 12, 110), 22)
+
+    def test_cursor_wraps_at_catalog_end(self):
+        self.assertEqual(smn.next_catalog_cursor(108, 4, 110), 2)
+
     def test_empty_catalog_has_no_batch(self):
         self.assertEqual(smn.select_catalog_batch([], {}, 12), ([], 0, False))
 
