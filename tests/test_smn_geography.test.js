@@ -25,6 +25,7 @@ const polygon = [[-64.20,-31.40],[-64.10,-31.40],[-64.10,-31.50],[-64.20,-31.50]
 
 test("polygon includes points inside and on its boundary", () => {
   assert.equal(isValidCapPolygon(polygon), true);
+  assert.equal(isValidCapPolygon([[0,0],[1,1],[2,2],[0,0]]), false);
   assert.equal(pointInCapPolygon(cordoba.lon, cordoba.lat, polygon), true);
   assert.equal(pointInCapPolygon(-64.20, -31.45, polygon), true);
 });
