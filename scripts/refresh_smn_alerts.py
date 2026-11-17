@@ -521,7 +521,7 @@ def main():
             "documentErrors": failures[:20],
             "failedCount": len(failures),
             "rateLimited": any(item.get("error") == "HTTP 429" for item in failures),
-            "unattemptedCount": max(0, len(selected_urls) - downloaded - len(failures)),
+            "unattemptedCount": max(0, len(unique_urls) - downloaded - len(failures)),
             "historyHours": HISTORY_HOURS,
         },
         "alerts": all_alerts,
