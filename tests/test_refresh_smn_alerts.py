@@ -21,6 +21,11 @@ class CapGeometryTests(unittest.TestCase):
     def test_invalid_polygon_is_rejected(self):
         self.assertEqual(smn.parse_polygon("not coordinates"), [])
 
+    def test_polygon_rejects_partial_or_out_of_range_coordinates(self):
+        self.assertEqual(smn.parse_polygon("-31.4,-64.2 invalid -31.5,-64.1"), [])
+        self.assertEqual(smn.parse_polygon("-31.4,-64.2 91,0 -31.5,-64.1"), [])
+        self.assertEqual(smn.parse_polygon("-31.4,-64.2 -31.4,-64.2 -31.4,-64.2"), [])
+
     def test_circle_parses_center_and_radius(self):
         self.assertEqual(
             smn.parse_circle("-31.4167,-64.1833 25"),
