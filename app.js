@@ -145,6 +145,7 @@ document.getElementById("use-location").addEventListener("click",()=>{
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));}
 
 const PUSH_WORKER_URL="https://push-notifications-infra-climago-smn.juliorobbles01.workers.dev";
+const PUSH_LOCATION_KEY="climago-push-location-v1";
 function setPushStatus(message){const el=document.getElementById("push-subscription-status");if(el)el.textContent=message;}
 function base64UrlToBytes(value){
   const padding="=".repeat((4-value.length%4)%4);
@@ -178,6 +179,7 @@ async function enablePushNotifications(){
     });
     const saved=await saveResponse.json().catch(()=>({}));
     if(!saveResponse.ok||!saved.ok)throw new Error(saved.error||"No se pudo guardar la suscripción (HTTP "+saveResponse.status+").");
+    try{localStorage.setItem(PUSH_LOCATION_KEY,JSON.stringify({lat:alertLocation.lat,lon:alertLocation.lon,name:alertLocation.name||"Ubicación principal"}));}catch{}
     setPushStatus("Notificaciones activadas para "+(alertLocation.name||"tu ubicación principal")+". Este teléfono quedó registrado.");
     const testButton=document.getElementById("push-test-button");if(testButton)testButton.disabled=false;
     button.textContent="Notificaciones activadas";
@@ -199,7 +201,16 @@ async function restorePushSubscriptionStatus(){
       setPushStatus("Hay una suscripción anterior, pero el permiso de notificaciones no está concedido.");
       return;
     }
-    setPushStatus("El navegador conserva una suscripción. Falta comprobar que el servidor la tenga registrada; enviá una prueba para verificarla.");
+    const alertLocation=getSmnAlertLocation();
+    const savedLocation=(()=>{try{return JSON.parse(localStorage.getItem(PUSH_LOCATION_KEY)||"null");}catch{return null;}})();
+    const sameLocation=savedLocation&&Number.isFinite(Number(savedLocation.lat))&&Number.isFinite(Number(savedLocation.lon))&&Number.isFinite(alertLocation.lat)&&Number.isFinite(alertLocation.lon)&&Math.abs(Number(savedLocation.lat)-alertLocation.lat)<0.00001&&Math.abs(Number(savedLocation.lon)-alertLocation.lon)<0.00001;
+    if(!sameLocation){
+      setPushStatus("Hay una suscripción en el navegador, pero no está vinculada de forma verificable a la ubicación principal actual. Reactivá las notificaciones para actualizar la zona.");
+      if(button)button.textContent="Actualizar ubicación de alertas";
+      if(testButton)testButton.disabled=true;
+      return;
+    }
+    setPushStatus("El navegador conserva una suscripción para "+(alertLocation.name||"la ubicación principal"). Verificá el servidor enviando una prueba.");
     if(button)button.textContent="Suscripción detectada";
     if(testButton)testButton.disabled=false;
   }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
