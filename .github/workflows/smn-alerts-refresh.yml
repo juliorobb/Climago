@@ -10,6 +10,15 @@ on:
       - "index.html"
       - "styles.css"
       - "tests/test_refresh_smn_alerts.py"
+      - "tests/test_smn_geography.test.js"
+  pull_request:
+    paths:
+      - ".github/workflows/smn-alerts-refresh.yml"
+      - "scripts/refresh_smn_alerts.py"
+      - "app.js"
+      - "index.html"
+      - "tests/test_refresh_smn_alerts.py"
+      - "tests/test_smn_geography.test.js"
   workflow_dispatch:
   # GitHub schedules run from the default branch (main).
   schedule:
@@ -20,7 +29,26 @@ concurrency:
   group: climago-smn-alerts-feature
   cancel-in-progress: true
 jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate alert code without contacting the SMN
+        run: |
+          node --check app.js
+          node --check service-worker.js
+          node --test tests/test_smn_geography.test.js
+          python -m py_compile scripts/refresh_smn_alerts.py
+          python -m unittest discover -s tests -v
   refresh:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
