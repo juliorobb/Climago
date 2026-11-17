@@ -90,6 +90,27 @@ class CapGeometryTests(unittest.TestCase):
         record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
         self.assertEqual(record["state"], "scheduled")
 
+    def test_cap_event_start_uses_the_later_effective_or_onset_time(self):
+        later = datetime.datetime(2026, 11, 16, 15, 0, tzinfo=datetime.timezone.utc)
+        record = {
+            "effective": "2026-11-16T12:00:00Z",
+            "onset": "2026-11-16T15:00:00Z",
+        }
+        self.assertEqual(smn.cap_event_start(record), later)
+
+    def test_future_onset_without_expiry_is_not_confirmed_as_scheduled(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        xml = b"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+          <identifier>scheduled-no-expiry</identifier><sender>smn@smn.gob.ar</sender>
+          <sent>2026-11-16T08:00:00-03:00</sent><status>Actual</status>
+          <msgType>Alert</msgType><scope>Public</scope>
+          <info><language>es-AR</language><event>Tormentas</event>
+            <onset>2026-11-16T15:00:00-03:00</onset>
+            <area><areaDesc>Córdoba</areaDesc></area>
+          </info></alert>"""
+        record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
+        self.assertEqual(record["state"], "unconfirmed")
+
     def test_cancel_message_without_info_is_parsed_and_links_previous_identifier(self):
         xml = """<?xml version="1.0" encoding="UTF-8"?>
         <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
