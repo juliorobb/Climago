@@ -60,5 +60,8 @@ test("old or missing per-alert checks downgrade active alerts to unconfirmed", (
   assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),status:"Test",scope:"Public"}), "unconfirmed");
   assert.equal(getSmnAlertState({state:"active",expires,lastSeen:new Date().toISOString(),status:"Actual",scope:"Restricted"}), "unconfirmed");
   assert.equal(getSmnAlertState({state:"cancelled",expires}), "cancelled");
-  assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()-60*60*1000).toISOString(),onset:new Date(Date.now()+60*60*1000).toISOString(),lastSeen:new Date().toISOString(),...publicAlert}), "scheduled");
+  assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()-60*60*1000).toISOString(),onset:new Date(Date.now()+60*60*1000).toISOString(),expires,lastSeen:new Date().toISOString(),...publicAlert}), "scheduled");
+  assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()+60*60*1000).toISOString(),onset:new Date(Date.now()-60*60*1000).toISOString(),expires,lastSeen:new Date().toISOString(),...publicAlert}), "scheduled");
+  assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()-60*60*1000).toISOString(),onset:new Date(Date.now()-30*60*1000).toISOString(),expires,lastSeen:new Date().toISOString(),...publicAlert}), "active");
+  assert.equal(getSmnAlertState({state:"scheduled",onset:new Date(Date.now()+60*60*1000).toISOString(),lastSeen:new Date().toISOString(),...publicAlert}), "unconfirmed");
 });
