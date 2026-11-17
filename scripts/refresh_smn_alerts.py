@@ -288,14 +288,17 @@ def cap_record(payload, url, stamp):
         "lastSeen": iso(stamp),
     }
     expiry = parse_time(record["expires"])
-    effective = parse_time(record["effective"] or record["onset"])
+    event_start = parse_time(record["onset"] or record["effective"])
     status = (record["status"] or "").lower()
+    scope = (record["scope"] or "").lower()
     message_type = (record["messageType"] or "").lower()
-    if status == "cancel" or message_type == "cancel":
+    if message_type == "cancel":
         state = "cancelled"
     elif expiry and expiry < stamp:
         state = "expired"
-    elif effective and effective > stamp:
+    elif status != "actual" or scope != "public":
+        state = "unconfirmed"
+    elif event_start and event_start > stamp:
         state = "scheduled"
     elif expiry and expiry >= stamp:
         state = "active"
@@ -400,7 +403,7 @@ def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stam
             continue
         if identifier:
             expiry = parse_time(old.get("expires"))
-            effective = parse_time(old.get("effective") or old.get("onset"))
+            effective = parse_time(old.get("onset") or old.get("effective"))
             status = str(old.get("status", "")).lower()
             msg_type = str(old.get("messageType", "")).lower()
             if old.get("state") == "cancelled" or identifier in cancelled_by or status == "cancel" or msg_type == "cancel":
