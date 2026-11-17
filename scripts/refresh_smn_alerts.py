@@ -488,9 +488,14 @@ def main():
     downloaded = len(parsed_records)
     # La cobertura solo es completa cuando todos los documentos del catálogo
     # fueron descargados y procesados correctamente en esta ejecución.
-    # Solo cuentan como frescos los documentos descargados y parseados en esta ejecución.
-    fresh_urls = {item.get("url") for item in parsed_records if item.get("url")}
-    catalog_fresh = bool(unique_urls) and all(url in fresh_urls for url in unique_urls)
+    # La cobertura se mide en una ventana móvil, porque el catálogo se consulta por lotes.
+    freshness_cutoff = stamp - timedelta(hours=24)
+    recently_seen_urls = {
+        item.get("url") for item in all_alerts
+        if item.get("url") and parse_time(item.get("lastSeen")) and parse_time(item.get("lastSeen")) >= freshness_cutoff
+    }
+    recently_seen_urls.update(item.get("url") for item in parsed_records if item.get("url"))
+    catalog_fresh = bool(unique_urls) and all(url in recently_seen_urls for url in unique_urls)
     complete = (
         not feed_failures and catalog_fresh
         and downloaded == len(selected_urls) and not failures
@@ -509,7 +514,7 @@ def main():
             "batchSize": MAX_DOCUMENTS,
             "truncated": truncated,
             "nextCursor": next_cursor,
-            "freshWindowHours": 14,
+            "freshWindowHours": 24,
             "catalogFresh": catalog_fresh,
             "feedSources": feed_status,
             "feedErrors": feed_failures,
