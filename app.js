@@ -170,14 +170,15 @@ async function enablePushNotifications(){
     if(!keyData.publicKey)throw new Error("El servidor no devolvió la clave pública VAPID.");
     let subscription=await registration.pushManager.getSubscription();
     if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:base64UrlToBytes(keyData.publicKey)});
-    if(!Number.isFinite(activeCoords.lat)||!Number.isFinite(activeCoords.lon))throw new Error("No hay coordenadas válidas para la ubicación seleccionada.");
+    const alertLocation=getSmnAlertLocation();
+    if(!Number.isFinite(alertLocation.lat)||!Number.isFinite(alertLocation.lon))throw new Error("La ubicación principal guardada no tiene coordenadas válidas para recibir alertas.");
     const saveResponse=await fetch(PUSH_WORKER_URL+"/?resource=subscribe",{
       method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8","Accept":"application/json"},
-      body:JSON.stringify({subscription:subscription.toJSON(),lat:activeCoords.lat,lon:activeCoords.lon,locationName:activeCoords.name||"Ubicación seleccionada"})
+      body:JSON.stringify({subscription:subscription.toJSON(),lat:alertLocation.lat,lon:alertLocation.lon,locationName:alertLocation.name||"Ubicación principal"})
     });
     const saved=await saveResponse.json().catch(()=>({}));
     if(!saveResponse.ok||!saved.ok)throw new Error(saved.error||"No se pudo guardar la suscripción (HTTP "+saveResponse.status+").");
-    setPushStatus("Notificaciones activadas para "+(activeCoords.name||"tu ubicación")+". Este teléfono quedó registrado.");
+    setPushStatus("Notificaciones activadas para "+(alertLocation.name||"tu ubicación principal")+". Este teléfono quedó registrado.");
     const testButton=document.getElementById("push-test-button");if(testButton)testButton.disabled=false;
     button.textContent="Notificaciones activadas";
   }catch(error){
@@ -198,8 +199,8 @@ async function restorePushSubscriptionStatus(){
       setPushStatus("Hay una suscripción anterior, pero el permiso de notificaciones no está concedido.");
       return;
     }
-    setPushStatus("Notificaciones activadas para este teléfono. La suscripción existente fue recuperada.");
-    if(button)button.textContent="Notificaciones activadas";
+    setPushStatus("El navegador conserva una suscripción. Falta comprobar que el servidor la tenga registrada; enviá una prueba para verificarla.");
+    if(button)button.textContent="Suscripción detectada";
     if(testButton)testButton.disabled=false;
   }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
 }
