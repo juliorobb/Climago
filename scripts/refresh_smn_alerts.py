@@ -317,6 +317,13 @@ def select_catalog_batch(urls, previous_coverage, batch_size=MAX_DOCUMENTS):
     return selected, cursor, len(urls) > count
 
 
+def next_catalog_cursor(start_cursor, attempted_count, total_count):
+    """Advance past every attempted URL, including a document rejected with HTTP 429."""
+    if total_count <= 0:
+        return 0
+    return (max(0, int(start_cursor)) + max(0, int(attempted_count))) % total_count
+
+
 def download_cap_catalog(selected_urls, stamp):
     """Download CAP documents sequentially and stop immediately when SMN rate-limits."""
     parsed_records = []
@@ -475,8 +482,8 @@ def main():
     previous_coverage = previous.get("coverage", {}) if isinstance(previous.get("coverage"), dict) else {}
     selected_urls, start_cursor, truncated = select_catalog_batch(unique_urls, previous_coverage)
     parsed_records, failures = download_cap_catalog(selected_urls, stamp)
-    successful_urls = {item.get("url") for item in parsed_records if item.get("url")}
-    next_cursor = (start_cursor + len(successful_urls)) % len(unique_urls) if unique_urls else 0
+    attempted_count = len(parsed_records) + len(failures)
+    next_cursor = next_catalog_cursor(start_cursor, attempted_count, len(unique_urls))
 
     # Reconcile lifecycle messages and preserve relevant recent history.
     current_catalog_urls = set(unique_urls)
