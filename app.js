@@ -609,7 +609,18 @@ function createSmnAlertCard(alert,geography="local"){
     card.append(smnElement("p","","Consultá las áreas y vigencia en el detalle del aviso."));
   }
   const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean):[];
-  const areaText=areas.length?areas.join(" · "):(alert.areaDesc||"Zona no especificada en los datos recibidos");
+  const hasOfficialGeometry=Array.isArray(alert.areas)&&alert.areas.some(area=>
+    area&&typeof area==="object"&&(
+      (Array.isArray(area.polygons)&&area.polygons.some(ring=>Array.isArray(ring)&&ring.length>=4))||
+      (Array.isArray(area.circles)&&area.circles.some(circle=>circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))))
+    )
+  );
+  const areaFallback=geography==="local"&&hasOfficialGeometry
+    ?"Área delimitada por geometría oficial; incluye esta ubicación"
+    :geography==="other"&&hasOfficialGeometry
+      ?"Área delimitada por geometría oficial; no incluye esta ubicación"
+      :"Zona no especificada en los datos recibidos";
+  const areaText=areas.length?areas.join(" · "):(alert.areaDesc||areaFallback);
   if(alert.relatedCount>1)card.append(smnElement("small","smn-alert-area",alert.relatedCount+" documentos CAP agrupados por fenómeno, nivel y zona informada."));
   card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
   const validity=[];
