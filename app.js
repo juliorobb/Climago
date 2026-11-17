@@ -756,8 +756,8 @@ async function loadOfficialAlerts(){
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
-    // Datos antiguos o con reloj futuro anómalo no confirman vigencia actual.
-    const stale=!Number.isFinite(generatedAtMs)||generatedAtMs>Date.now()+5*60*1000||(Date.now()-generatedAtMs>90*60*1000);
+    // Una copia servida desde caché nunca confirma vigencia actual por sí sola.
+    const stale=staleCache||!Number.isFinite(generatedAtMs)||generatedAtMs>Date.now()+5*60*1000||(Date.now()-generatedAtMs>90*60*1000);
     const alerts=data.alerts.map(alert=>({...alert,dataStale:stale}));
     const selectedCoords=getSmnAlertLocation();
     const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
@@ -787,12 +787,14 @@ async function loadOfficialAlerts(){
       if(statusPanel)statusPanel.dataset.state="partial";
     }
     if(stale){
-      if(statusTitle)statusTitle.textContent="Datos oficiales desactualizados o sin fecha verificable";
-      if(statusDetail)statusDetail.textContent+=" La última actualización supera los 90 minutos o no tiene una fecha válida. No uses esta información para confirmar que no hay riesgo.";
+      if(statusTitle)statusTitle.textContent="Datos oficiales sin actualización verificable";
+      if(statusDetail)statusDetail.textContent+=staleCache
+        ?" No se pudo confirmar una actualización con el servidor. Esta copia no permite confirmar que no haya riesgo."
+        :" La última actualización supera los 90 minutos o no tiene una fecha válida. No uses esta información para confirmar que no hay riesgo.";
       if(statusPanel)statusPanel.dataset.state="stale";
     }
-    if(staleCache){
-      if(statusDetail)statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono porque no fue posible consultar el servidor.";
+    if(staleCache&&statusDetail){
+      statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono.";
     }
     if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
     const activeCount=document.getElementById("smn-active-count");
