@@ -33,7 +33,15 @@ async function networkFirstAlerts(request,url){
     const response=await fetch(request,{cache:"no-store"});
     if(response.ok){
       const type=(response.headers.get("content-type")||"").toLowerCase();
-      if(type.includes("json"))await cache.put(key,response.clone());
+      if(type.includes("json")){
+        try{
+          await response.clone().json();
+          await cache.put(key,response.clone());
+          return response;
+        }catch(error){}
+      }
+      const previous=await cachedAlertsResponse(cache,key);
+      if(previous)return previous;
       return response;
     }
     if(response.status===429||response.status>=500){
