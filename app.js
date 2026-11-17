@@ -550,7 +550,11 @@ function isValidCapPolygon(ring){
   const first=points[0],last=points[points.length-1];
   if(Math.abs(first[0]-last[0])>1e-9||Math.abs(first[1]-last[1])>1e-9)return false;
   const distinct=new Set(points.slice(0,-1).map(point=>point.join(",")));
-  return distinct.size>=3;
+  if(distinct.size<3)return false;
+  let twiceArea=0;
+  for(let i=0;i<points.length-1;i++)
+    twiceArea+=points[i][0]*points[i+1][1]-points[i+1][0]*points[i][1];
+  return Math.abs(twiceArea)>1e-12;
 }
 function pointInCapPolygon(lon,lat,ring){
   if(!Number.isFinite(lon)||!Number.isFinite(lat)||!isValidCapPolygon(ring))return false;
