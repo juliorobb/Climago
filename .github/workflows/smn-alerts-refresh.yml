@@ -9,6 +9,7 @@ on:
       - "service-worker.js"
       - "index.html"
       - "styles.css"
+      - "tests/test_refresh_smn_alerts.py"
   workflow_dispatch:
   # GitHub schedules run from the default branch (main).
   schedule:
