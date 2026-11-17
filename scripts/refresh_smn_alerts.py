@@ -138,19 +138,20 @@ def index_links(payload):
 
 
 def parse_polygon(value):
-    """Convert CAP 'lat,lon lat,lon ...' into GeoJSON-order [lon, lat] pairs."""
+    """Convert a complete CAP lat,lon ring into GeoJSON-order [lon, lat] pairs."""
     points = []
     for pair in (value or "").strip().split():
         parts = pair.split(",")
         if len(parts) != 2:
-            continue
+            return []
         try:
             lat, lon = float(parts[0]), float(parts[1])
         except ValueError:
-            continue
-        if -90 <= lat <= 90 and -180 <= lon <= 180:
-            points.append([lon, lat])
-    if len(points) < 3:
+            return []
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return []
+        points.append([lon, lat])
+    if len(points) < 3 or len({tuple(point) for point in points}) < 3:
         return []
     if points[0] != points[-1]:
         points.append(points[0])
