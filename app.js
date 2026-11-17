@@ -210,7 +210,7 @@ async function restorePushSubscriptionStatus(){
       if(testButton)testButton.disabled=true;
       return;
     }
-    setPushStatus("El navegador conserva una suscripción para "+(alertLocation.name||"la ubicación principal"). Verificá el servidor enviando una prueba.");
+    setPushStatus("El navegador conserva una suscripción para "+(alertLocation.name||"la ubicación principal")+". Verificá el servidor enviando una prueba.");
     if(button)button.textContent="Suscripción detectada";
     if(testButton)testButton.disabled=false;
   }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
