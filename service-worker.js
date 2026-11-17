@@ -35,9 +35,11 @@ async function networkFirstAlerts(request,url){
       const type=(response.headers.get("content-type")||"").toLowerCase();
       if(type.includes("json")){
         try{
-          await response.clone().json();
-          await cache.put(key,response.clone());
-          return response;
+          const data=await response.clone().json();
+          if(Array.isArray(data.alerts)&&data.generatedAt&&data.status!=="unavailable"){
+            await cache.put(key,response.clone());
+            return response;
+          }
         }catch(error){}
       }
       const previous=await cachedAlertsResponse(cache,key);
