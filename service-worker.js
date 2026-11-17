@@ -19,6 +19,13 @@ self.addEventListener("activate",event=>{
       .then(()=>self.clients.claim())
   );
 });
+async function cachedAlertsResponse(cache,key){
+  const previous=await cache.match(key);
+  if(!previous)return null;
+  const headers=new Headers(previous.headers);
+  headers.set("X-ClimaGo-Data-Status","stale-cache");
+  return new Response(previous.body,{status:previous.status,statusText:previous.statusText,headers});
+}
 async function networkFirstAlerts(request,url){
   const cache=await caches.open(DATA_CACHE);
   const key=new Request(url.origin+url.pathname,{method:"GET"});
@@ -27,15 +34,16 @@ async function networkFirstAlerts(request,url){
     if(response.ok){
       const type=(response.headers.get("content-type")||"").toLowerCase();
       if(type.includes("json"))await cache.put(key,response.clone());
+      return response;
+    }
+    if(response.status===429||response.status>=500){
+      const previous=await cachedAlertsResponse(cache,key);
+      if(previous)return previous;
     }
     return response;
   }catch(error){
-    const previous=await cache.match(key);
-    if(previous){
-      const headers=new Headers(previous.headers);
-      headers.set("X-ClimaGo-Data-Status","stale-cache");
-      return new Response(previous.body,{status:previous.status,statusText:previous.statusText,headers});
-    }
+    const previous=await cachedAlertsResponse(cache,key);
+    if(previous)return previous;
     return new Response(JSON.stringify({
       status:"unavailable",
       alerts:[],
