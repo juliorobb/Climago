@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05]
+    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, work/alertas-geografia-integracion-2026-11-17]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -34,6 +34,7 @@ jobs:
           node --check app.js
           node --check service-worker.js
           python -m py_compile scripts/refresh_smn_alerts.py
+          python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
       - name: Commit refreshed data only when it changes
