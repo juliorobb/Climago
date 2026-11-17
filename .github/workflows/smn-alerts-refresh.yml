@@ -38,7 +38,7 @@ jobs:
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
   refresh:
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/work/smn-cap-parser-geo-complete-2026-11-16' && contains(github.event.head_commit.message, '[run-smn-refresh-once]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
