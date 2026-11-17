@@ -541,6 +541,7 @@ function isValidCapPolygon(ring){
   const points=[];
   for(const point of ring){
     if(!Array.isArray(point)||point.length<2)return false;
+    if(point[0]===null||point[0]===undefined||point[1]===null||point[1]===undefined||String(point[0]).trim()===""||String(point[1]).trim()==="")return false;
     const lon=Number(point[0]),lat=Number(point[1]);
     if(!Number.isFinite(lon)||!Number.isFinite(lat)||lon< -180||lon>180||lat< -90||lat>90)return false;
     points.push([lon,lat]);
@@ -564,7 +565,8 @@ function pointInCapPolygon(lon,lat,ring){
   return inside;
 }
 function pointInCapCircle(lon,lat,circle){
-  const circleLat=Number(circle?.lat),circleLon=Number(circle?.lon),radius=Number(circle?.radiusKm);
+  if(circle?.lat===null||circle?.lat===undefined||circle?.lon===null||circle?.lon===undefined||circle?.radiusKm===null||circle?.radiusKm===undefined||String(circle.lat).trim()===""||String(circle.lon).trim()===""||String(circle.radiusKm).trim()==="")return false;
+  const circleLat=Number(circle.lat),circleLon=Number(circle.lon),radius=Number(circle.radiusKm);
   if(![lon,lat,circleLat,circleLon,radius].every(Number.isFinite)||lat< -90||lat>90||lon< -180||lon>180||circleLat< -90||circleLat>90||circleLon< -180||circleLon>180||radius<=0)return false;
   const rad=value=>value*Math.PI/180;
   const dLat=rad(circleLat-lat),dLon=rad(circleLon-lon);
@@ -584,7 +586,8 @@ function getSmnAlertLocation(){
   return getSelectedCoordinates();
 }
 function getSmnGeographicStatus(alert,coords){
-  const lat=Number(coords?.lat),lon=Number(coords?.lon);
+  if(coords?.lat===null||coords?.lat===undefined||coords?.lon===null||coords?.lon===undefined||String(coords.lat).trim()===""||String(coords.lon).trim()==="")return "unverifiable";
+  const lat=Number(coords.lat),lon=Number(coords.lon);
   if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -90||lat>90||lon< -180||lon>180)return "unverifiable";
   const areas=Array.isArray(alert.areas)?alert.areas:[];
   if(!areas.length)return "unverifiable";
@@ -601,7 +604,7 @@ function getSmnGeographicStatus(alert,coords){
     }
     const circles=Array.isArray(area.circles)?area.circles:[];
     for(const circle of circles){
-      const circleValid=circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))&&Number(circle.lat)>=-90&&Number(circle.lat)<=90&&Number(circle.lon)>=-180&&Number(circle.lon)<=180&&Number(circle.radiusKm)>0;
+      const circleValid=circle&&circle.lat!==null&&circle.lat!==undefined&&circle.lon!==null&&circle.lon!==undefined&&circle.radiusKm!==null&&circle.radiusKm!==undefined&&String(circle.lat).trim()!==""&&String(circle.lon).trim()!==""&&String(circle.radiusKm).trim()!==""&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))&&Number(circle.lat)>=-90&&Number(circle.lat)<=90&&Number(circle.lon)>=-180&&Number(circle.lon)<=180&&Number(circle.radiusKm)>0;
       if(circleValid){
         areaHasGeometry=true;hasGeometry=true;
         if(pointInCapCircle(lon,lat,circle))return "local";
