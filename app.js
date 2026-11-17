@@ -528,14 +528,23 @@ function getSmnAlertState(alert){
   if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=now)return "expired";
   if(["active","scheduled"].includes(current)){
     if(String(alert.status||"").toLowerCase()!=="actual"||String(alert.scope||"").toLowerCase()!=="public")return "unconfirmed";
+    if(!expiry||Number.isNaN(expiry.getTime()))return "unconfirmed";
     const checkedAt=alert.lastSeen?Date.parse(alert.lastSeen):NaN;
     const checkIsStale=!Number.isFinite(checkedAt)||checkedAt>now+5*60*1000||now-checkedAt>24*60*60*1000;
     if(alert.dataStale||checkIsStale)return "unconfirmed";
   }
-  const effective=alert.onset||alert.effective;
-  const start=effective?new Date(effective):null;
-  if(start&&!Number.isNaN(start.getTime())&&start.getTime()>now)return "scheduled";
+  const start=getSmnAlertStart(alert);
+  if(start&&start.getTime()>now)return "scheduled";
+  if(current==="scheduled")return start?"active":"unconfirmed";
   return current;
+}
+function getSmnAlertStart(alert){
+  const candidates=[alert.effective,alert.onset].map(value=>value?Date.parse(value):NaN).filter(Number.isFinite);
+  return candidates.length?new Date(Math.max(...candidates)):null;
+}
+function getSmnAlertStartValue(alert){
+  const start=getSmnAlertStart(alert);
+  return start?start.toISOString():"";
 }
 function isValidCapPolygon(ring){
   if(!Array.isArray(ring)||ring.length<4)return false;
@@ -659,7 +668,7 @@ function createSmnAlertCard(alert,geography="local"){
   if(alert.relatedCount>1)card.append(smnElement("small","smn-alert-area",alert.relatedCount+" documentos CAP agrupados por fenómeno, nivel y zona informada."));
   card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
   const validity=[];
-  const start=alert.periodStart||alert.onset||alert.effective;
+  const start=alert.periodStart||getSmnAlertStartValue(alert);
   const end=alert.periodEnd||alert.expires;
   if(start)validity.push("Desde "+formatSmnDate(start));
   if(end)validity.push("Hasta "+formatSmnDate(end));
@@ -704,7 +713,7 @@ function groupSmnAlerts(alerts){
     }
     group.relatedDocuments.push(alert);
     group.relatedCount++;
-    const start=alert.onset||alert.effective||"";
+    const start=getSmnAlertStartValue(alert);
     const end=alert.expires||"";
     if(start&&(!group.periodStart||Date.parse(start)<Date.parse(group.periodStart)))group.periodStart=start;
     if(end&&(!group.periodEnd||Date.parse(end)>Date.parse(group.periodEnd)))group.periodEnd=end;
