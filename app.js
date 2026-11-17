@@ -527,11 +527,12 @@ function getSmnAlertState(alert){
   const expiry=alert.expires?new Date(alert.expires):null;
   if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=now)return "expired";
   if(["active","scheduled"].includes(current)){
+    if(String(alert.status||"").toLowerCase()!=="actual"||String(alert.scope||"").toLowerCase()!=="public")return "unconfirmed";
     const checkedAt=alert.lastSeen?Date.parse(alert.lastSeen):NaN;
     const checkIsStale=!Number.isFinite(checkedAt)||checkedAt>now+5*60*1000||now-checkedAt>24*60*60*1000;
     if(alert.dataStale||checkIsStale)return "unconfirmed";
   }
-  const effective=alert.effective||alert.onset;
+  const effective=alert.onset||alert.effective;
   const start=effective?new Date(effective):null;
   if(start&&!Number.isNaN(start.getTime())&&start.getTime()>now)return "scheduled";
   return current;
@@ -654,7 +655,7 @@ function createSmnAlertCard(alert,geography="local"){
   if(alert.relatedCount>1)card.append(smnElement("small","smn-alert-area",alert.relatedCount+" documentos CAP agrupados por fenómeno, nivel y zona informada."));
   card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
   const validity=[];
-  const start=alert.periodStart||alert.effective||alert.onset;
+  const start=alert.periodStart||alert.onset||alert.effective;
   const end=alert.periodEnd||alert.expires;
   if(start)validity.push("Desde "+formatSmnDate(start));
   if(end)validity.push("Hasta "+formatSmnDate(end));
@@ -699,7 +700,7 @@ function groupSmnAlerts(alerts){
     }
     group.relatedDocuments.push(alert);
     group.relatedCount++;
-    const start=alert.effective||alert.onset||"";
+    const start=alert.onset||alert.effective||"";
     const end=alert.expires||"";
     if(start&&(!group.periodStart||Date.parse(start)<Date.parse(group.periodStart)))group.periodStart=start;
     if(end&&(!group.periodEnd||Date.parse(end)>Date.parse(group.periodEnd)))group.periodEnd=end;
