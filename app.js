@@ -525,6 +525,7 @@ function getSmnAlertState(alert){
   if(current==="cancelled"||String(alert.status||"").toLowerCase()==="cancel"||String(alert.messageType||"").toLowerCase()==="cancel")return "cancelled";
   const expiry=alert.expires?new Date(alert.expires):null;
   if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=Date.now())return "expired";
+  if(alert.dataStale&&["active","scheduled"].includes(current))return "unconfirmed";
   const effective=alert.effective||alert.onset;
   const start=effective?new Date(effective):null;
   if(start&&!Number.isNaN(start.getTime())&&start.getTime()>Date.now())return "scheduled";
@@ -712,7 +713,10 @@ async function loadOfficialAlerts(){
     const data=await response.json();
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
-    const alerts=data.alerts;
+    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
+    // Datos con más de 90 minutos no pueden confirmar vigencia actual ni futura.
+    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
+    const alerts=data.alerts.map(alert=>({...alert,dataStale:stale}));
     const selectedCoords=getSmnAlertLocation();
     lastAlertsLocationKey=String(selectedCoords.lat)+","+String(selectedCoords.lon);
     const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
@@ -732,9 +736,6 @@ async function loadOfficialAlerts(){
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
     const locationSummary=" Ubicación evaluada: "+(selectedCoords.name||"seleccionada")+". "+classified.filter(item=>item.geo==="other").length+" avisos de otras regiones no se muestran; "+classified.filter(item=>item.geo==="unverifiable").length+" no tienen geometría suficiente para confirmar si alcanzan esta ubicación.";
-    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
-    // Una fecha ausente o inválida nunca debe presentarse como información reciente.
-    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
     if(complete){
       if(statusTitle)statusTitle.textContent=currentAlerts?"Se encontraron avisos oficiales vigentes":scheduledAlerts?"Se encontraron avisos oficiales programados":unconfirmedAlerts?"Hay avisos cuya vigencia debe confirmarse":"Sin avisos vigentes en la cobertura consultada";
       if(statusDetail)statusDetail.textContent="Se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados."+locationSummary;
