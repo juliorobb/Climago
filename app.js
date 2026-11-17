@@ -523,30 +523,49 @@ function smnElement(tag,className,text){
 function getSmnAlertState(alert){
   const current=String(alert.state||"unconfirmed").toLowerCase();
   if(current==="cancelled"||String(alert.status||"").toLowerCase()==="cancel"||String(alert.messageType||"").toLowerCase()==="cancel")return "cancelled";
+  const now=Date.now();
   const expiry=alert.expires?new Date(alert.expires):null;
-  if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=Date.now())return "expired";
-  if(alert.dataStale&&["active","scheduled"].includes(current))return "unconfirmed";
+  if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=now)return "expired";
+  if(["active","scheduled"].includes(current)){
+    const checkedAt=alert.lastSeen?Date.parse(alert.lastSeen):NaN;
+    const checkIsStale=!Number.isFinite(checkedAt)||checkedAt>now+5*60*1000||now-checkedAt>24*60*60*1000;
+    if(alert.dataStale||checkIsStale)return "unconfirmed";
+  }
   const effective=alert.effective||alert.onset;
   const start=effective?new Date(effective):null;
-  if(start&&!Number.isNaN(start.getTime())&&start.getTime()>Date.now())return "scheduled";
+  if(start&&!Number.isNaN(start.getTime())&&start.getTime()>now)return "scheduled";
   return current;
 }
-function pointInCapPolygon(lon,lat,ring){
+function isValidCapPolygon(ring){
   if(!Array.isArray(ring)||ring.length<4)return false;
+  const points=[];
+  for(const point of ring){
+    if(!Array.isArray(point)||point.length<2)return false;
+    const lon=Number(point[0]),lat=Number(point[1]);
+    if(!Number.isFinite(lon)||!Number.isFinite(lat)||lon< -180||lon>180||lat< -90||lat>90)return false;
+    points.push([lon,lat]);
+  }
+  const first=points[0],last=points[points.length-1];
+  if(Math.abs(first[0]-last[0])>1e-9||Math.abs(first[1]-last[1])>1e-9)return false;
+  const distinct=new Set(points.slice(0,-1).map(point=>point.join(",")));
+  return distinct.size>=3;
+}
+function pointInCapPolygon(lon,lat,ring){
+  if(!Number.isFinite(lon)||!Number.isFinite(lat)||!isValidCapPolygon(ring))return false;
   let inside=false;
   for(let i=0,j=ring.length-1;i<ring.length;j=i++){
-    const a=ring[i],b=ring[j];
-    if(!Array.isArray(a)||!Array.isArray(b))continue;
-    const xi=Number(a[0]),yi=Number(a[1]),xj=Number(b[0]),yj=Number(b[1]);
-    if(![xi,yi,xj,yj].every(Number.isFinite))continue;
-    const intersects=((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi+Number.EPSILON)+xi);
+    const xi=Number(ring[i][0]),yi=Number(ring[i][1]),xj=Number(ring[j][0]),yj=Number(ring[j][1]);
+    const cross=(lon-xi)*(yj-yi)-(lat-yi)*(xj-xi);
+    const onSegment=Math.abs(cross)<=1e-9&&lon>=Math.min(xi,xj)-1e-9&&lon<=Math.max(xi,xj)+1e-9&&lat>=Math.min(yi,yj)-1e-9&&lat<=Math.max(yi,yj)+1e-9;
+    if(onSegment)return true;
+    const intersects=((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi);
     if(intersects)inside=!inside;
   }
   return inside;
 }
 function pointInCapCircle(lon,lat,circle){
   const circleLat=Number(circle?.lat),circleLon=Number(circle?.lon),radius=Number(circle?.radiusKm);
-  if(![circleLat,circleLon,radius].every(Number.isFinite)||radius<=0)return false;
+  if(![lon,lat,circleLat,circleLon,radius].every(Number.isFinite)||lat< -90||lat>90||lon< -180||lon>180||circleLat< -90||circleLat>90||circleLon< -180||circleLon>180||radius<=0)return false;
   const rad=value=>value*Math.PI/180;
   const dLat=rad(circleLat-lat),dLon=rad(circleLon-lon);
   const a=Math.sin(dLat/2)**2+Math.cos(rad(lat))*Math.cos(rad(circleLat))*Math.sin(dLon/2)**2;
@@ -555,35 +574,42 @@ function pointInCapCircle(lon,lat,circle){
 }
 function getSmnAlertLocation(){
   const list=readLocations(),id=primaryId(list),primary=list.find(place=>place.id===id);
-  if(primary&&Number.isFinite(primary.lat)&&Number.isFinite(primary.lon))
-    return {lat:primary.lat,lon:primary.lon,name:primary.name};
+  if(primary){
+    if(Number.isFinite(primary.lat)&&Number.isFinite(primary.lon))
+      return {lat:primary.lat,lon:primary.lon,name:primary.name};
+    return {lat:null,lon:null,name:primary.name};
+  }
   if(activeCoords&&Number.isFinite(activeCoords.lat)&&Number.isFinite(activeCoords.lon))
     return activeCoords;
   return getSelectedCoordinates();
 }
 function getSmnGeographicStatus(alert,coords){
   const lat=Number(coords?.lat),lon=Number(coords?.lon);
-  if(!Number.isFinite(lat)||!Number.isFinite(lon))return "unverifiable";
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -90||lat>90||lon< -180||lon>180)return "unverifiable";
   const areas=Array.isArray(alert.areas)?alert.areas:[];
-  let hasGeometry=false;
+  if(!areas.length)return "unverifiable";
+  let hasGeometry=false,hasIncompleteArea=false;
   for(const area of areas){
-    if(!area||typeof area!=="object")continue;
+    if(!area||typeof area!=="object"){hasIncompleteArea=true;continue;}
+    let areaHasGeometry=false;
     const polygons=Array.isArray(area.polygons)?area.polygons:[];
     for(const ring of polygons){
-      if(Array.isArray(ring)&&ring.length>=4){
-        hasGeometry=true;
+      if(isValidCapPolygon(ring)){
+        areaHasGeometry=true;hasGeometry=true;
         if(pointInCapPolygon(lon,lat,ring))return "local";
-      }
+      }else hasIncompleteArea=true;
     }
     const circles=Array.isArray(area.circles)?area.circles:[];
     for(const circle of circles){
-      if(circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))){
-        hasGeometry=true;
+      const circleValid=circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))&&Number(circle.lat)>=-90&&Number(circle.lat)<=90&&Number(circle.lon)>=-180&&Number(circle.lon)<=180&&Number(circle.radiusKm)>0;
+      if(circleValid){
+        areaHasGeometry=true;hasGeometry=true;
         if(pointInCapCircle(lon,lat,circle))return "local";
-      }
+      }else hasIncompleteArea=true;
     }
+    if(!areaHasGeometry)hasIncompleteArea=true;
   }
-  return hasGeometry?"other":"unverifiable";
+  return hasGeometry&&!hasIncompleteArea?"other":"unverifiable";
 }
 function createSmnAlertCard(alert,geography="local"){
   const card=smnElement("article","smn-alert-card");
@@ -687,7 +713,6 @@ function renderSmnAlerts(host,alerts,emptyText,geography="local"){
   for(const alert of groupSmnAlerts(alerts))host.append(createSmnAlertCard(alert,geography));
 }
 let smnAlertsRequest=0;
-let lastAlertsLocationKey="";
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
@@ -714,11 +739,10 @@ async function loadOfficialAlerts(){
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
     const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
-    // Datos con más de 90 minutos no pueden confirmar vigencia actual ni futura.
-    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
+    // Datos antiguos o con reloj futuro anómalo no confirman vigencia actual.
+    const stale=!Number.isFinite(generatedAtMs)||generatedAtMs>Date.now()+5*60*1000||(Date.now()-generatedAtMs>90*60*1000);
     const alerts=data.alerts.map(alert=>({...alert,dataStale:stale}));
     const selectedCoords=getSmnAlertLocation();
-    lastAlertsLocationKey=String(selectedCoords.lat)+","+String(selectedCoords.lon);
     const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
     const localAlerts=classified.filter(item=>item.geo==="local").map(item=>item.alert);
     const unverified=classified.filter(item=>item.geo==="unverifiable"&&["active","scheduled","unconfirmed"].includes(getSmnAlertState(item.alert))).map(item=>item.alert);
@@ -728,7 +752,7 @@ async function loadOfficialAlerts(){
     renderSmnAlerts(historyHost,history,"No hay avisos históricos correspondientes a esta ubicación.");
     if(unverifiedHost)renderSmnAlerts(unverifiedHost,unverified,"No hay avisos activos sin ubicación verificable.","unverifiable");
     const coverage=data.coverage||{};
-    const complete=coverage.complete===true||data.status==="ok";
+    const complete=coverage.complete===true&&data.status==="ok";
     const currentAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="active")).length;
     const scheduledAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="scheduled")).length;
     const unconfirmedAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="unconfirmed")).length;
@@ -774,7 +798,6 @@ async function loadOfficialAlerts(){
   }
 }
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
-document.addEventListener("climago-location-updated",()=>{const coords=getSmnAlertLocation();const key=String(coords.lat)+","+String(coords.lon);if(key!==lastAlertsLocationKey)loadOfficialAlerts();});
 loadOfficialAlerts();
 
 function updateMoonPhase(){
