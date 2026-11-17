@@ -17,6 +17,7 @@ on:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
       - "app.js"
+      - "service-worker.js"
       - "index.html"
       - "tests/test_refresh_smn_alerts.py"
       - "tests/test_smn_geography.test.js"
