@@ -660,7 +660,7 @@ function getSmnAlertLevel(alert){
     if(color)return color;
   }
   const text=[alert.headline,alert.event,alert.description].filter(Boolean).join(" ");
-  const explicit=text.match(/(?:alerta|nivel)\\s+(rojo|roja|naranja|amarillo|amarilla|verde)/i);
+  const explicit=text.match(/(?:alerta|nivel)\s+(rojo|roja|naranja|amarillo|amarilla|verde)/i);
   return explicit?colorMap(explicit[1]):"desconocido";
 }
 function createSmnAlertCard(alert,geography="local"){
