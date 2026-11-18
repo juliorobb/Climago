@@ -276,6 +276,10 @@ def cap_record(payload, url, stamp):
         "severity": first_text(preferred, "severity"),
         "urgency": first_text(preferred, "urgency"),
         "certainty": first_text(preferred, "certainty"),
+        "parameters": [{
+            "name": first_text(parameter, "valuename"),
+            "value": first_text(parameter, "value"),
+        } for parameter in children(preferred, "parameter")],
         "effective": first_text(preferred, "effective"),
         "onset": first_text(preferred, "onset"),
         "expires": first_text(preferred, "expires"),
@@ -289,6 +293,10 @@ def cap_record(payload, url, stamp):
             "severity": first_text(info, "severity"),
             "urgency": first_text(info, "urgency"),
             "certainty": first_text(info, "certainty"),
+            "parameters": [{
+                "name": first_text(parameter, "valuename"),
+                "value": first_text(parameter, "value"),
+            } for parameter in children(info, "parameter")],
             "effective": first_text(info, "effective"),
             "onset": first_text(info, "onset"),
             "expires": first_text(info, "expires"),
@@ -507,7 +515,12 @@ def main():
     # Priorizar los avisos de corto plazo y rotar el catálogo general en lotes pequeños.
     unique_urls = list(dict.fromkeys(rss_discovered + index_urls))
     previous_coverage = previous.get("coverage", {}) if isinstance(previous.get("coverage"), dict) else {}
-    selected_urls, start_cursor, truncated = select_catalog_batch(unique_urls, previous_coverage)
+    try:
+        batch_size = int(os.environ.get("SMN_CAP_BATCH_SIZE", MAX_DOCUMENTS))
+    except (TypeError, ValueError):
+        batch_size = MAX_DOCUMENTS
+    batch_size = min(max(1, batch_size), max(1, len(unique_urls)))
+    selected_urls, start_cursor, truncated = select_catalog_batch(unique_urls, previous_coverage, batch_size)
     parsed_records, failures = download_cap_catalog(selected_urls, stamp)
     attempted_count = len(parsed_records) + len(failures)
     next_cursor = next_catalog_cursor(start_cursor, attempted_count, len(unique_urls))
@@ -541,7 +554,7 @@ def main():
             "discovered": len(unique_urls),
             "selected": len(selected_urls),
             "downloaded": downloaded,
-            "batchSize": MAX_DOCUMENTS,
+            "batchSize": batch_size,
             "truncated": truncated,
             "nextCursor": next_cursor,
             "freshWindowHours": 24,
