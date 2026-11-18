@@ -645,6 +645,24 @@ function getSmnGeographicStatus(alert,coords){
   }
   return hasGeometry&&!hasIncompleteArea?"other":"unverifiable";
 }
+function getSmnAlertLevel(alert){
+  const colorMap=value=>{
+    const normalized=String(value||"").trim().toLowerCase();
+    if(["amarillo","amarilla","yellow"].includes(normalized))return "amarillo";
+    if(["naranja","orange"].includes(normalized))return "naranja";
+    if(["rojo","roja","red"].includes(normalized))return "rojo";
+    if(["verde","green"].includes(normalized))return "verde";
+    return null;
+  };
+  for(const parameter of (Array.isArray(alert.parameters)?alert.parameters:[])){
+    if(!/(color|colour|nivel|level|alerta|alert)/i.test(String(parameter.name||"")))continue;
+    const color=colorMap(parameter.value);
+    if(color)return color;
+  }
+  const text=[alert.headline,alert.event,alert.description].filter(Boolean).join(" ");
+  const explicit=text.match(/(?:alerta|nivel)\\s+(rojo|roja|naranja|amarillo|amarilla|verde)/i);
+  return explicit?colorMap(explicit[1]):"desconocido";
+}
 function createSmnAlertCard(alert,geography="local"){
   const card=smnElement("article","smn-alert-card");
   card.dataset.geography=geography;
@@ -655,6 +673,11 @@ function createSmnAlertCard(alert,geography="local"){
   const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
   badge.dataset.state=state;
   top.append(title,badge);
+  const alertLevel=getSmnAlertLevel(alert);
+  const levelLabels={amarillo:"ALERTA AMARILLA",naranja:"ALERTA NARANJA",rojo:"ALERTA ROJA",verde:"NIVEL VERDE"};
+  const levelBadge=smnElement("span","smn-alert-level",levelLabels[alertLevel]||"Nivel SAT no informado");
+  levelBadge.dataset.level=alertLevel;
+  top.append(levelBadge);
   card.append(top);
   if(geography==="unverifiable")card.append(smnElement("p","smn-alert-location-note","El aviso no incluye una geometría oficial suficiente para confirmar si alcanza esta ubicación."));
   const severity=[
@@ -720,7 +743,7 @@ function groupSmnAlerts(alerts){
     const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean).sort():[];
     const key=JSON.stringify([
       alert.event||alert.headline||alert.title||"Aviso meteorológico",
-      alert.severity||"",alert.urgency||"",alert.certainty||"",getSmnAlertState(alert),
+      alert.severity||"",alert.urgency||"",alert.certainty||"",getSmnAlertLevel(alert),getSmnAlertState(alert),
       alert.description||"",alert.instruction||"",areas
     ]);
     let group=groups.get(key);
