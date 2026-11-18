@@ -1857,3 +1857,10 @@
 .push-optin-card .primary-button{margin:0}
 .push-optin-card button:disabled{opacity:.65}
 
+
+/* Nivel SAT: solo se colorea cuando el dato oficial es explícito. */
+.smn-alert-level{font-size:9px;color:#c1cfdb;border:1px solid #536879;border-radius:20px;padding:4px 7px;white-space:nowrap}
+.smn-alert-level[data-level="amarillo"]{color:#ffe08a;border-color:#a88732;background:#493b1b}
+.smn-alert-level[data-level="naranja"]{color:#ffd0a1;border-color:#b96a2d;background:#4a2d1c}
+.smn-alert-level[data-level="rojo"]{color:#ffb5b5;border-color:#a83c4b;background:#48232b}
+.smn-alert-level[data-level="verde"]{color:#b8e6c8;border-color:#3d8a5d;background:#1d3b2a}
