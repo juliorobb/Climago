@@ -82,7 +82,7 @@ jobs:
           python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         env:
-          SMN_CAP_BATCH_SIZE: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 14 && '96' || '12' }}
+          SMN_CAP_BATCH_SIZE: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 14 && '200' || '12' }}
         run: python scripts/refresh_smn_alerts.py
       - name: Upload generated CAP catalog for PR validation
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
