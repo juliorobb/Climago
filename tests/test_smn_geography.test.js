@@ -15,8 +15,9 @@ const sandbox = {};
 const selected = [
   extract("getSmnAlertState", "isValidCapPolygon"),
   extract("isValidCapPolygon", "getSmnAlertLocation"),
-  extract("getSmnGeographicStatus", "createSmnAlertCard"),
-  "globalThis.alertFns = {getSmnAlertState, isValidCapPolygon, pointInCapPolygon, pointInCapCircle, getSmnGeographicStatus};"
+  extract("getSmnGeographicStatus", "getSmnAlertLevel"),
+  extract("getSmnAlertLevel", "createSmnAlertCard"),
+  "globalThis.alertFns = {getSmnAlertState, isValidCapPolygon, pointInCapPolygon, pointInCapCircle, getSmnGeographicStatus, getSmnAlertLevel};"
 ].join("\n");
 vm.runInNewContext(selected, sandbox);
 const {getSmnAlertState, isValidCapPolygon, pointInCapPolygon, pointInCapCircle, getSmnGeographicStatus} = sandbox.alertFns;
@@ -64,4 +65,11 @@ test("old or missing per-alert checks downgrade active alerts to unconfirmed", (
   assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()+60*60*1000).toISOString(),onset:new Date(Date.now()-60*60*1000).toISOString(),expires,lastSeen:new Date().toISOString(),...publicAlert}), "scheduled");
   assert.equal(getSmnAlertState({state:"scheduled",effective:new Date(Date.now()-60*60*1000).toISOString(),onset:new Date(Date.now()-30*60*1000).toISOString(),expires,lastSeen:new Date().toISOString(),...publicAlert}), "active");
   assert.equal(getSmnAlertState({state:"scheduled",onset:new Date(Date.now()+60*60*1000).toISOString(),lastSeen:new Date().toISOString(),...publicAlert}), "unconfirmed");
+});
+
+test("SAT color is shown only when explicitly present in official CAP data", () => {
+  const {getSmnAlertLevel} = sandbox.alertFns;
+  assert.equal(getSmnAlertLevel({parameters:[{name:"SAT_COLOR",value:"Naranja"}]}), "naranja");
+  assert.equal(getSmnAlertLevel({headline:"Alerta roja por tormentas"}), "rojo");
+  assert.equal(getSmnAlertLevel({severity:"Severe",headline:"Tormentas fuertes"}), "desconocido");
 });
