@@ -55,6 +55,7 @@ class CapGeometryTests(unittest.TestCase):
           <info><language>es-AR</language><event>Tormentas</event>
             <headline>Alerta de prueba</headline><severity>Severe</severity>
             <urgency>Immediate</urgency><certainty>Observed</certainty>
+            <parameter><valueName>SAT_COLOR</valueName><value>Naranja</value></parameter>
             <expires>2026-11-16T12:00:00-03:00</expires>
             <area><areaDesc>Córdoba</areaDesc>
               <polygon>-31.40,-64.20 -31.40,-64.10 -31.50,-64.10 -31.50,-64.20</polygon>
@@ -69,6 +70,8 @@ class CapGeometryTests(unittest.TestCase):
         self.assertEqual(record["identifier"], "test-123")
         self.assertEqual(len(record["infoBlocks"]), 2)
         self.assertEqual(record["event"], "Tormentas")
+        self.assertEqual(record["parameters"], [{"name": "SAT_COLOR", "value": "Naranja"}])
+        self.assertEqual(record["infoBlocks"][0]["parameters"], [{"name": "SAT_COLOR", "value": "Naranja"}])
         self.assertEqual(record["areas"][0]["description"], "Córdoba")
         self.assertEqual(len(record["areas"][0]["polygons"]), 1)
         self.assertEqual(len(record["areas"][0]["circles"]), 1)
