@@ -37,7 +37,7 @@ concurrency:
 
 jobs:
   validate:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/pronostico-luna-iconos-detalles' || github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17'))
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/pronostico-luna-iconos-detalles' || github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
           python -m unittest discover -s tests -v
 
   refresh:
-    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17' || (github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17')
     permissions:
       contents: write
     runs-on: ubuntu-latest
