@@ -1,8 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
-  # Pull-request validation is enabled in the integration base branch too.
   push:
-    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, work/alertas-geografia-integracion-2026-11-17]
+    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, pronostico-luna-iconos-detalles, work/alertas-geografia-integracion-2026-11-17]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -20,6 +19,7 @@ on:
       - "app.js"
       - "service-worker.js"
       - "index.html"
+      - "styles.css"
       - "tests/test_refresh_smn_alerts.py"
       - "tests/test_smn_geography.test.js"
       - "tests/test_smn_service_worker.test.js"
@@ -27,14 +27,17 @@ on:
   # GitHub schedules run from the default branch (main).
   schedule:
     - cron: "17 * * * *"
+
 permissions:
   contents: read
+
 concurrency:
   group: climago-smn-alerts-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   validate:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/pronostico-luna-iconos-detalles' || github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,8 +55,9 @@ jobs:
           node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
+
   refresh:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17'
     permissions:
       contents: write
     runs-on: ubuntu-latest
