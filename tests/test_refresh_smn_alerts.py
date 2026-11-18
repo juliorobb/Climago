@@ -90,7 +90,7 @@ class CapGeometryTests(unittest.TestCase):
 
     def test_later_effective_or_onset_controls_event_timing(self):
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
-        xml = b"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+        xml = """<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
           <identifier>scheduled-onset</identifier><sender>smn@smn.gob.ar</sender>
           <sent>2026-11-16T08:00:00-03:00</sent><status>Actual</status>
           <msgType>Alert</msgType><scope>Public</scope>
@@ -99,7 +99,7 @@ class CapGeometryTests(unittest.TestCase):
             <onset>2026-11-16T15:00:00-03:00</onset>
             <expires>2026-11-16T18:00:00-03:00</expires>
             <area><areaDesc>Córdoba</areaDesc><polygon>-31.40,-64.20 -31.40,-64.10 -31.50,-64.10</polygon></area>
-          </info></alert>"""
+          </info></alert>""".encode("utf-8")
         record = smn.cap_record(xml, "https://ssl.smn.gob.ar/test.xml", stamp)
         self.assertEqual(record["state"], "scheduled")
 
@@ -113,7 +113,7 @@ class CapGeometryTests(unittest.TestCase):
 
     def test_future_onset_without_expiry_is_not_confirmed_as_scheduled(self):
         stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
-        xml = b"""<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+        xml = """<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
           <identifier>scheduled-no-expiry</identifier><sender>smn@smn.gob.ar</sender>
           <sent>2026-11-16T08:00:00-03:00</sent><status>Actual</status>
           <msgType>Alert</msgType><scope>Public</scope>
