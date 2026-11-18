@@ -57,7 +57,7 @@ jobs:
           python -m unittest discover -s tests -v
 
   refresh:
-    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles'
+    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17'
     permissions:
       contents: write
     runs-on: ubuntu-latest
