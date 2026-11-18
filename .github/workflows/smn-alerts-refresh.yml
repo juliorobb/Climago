@@ -80,25 +80,10 @@ jobs:
           node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
-      - name: Download and normalize official CAP alerts in rotating batches
-        run: |
-          set -euo pipefail
-          for batch in $(seq 1 8); do
-            echo "=== SMN CAP batch $batch/8 ==="
-            python scripts/refresh_smn_alerts.py
-            state=$(python - <<'PY'
-          import json
-          with open("data/smn-alerts.json", encoding="utf-8") as f:
-              data = json.load(f)
-          coverage = data.get("coverage", {})
-          print("complete" if coverage.get("complete") else "rate_limited" if coverage.get("rateLimited") else "no_progress" if not coverage.get("downloaded") else "continue")
-          PY
-          )
-            echo "Batch state: $state"
-            if [ "$state" != "continue" ]; then
-              break
-            fi
-          done
+      - name: Download and normalize official CAP alerts
+        env:
+          SMN_CAP_BATCH_SIZE: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 14 && '96' || '12' }}
+        run: python scripts/refresh_smn_alerts.py
       - name: Upload generated CAP catalog for PR validation
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
         uses: actions/upload-artifact@v4
