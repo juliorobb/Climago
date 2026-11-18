@@ -8,7 +8,7 @@ const start = source.indexOf("async function cachedAlertsResponse(");
 const end = source.indexOf('self.addEventListener("fetch"', start);
 assert.notEqual(start, -1, "Missing cachedAlertsResponse");
 assert.notEqual(end, -1, "Missing fetch handler boundary");
-const code = source.slice(start, end) + "\nglobalThis.alertCacheFns={networkFirstAlerts};";
+const code = "const DATA_CACHE = \"climago-data-v1\";\n" + source.slice(start, end) + "\nglobalThis.alertCacheFns={networkFirstAlerts};";
 let fetchResult;
 let fetchError = null;
 let cached = new Response(JSON.stringify({alerts:[{identifier:"cached-alert"}]}), {
