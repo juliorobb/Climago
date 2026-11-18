@@ -57,7 +57,7 @@ jobs:
           python -m unittest discover -s tests -v
 
   refresh:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17' || (github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17')
+    if: (github.event_name == 'pull_request' && github.event.pull_request.number == 14) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/work/alertas-geografia-integracion-2026-11-17') || (github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/work/alertas-geografia-integracion-2026-11-17')
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -82,7 +82,16 @@ jobs:
           python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
+      - name: Upload generated CAP catalog for PR validation
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
+        uses: actions/upload-artifact@v4
+        with:
+          name: smn-cap-catalog-pr14
+          path: data/smn-alerts.json
+          if-no-files-found: error
+          retention-days: 3
       - name: Commit refreshed data only when it changes
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
