@@ -189,6 +189,13 @@ async function enablePushNotifications(){
   }finally{button.disabled=false;}
 }
 document.getElementById("push-enable-button")?.addEventListener("click",enablePushNotifications);
+function pushSubscriptionLocationState(savedLocation,alertLocation){
+  if(!savedLocation)return "legacy";
+  const valid=Number.isFinite(Number(savedLocation.lat))&&Number.isFinite(Number(savedLocation.lon))&&Number.isFinite(alertLocation?.lat)&&Number.isFinite(alertLocation?.lon);
+  if(!valid)return "mismatch";
+  const same=Math.abs(Number(savedLocation.lat)-alertLocation.lat)<0.00001&&Math.abs(Number(savedLocation.lon)-alertLocation.lon)<0.00001;
+  return same?"matched":"mismatch";
+}
 async function restorePushSubscriptionStatus(){
   const button=document.getElementById("push-enable-button");
   const testButton=document.getElementById("push-test-button");
@@ -208,14 +215,18 @@ async function restorePushSubscriptionStatus(){
     }
     const alertLocation=getSmnAlertLocation();
     const savedLocation=(()=>{try{return JSON.parse(localStorage.getItem(PUSH_LOCATION_KEY)||"null");}catch{return null;}})();
-    const sameLocation=savedLocation&&Number.isFinite(Number(savedLocation.lat))&&Number.isFinite(Number(savedLocation.lon))&&Number.isFinite(alertLocation.lat)&&Number.isFinite(alertLocation.lon)&&Math.abs(Number(savedLocation.lat)-alertLocation.lat)<0.00001&&Math.abs(Number(savedLocation.lon)-alertLocation.lon)<0.00001;
-    if(!sameLocation){
-      setPushStatus("Hay una suscripción en el navegador, pero no está vinculada de forma verificable a la ubicación principal actual. Reactivá las notificaciones para actualizar la zona.");
+    const locationState=pushSubscriptionLocationState(savedLocation,alertLocation);
+    if(locationState==="mismatch"){
+      setPushStatus("La suscripción guardada corresponde a otra ubicación. Reactivá las notificaciones para actualizar la zona.");
       if(button)button.textContent="Actualizar ubicación de alertas";
       if(testButton)testButton.disabled=true;
       return;
     }
-    setPushStatus("El navegador conserva una suscripción para "+(alertLocation.name||"la ubicación principal")+". Verificá el servidor enviando una prueba.");
+    if(locationState==="legacy"){
+      setPushStatus("Se detectó una suscripción anterior del navegador. Se conserva y podés comprobar el servidor enviando una prueba.");
+    }else{
+      setPushStatus("El navegador conserva una suscripción para "+(alertLocation.name||"la ubicación principal")+". Verificá el servidor enviando una prueba.");
+    }
     if(button)button.textContent="Suscripción detectada";
     if(testButton)testButton.disabled=false;
   }catch(error){console.warn("No se pudo recuperar el estado Push:",error);}
