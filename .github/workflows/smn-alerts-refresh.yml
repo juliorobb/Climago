@@ -1,7 +1,7 @@
 name: Refresh official SMN CAP alerts
 on:
   push:
-    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, pronostico-luna-iconos-detalles]
+    branches: [main, feature/alertas-smn-estables-v1, release/smn-alerts-radar-2026-11-05, pronostico-luna-iconos-detalles, integration/alertas-stage1-pronostico]
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
       - "scripts/refresh_smn_alerts.py"
@@ -12,6 +12,7 @@ on:
       - "tests/test_refresh_smn_alerts.py"
       - "tests/test_smn_geography.test.js"
       - "tests/test_smn_service_worker.test.js"
+      - "tests/test_smn_geography.test.js"
   pull_request:
     paths:
       - ".github/workflows/smn-alerts-refresh.yml"
@@ -37,7 +38,7 @@ concurrency:
 
 jobs:
   validate:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/pronostico-luna-iconos-detalles')
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/pronostico-luna-iconos-detalles' || github.ref == 'refs/heads/integration/alertas-stage1-pronostico'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +58,7 @@ jobs:
           python -m unittest discover -s tests -v
 
   refresh:
-    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles'
+    if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/integration/alertas-stage1-pronostico'
     permissions:
       contents: write
     runs-on: ubuntu-latest
