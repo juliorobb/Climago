@@ -520,7 +520,7 @@ def main():
         file.write("\n")
     print("SMN feeds:", json.dumps(feed_status, ensure_ascii=False))
     print("CAP links:", len(unique_urls), "| selected:", len(selected_urls), "| downloaded:", downloaded)
-    print("Complete:", complete, "| retained:", len(retained), "| status:", state)
+    print("Complete:", complete, "| retained:", retained_count, "| status:", state)
     if feed_failures or failures:
         print("Warnings:", json.dumps({"feeds": feed_failures, "documents": failures}, ensure_ascii=False))
 
