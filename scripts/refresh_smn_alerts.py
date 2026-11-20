@@ -65,6 +65,93 @@ def parse_time(value):
     return parsed.astimezone(timezone.utc)
 
 
+def cap_event_start(record):
+    """Use the later CAP effective/onset time as the earliest confirmed event start."""
+    candidates = [
+        parse_time(record.get("effective")),
+        parse_time(record.get("onset")),
+    ]
+    valid = [value for value in candidates if value is not None]
+    return max(valid) if valid else None
+
+def parse_polygon(value):
+    """Convert a complete CAP lat,lon ring into GeoJSON-order [lon, lat] pairs."""
+    points = []
+    for pair in (value or "").strip().split():
+        parts = pair.split(",")
+        if len(parts) != 2:
+            return []
+        try:
+            lat, lon = float(parts[0]), float(parts[1])
+        except ValueError:
+            return []
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return []
+        points.append([lon, lat])
+    if len(points) < 3 or len({tuple(point) for point in points}) < 3:
+        return []
+    if points[0] != points[-1]:
+        points.append(points[0])
+    return points
+
+
+def parse_circle(value):
+    parts = (value or "").strip().split()
+    if len(parts) != 2:
+        return None
+    coords = parts[0].split(",")
+    if len(coords) != 2:
+        return None
+    try:
+        lat, lon, radius_km = float(coords[0]), float(coords[1]), float(parts[1])
+    except ValueError:
+        return None
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180 and radius_km > 0):
+        return None
+    return {"lat": lat, "lon": lon, "radiusKm": radius_km}
+
+
+def cap_area(area):
+    description = first_text(area, "areadesc")
+    polygons = [ring for node in children(area, "polygon")
+                if (ring := parse_polygon("".join(node.itertext()))) ]
+    circles = [circle for node in children(area, "circle")
+               if (circle := parse_circle("".join(node.itertext()))) ]
+    geocodes = []
+    for node in children(area, "geocode"):
+        name = first_text(node, "valuename")
+        value = first_text(node, "value")
+        if name or value:
+            geocodes.append({"valueName": name, "value": value})
+    result = {
+        "description": description,
+        "polygons": polygons,
+        "circles": circles,
+        "geocodes": geocodes,
+    }
+    return result
+
+
+def referenced_identifiers(references):
+    """Extract the identifier from CAP reference triples: sender,identifier,sent."""
+    identifiers = []
+    for reference in references or []:
+        parts = str(reference).split(",")
+        if len(parts) == 3 and parts[1].strip():
+            identifiers.append(parts[1].strip())
+    return list(dict.fromkeys(identifiers))
+
+
+def referenced_ids_for(records, message_type):
+    wanted = str(message_type or "").lower()
+    return {
+        identifier
+        for item in records
+        if str(item.get("messageType", "")).lower() == wanted
+        for identifier in item.get("referencedIdentifiers", [])
+    }
+
+
 def request_text(url, accept):
     request = urllib.request.Request(url, headers={
         "User-Agent": USER_AGENT,
@@ -137,47 +224,79 @@ def cap_record(payload, url, stamp):
     except ET.ParseError as error:
         raise ValueError("XML CAP inválido: " + str(error))
     info_nodes = children(root, "info")
-    if not info_nodes:
+    message_type = first_text(root, "msgtype")
+    # CAP cancellation messages may legitimately contain no <info> block.
+    if not info_nodes and message_type.lower() != "cancel":
         raise ValueError("El documento no contiene bloques CAP <info>.")
-    info = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0])
+    preferred = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0] if info_nodes else None)
     areas = []
-    for area in children(info, "area"):
-        area_name = first_text(area, "areadesc")
-        if area_name and area_name not in areas:
-            areas.append(area_name)
+    for area in children(preferred, "area"):
+        parsed = cap_area(area)
+        if parsed not in areas:
+            areas.append(parsed)
     identifier = first_text(root, "identifier")
     if not identifier:
         raise ValueError("Documento CAP sin identifier.")
+    references = [v for v in (first_text(root, "references") or "").split() if v]
     record = {
         "identifier": identifier,
+        "geometrySchemaVersion": 1,
         "sender": first_text(root, "sender"),
         "sent": first_text(root, "sent"),
-        "messageType": first_text(root, "msgtype"),
+        "messageType": message_type,
         "status": first_text(root, "status"),
-        "event": first_text(info, "event"),
-        "headline": first_text(info, "headline"),
-        "description": first_text(info, "description"),
-        "instruction": first_text(info, "instruction"),
-        "severity": first_text(info, "severity"),
-        "urgency": first_text(info, "urgency"),
-        "certainty": first_text(info, "certainty"),
-        "effective": first_text(info, "effective"),
-        "onset": first_text(info, "onset"),
-        "expires": first_text(info, "expires"),
+        "references": references,
+        "referencedIdentifiers": referenced_identifiers(references),
+        "scope": first_text(root, "scope"),
+        "source": first_text(root, "source"),
+        "event": first_text(preferred, "event"),
+        "headline": first_text(preferred, "headline"),
+        "description": first_text(preferred, "description"),
+        "instruction": first_text(preferred, "instruction"),
+        "severity": first_text(preferred, "severity"),
+        "urgency": first_text(preferred, "urgency"),
+        "certainty": first_text(preferred, "certainty"),
+        "parameters": [{
+            "name": first_text(parameter, "valuename"),
+            "value": first_text(parameter, "value"),
+        } for parameter in children(preferred, "parameter")],
+        "effective": first_text(preferred, "effective"),
+        "onset": first_text(preferred, "onset"),
+        "expires": first_text(preferred, "expires"),
         "areas": areas,
+        "infoBlocks": [{
+            "language": first_text(info, "language"),
+            "event": first_text(info, "event"),
+            "headline": first_text(info, "headline"),
+            "description": first_text(info, "description"),
+            "instruction": first_text(info, "instruction"),
+            "severity": first_text(info, "severity"),
+            "urgency": first_text(info, "urgency"),
+            "certainty": first_text(info, "certainty"),
+            "parameters": [{
+                "name": first_text(parameter, "valuename"),
+                "value": first_text(parameter, "value"),
+            } for parameter in children(info, "parameter")],
+            "effective": first_text(info, "effective"),
+            "onset": first_text(info, "onset"),
+            "expires": first_text(info, "expires"),
+        } for info in info_nodes],
         "url": url,
-        "source": "Servicio Meteorológico Nacional · CAP",
+        "sourceLabel": "Servicio Meteorológico Nacional · CAP",
         "lastSeen": iso(stamp),
     }
     expiry = parse_time(record["expires"])
-    effective = parse_time(record["effective"] or record["onset"])
+    event_start = cap_event_start(record)
     status = (record["status"] or "").lower()
+    scope = (record["scope"] or "").lower()
     message_type = (record["messageType"] or "").lower()
-    if status == "cancel" or message_type == "cancel":
+    if message_type == "cancel":
         state = "cancelled"
     elif expiry and expiry < stamp:
         state = "expired"
-    elif effective and effective > stamp:
+    elif status != "actual" or scope != "public":
+        state = "unconfirmed"
+    elif event_start and event_start > stamp and expiry:
         state = "scheduled"
     elif expiry and expiry >= stamp:
         state = "active"
