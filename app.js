@@ -258,15 +258,132 @@ function smnElement(tag,className,text){
 function getSmnAlertState(alert){
   const current=String(alert.state||"unconfirmed").toLowerCase();
   if(current==="cancelled"||String(alert.status||"").toLowerCase()==="cancel"||String(alert.messageType||"").toLowerCase()==="cancel")return "cancelled";
+  const now=Date.now();
   const expiry=alert.expires?new Date(alert.expires):null;
-  if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=Date.now())return "expired";
-  const effective=alert.effective||alert.onset;
-  const start=effective?new Date(effective):null;
-  if(start&&!Number.isNaN(start.getTime())&&start.getTime()>Date.now())return "scheduled";
+  if(expiry&&!Number.isNaN(expiry.getTime())&&expiry.getTime()<=now)return "expired";
+  if(["active","scheduled"].includes(current)){
+    if(String(alert.status||"").toLowerCase()!=="actual"||String(alert.scope||"").toLowerCase()!=="public")return "unconfirmed";
+    if(!expiry||Number.isNaN(expiry.getTime()))return "unconfirmed";
+    const checkedAt=alert.lastSeen?Date.parse(alert.lastSeen):NaN;
+    const checkIsStale=!Number.isFinite(checkedAt)||checkedAt>now+5*60*1000||now-checkedAt>24*60*60*1000;
+    if(alert.dataStale||checkIsStale)return "unconfirmed";
+  }
+  const start=getSmnAlertStart(alert);
+  if(start&&start.getTime()>now)return "scheduled";
+  if(current==="scheduled")return start?"active":"unconfirmed";
   return current;
 }
-function createSmnAlertCard(alert){
+function getSmnAlertStart(alert){
+  const candidates=[alert.effective,alert.onset].map(value=>value?Date.parse(value):NaN).filter(Number.isFinite);
+  return candidates.length?new Date(Math.max(...candidates)):null;
+}
+function getSmnAlertStartValue(alert){
+  const start=getSmnAlertStart(alert);
+  return start?start.toISOString():"";
+}
+function isValidCapPolygon(ring){
+  if(!Array.isArray(ring)||ring.length<4)return false;
+  const points=[];
+  for(const point of ring){
+    if(!Array.isArray(point)||point.length<2)return false;
+    if(point[0]===null||point[0]===undefined||point[1]===null||point[1]===undefined||String(point[0]).trim()===""||String(point[1]).trim()==="")return false;
+    const lon=Number(point[0]),lat=Number(point[1]);
+    if(!Number.isFinite(lon)||!Number.isFinite(lat)||lon< -180||lon>180||lat< -90||lat>90)return false;
+    points.push([lon,lat]);
+  }
+  const first=points[0],last=points[points.length-1];
+  if(Math.abs(first[0]-last[0])>1e-9||Math.abs(first[1]-last[1])>1e-9)return false;
+  const distinct=new Set(points.slice(0,-1).map(point=>point.join(",")));
+  if(distinct.size<3)return false;
+  let twiceArea=0;
+  for(let i=0;i<points.length-1;i++)
+    twiceArea+=points[i][0]*points[i+1][1]-points[i+1][0]*points[i][1];
+  return Math.abs(twiceArea)>1e-12;
+}
+function pointInCapPolygon(lon,lat,ring){
+  if(!Number.isFinite(lon)||!Number.isFinite(lat)||!isValidCapPolygon(ring))return false;
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const xi=Number(ring[i][0]),yi=Number(ring[i][1]),xj=Number(ring[j][0]),yj=Number(ring[j][1]);
+    const cross=(lon-xi)*(yj-yi)-(lat-yi)*(xj-xi);
+    const onSegment=Math.abs(cross)<=1e-9&&lon>=Math.min(xi,xj)-1e-9&&lon<=Math.max(xi,xj)+1e-9&&lat>=Math.min(yi,yj)-1e-9&&lat<=Math.max(yi,yj)+1e-9;
+    if(onSegment)return true;
+    const intersects=((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi);
+    if(intersects)inside=!inside;
+  }
+  return inside;
+}
+function pointInCapCircle(lon,lat,circle){
+  if(circle?.lat===null||circle?.lat===undefined||circle?.lon===null||circle?.lon===undefined||circle?.radiusKm===null||circle?.radiusKm===undefined||String(circle.lat).trim()===""||String(circle.lon).trim()===""||String(circle.radiusKm).trim()==="")return false;
+  const circleLat=Number(circle.lat),circleLon=Number(circle.lon),radius=Number(circle.radiusKm);
+  if(![lon,lat,circleLat,circleLon,radius].every(Number.isFinite)||lat< -90||lat>90||lon< -180||lon>180||circleLat< -90||circleLat>90||circleLon< -180||circleLon>180||radius<=0)return false;
+  const rad=value=>value*Math.PI/180;
+  const dLat=rad(circleLat-lat),dLon=rad(circleLon-lon);
+  const a=Math.sin(dLat/2)**2+Math.cos(rad(lat))*Math.cos(rad(circleLat))*Math.sin(dLon/2)**2;
+  const distance=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
+  return distance<=radius;
+}
+function getSmnAlertLocation(){
+  const list=readLocations(),id=primaryId(list),primary=list.find(place=>place.id===id);
+  if(primary){
+    if(Number.isFinite(primary.lat)&&Number.isFinite(primary.lon))
+      return {lat:primary.lat,lon:primary.lon,name:primary.name};
+    return {lat:null,lon:null,name:primary.name};
+  }
+  if(activeCoords&&Number.isFinite(activeCoords.lat)&&Number.isFinite(activeCoords.lon))
+    return activeCoords;
+  return getSelectedCoordinates();
+}
+function getSmnGeographicStatus(alert,coords){
+  if(coords?.lat===null||coords?.lat===undefined||coords?.lon===null||coords?.lon===undefined||String(coords.lat).trim()===""||String(coords.lon).trim()==="")return "unverifiable";
+  const lat=Number(coords.lat),lon=Number(coords.lon);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -90||lat>90||lon< -180||lon>180)return "unverifiable";
+  const areas=Array.isArray(alert.areas)?alert.areas:[];
+  if(!areas.length)return "unverifiable";
+  let hasGeometry=false,hasIncompleteArea=false;
+  for(const area of areas){
+    if(!area||typeof area!=="object"){hasIncompleteArea=true;continue;}
+    let areaHasGeometry=false;
+    const polygons=Array.isArray(area.polygons)?area.polygons:[];
+    for(const ring of polygons){
+      if(isValidCapPolygon(ring)){
+        areaHasGeometry=true;hasGeometry=true;
+        if(pointInCapPolygon(lon,lat,ring))return "local";
+      }else hasIncompleteArea=true;
+    }
+    const circles=Array.isArray(area.circles)?area.circles:[];
+    for(const circle of circles){
+      const circleValid=circle&&circle.lat!==null&&circle.lat!==undefined&&circle.lon!==null&&circle.lon!==undefined&&circle.radiusKm!==null&&circle.radiusKm!==undefined&&String(circle.lat).trim()!==""&&String(circle.lon).trim()!==""&&String(circle.radiusKm).trim()!==""&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))&&Number(circle.lat)>=-90&&Number(circle.lat)<=90&&Number(circle.lon)>=-180&&Number(circle.lon)<=180&&Number(circle.radiusKm)>0;
+      if(circleValid){
+        areaHasGeometry=true;hasGeometry=true;
+        if(pointInCapCircle(lon,lat,circle))return "local";
+      }else hasIncompleteArea=true;
+    }
+    if(!areaHasGeometry)hasIncompleteArea=true;
+  }
+  return hasGeometry&&!hasIncompleteArea?"other":"unverifiable";
+}
+function getSmnAlertLevel(alert){
+  const colorMap=value=>{
+    const normalized=String(value||"").trim().toLowerCase();
+    if(["amarillo","amarilla","yellow"].includes(normalized))return "amarillo";
+    if(["naranja","orange"].includes(normalized))return "naranja";
+    if(["rojo","roja","red"].includes(normalized))return "rojo";
+    if(["verde","green"].includes(normalized))return "verde";
+    return null;
+  };
+  for(const parameter of (Array.isArray(alert.parameters)?alert.parameters:[])){
+    if(!/(color|colour|nivel|level|alerta|alert)/i.test(String(parameter.name||"")))continue;
+    const color=colorMap(parameter.value);
+    if(color)return color;
+  }
+  const text=[alert.headline,alert.event,alert.description].filter(Boolean).join(" ");
+  const explicit=text.match(/(?:alerta|nivel)\s+(rojo|roja|naranja|amarillo|amarilla|verde)/i);
+  return explicit?colorMap(explicit[1]):"desconocido";
+}
+function createSmnAlertCard(alert,geography="local"){
   const card=smnElement("article","smn-alert-card");
+  card.dataset.geography=geography;
   const top=smnElement("div","smn-alert-top");
   const title=smnElement("b","",alert.headline||alert.event||alert.title||"Aviso meteorológico");
   const state=getSmnAlertState(alert);
@@ -274,7 +391,13 @@ function createSmnAlertCard(alert){
   const badge=smnElement("span","smn-alert-badge",labels[state]||"ESTADO NO VERIFICADO");
   badge.dataset.state=state;
   top.append(title,badge);
+  const alertLevel=getSmnAlertLevel(alert);
+  const levelLabels={amarillo:"ALERTA AMARILLA",naranja:"ALERTA NARANJA",rojo:"ALERTA ROJA",verde:"NIVEL VERDE"};
+  const levelBadge=smnElement("span","smn-alert-level",levelLabels[alertLevel]||"Nivel SAT no informado");
+  levelBadge.dataset.level=alertLevel;
+  top.append(levelBadge);
   card.append(top);
+  if(geography==="unverifiable")card.append(smnElement("p","smn-alert-location-note","El aviso no incluye una geometría oficial suficiente para confirmar si alcanza esta ubicación."));
   const severity=[
     localizeSmnValue(alert.severity,"severity"),
     localizeSmnValue(alert.urgency,"urgency"),
@@ -288,38 +411,87 @@ function createSmnAlertCard(alert){
     card.append(smnElement("p","","Consultá las áreas y vigencia en el detalle del aviso."));
   }
   const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean):[];
-  const areaText=areas.length?areas.join(" · "):(alert.areaDesc||"Zona no especificada en los datos recibidos");
+  const hasOfficialGeometry=Array.isArray(alert.areas)&&alert.areas.some(area=>
+    area&&typeof area==="object"&&(
+      (Array.isArray(area.polygons)&&area.polygons.some(ring=>Array.isArray(ring)&&ring.length>=4))||
+      (Array.isArray(area.circles)&&area.circles.some(circle=>circle&&Number.isFinite(Number(circle.lat))&&Number.isFinite(Number(circle.lon))&&Number.isFinite(Number(circle.radiusKm))))
+    )
+  );
+  const areaFallback=geography==="local"&&hasOfficialGeometry
+    ?"Área delimitada por geometría oficial; incluye esta ubicación"
+    :geography==="other"&&hasOfficialGeometry
+      ?"Área delimitada por geometría oficial; no incluye esta ubicación"
+      :"Zona no especificada en los datos recibidos";
+  const areaText=areas.length?areas.join(" · "):(alert.areaDesc||areaFallback);
+  if(alert.relatedCount>1)card.append(smnElement("small","smn-alert-area",alert.relatedCount+" documentos CAP agrupados por fenómeno, nivel y zona informada."));
   card.append(smnElement("small","smn-alert-area","Zonas: "+areaText));
   const validity=[];
-  if(alert.effective)validity.push("Desde "+formatSmnDate(alert.effective));
-  else if(alert.onset)validity.push("Desde "+formatSmnDate(alert.onset));
-  if(alert.expires)validity.push("Hasta "+formatSmnDate(alert.expires));
+  const start=alert.periodStart||getSmnAlertStartValue(alert);
+  const end=alert.periodEnd||alert.expires;
+  if(start)validity.push("Desde "+formatSmnDate(start));
+  if(end)validity.push("Hasta "+formatSmnDate(end));
   else validity.push("Vencimiento no informado");
   card.append(smnElement("small","smn-alert-validity","Vigencia: "+validity.join(" · ")));
   card.append(smnElement("small","smn-alert-source","Fuente: Servicio Meteorológico Nacional · CAP"));
   if(alert.lastSeen)card.append(smnElement("small","smn-alert-checked","Último chequeo: "+formatSmnDate(alert.lastSeen)));
-  const url=alert.url||alert.documentUrl;
-  if(url){
-    try{
-      const parsed=new URL(url);
-      if(parsed.protocol==="https:"&&parsed.hostname==="ssl.smn.gob.ar"){
-        const link=smnElement("a","","Documento CAP del SMN ↗");
-        link.href=parsed.href;link.target="_blank";link.rel="noopener noreferrer";
-        card.append(link);
-      }
-    }catch{}
+  const documents=Array.isArray(alert.relatedDocuments)&&alert.relatedDocuments.length?alert.relatedDocuments:[alert];
+  const safeDocuments=documents.filter(item=>{
+    try{const parsed=new URL(item.url||item.documentUrl);return parsed.protocol==="https:"&&parsed.hostname==="ssl.smn.gob.ar";}
+    catch{return false;}
+  });
+  if(safeDocuments.length===1){
+    const link=smnElement("a","","Documento CAP del SMN ↗");
+    link.href=safeDocuments[0].url||safeDocuments[0].documentUrl;link.target="_blank";link.rel="noopener noreferrer";
+    card.append(link);
+  }else if(safeDocuments.length>1){
+    const details=smnElement("details","smn-alert-documents");
+    details.append(smnElement("summary","","Ver "+safeDocuments.length+" documentos CAP del SMN"));
+    for(const item of safeDocuments){
+      const link=smnElement("a","","Abrir documento CAP · "+(item.sent?formatSmnDate(item.sent):"fecha no informada"));
+      link.href=item.url||item.documentUrl;link.target="_blank";link.rel="noopener noreferrer";
+      details.append(link);
+    }
+    card.append(details);
   }
   return card;
 }
-function renderSmnAlerts(host,alerts,emptyText){
+function groupSmnAlerts(alerts){
+  const groups=new Map();
+  for(const alert of alerts){
+    const areas=Array.isArray(alert.areas)?alert.areas.map(a=>typeof a==="string"?a:(a.description||"")).filter(Boolean).sort():[];
+    const key=JSON.stringify([
+      alert.event||alert.headline||alert.title||"Aviso meteorológico",
+      alert.severity||"",alert.urgency||"",alert.certainty||"",getSmnAlertLevel(alert),getSmnAlertState(alert),
+      alert.description||"",alert.instruction||"",areas
+    ]);
+    let group=groups.get(key);
+    if(!group){
+      group={...alert,areas,relatedDocuments:[],relatedCount:0,periodStart:"",periodEnd:""};
+      groups.set(key,group);
+    }
+    group.relatedDocuments.push(alert);
+    group.relatedCount++;
+    const start=getSmnAlertStartValue(alert);
+    const end=alert.expires||"";
+    if(start&&(!group.periodStart||Date.parse(start)<Date.parse(group.periodStart)))group.periodStart=start;
+    if(end&&(!group.periodEnd||Date.parse(end)>Date.parse(group.periodEnd)))group.periodEnd=end;
+  }
+  return [...groups.values()].sort((a,b)=>{
+    const rank={Severe:0,Moderate:1,Minor:2,Unknown:3};
+    return (rank[a.severity]??4)-(rank[b.severity]??4)||String(a.event).localeCompare(String(b.event));
+  });
+}
+function renderSmnAlerts(host,alerts,emptyText,geography="local"){
+  if(!host)return;
   host.replaceChildren();
   if(!alerts.length){host.append(smnElement("div","empty-state",emptyText));return;}
-  for(const alert of alerts)host.append(createSmnAlertCard(alert));
+  for(const alert of groupSmnAlerts(alerts))host.append(createSmnAlertCard(alert,geography));
 }
 let smnAlertsRequest=0;
 async function loadOfficialAlerts(){
   const activeHost=document.getElementById("smn-alerts-active");
   const historyHost=document.getElementById("smn-alerts-history");
+  const unverifiedHost=document.getElementById("smn-alerts-unverified");
   const statusTitle=document.getElementById("smn-alerts-status-title");
   const statusDetail=document.getElementById("smn-alerts-status-detail");
   const statusPanel=document.getElementById("smn-alerts-status");
@@ -341,44 +513,54 @@ async function loadOfficialAlerts(){
     const data=await response.json();
     if(requestId!==smnAlertsRequest)return;
     if(!Array.isArray(data.alerts))throw new Error("El archivo recibido no contiene una lista de avisos válida.");
-    const alerts=data.alerts;
-    const active=alerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
-    const history=alerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
-    renderSmnAlerts(activeHost,active,"No se identificaron avisos vigentes entre los documentos consultados.");
-    renderSmnAlerts(historyHost,history,"No hay avisos vencidos o cancelados conservados en el historial.");
+    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
+    // Una copia servida desde caché nunca confirma vigencia actual por sí sola.
+    const stale=staleCache||!Number.isFinite(generatedAtMs)||generatedAtMs>Date.now()+5*60*1000||(Date.now()-generatedAtMs>90*60*1000);
+    const alerts=data.alerts.map(alert=>({...alert,dataStale:stale}));
+    const selectedCoords=getSmnAlertLocation();
+    const classified=alerts.map(alert=>({alert,geo:getSmnGeographicStatus(alert,selectedCoords)}));
+    const localAlerts=classified.filter(item=>item.geo==="local").map(item=>item.alert);
+    const unverified=classified.filter(item=>item.geo==="unverifiable"&&["active","scheduled","unconfirmed"].includes(getSmnAlertState(item.alert))).map(item=>item.alert);
+    const active=localAlerts.filter(a=>["active","scheduled","unconfirmed"].includes(getSmnAlertState(a)));
+    const history=localAlerts.filter(a=>["expired","cancelled","not_currently_listed"].includes(getSmnAlertState(a)));
+    renderSmnAlerts(activeHost,active,"No se identificaron avisos con geometría oficial que alcance esta ubicación.");
+    renderSmnAlerts(historyHost,history,"No hay avisos históricos correspondientes a esta ubicación.");
+    if(unverifiedHost)renderSmnAlerts(unverifiedHost,unverified,"No hay avisos activos sin ubicación verificable.","unverifiable");
     const coverage=data.coverage||{};
-    const complete=coverage.complete===true||data.status==="ok";
-    const currentAlerts=alerts.filter(a=>getSmnAlertState(a)==="active").length;
-    const scheduledAlerts=alerts.filter(a=>getSmnAlertState(a)==="scheduled").length;
-    const unconfirmedAlerts=alerts.filter(a=>getSmnAlertState(a)==="unconfirmed").length;
+    const complete=coverage.complete===true&&data.status==="ok";
+    const currentAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="active")).length;
+    const scheduledAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="scheduled")).length;
+    const unconfirmedAlerts=groupSmnAlerts(localAlerts.filter(a=>getSmnAlertState(a)==="unconfirmed")).length;
     const discovered=Number(coverage.discovered??data.discoveredDocuments??0);
     const downloaded=Number(coverage.downloaded??data.downloadedDocuments??0);
     const generated=data.generatedAt?formatSmnDate(data.generatedAt):"fecha no informada";
-    const generatedAtMs=data.generatedAt?Date.parse(data.generatedAt):NaN;
-    // Una fecha ausente o inválida nunca debe presentarse como información reciente.
-    const stale=!Number.isFinite(generatedAtMs)||(Date.now()-generatedAtMs>90*60*1000);
+    const locationSummary=" Ubicación evaluada: "+(selectedCoords.name||"seleccionada")+". "+classified.filter(item=>item.geo==="other").length+" avisos de otras regiones no se muestran; "+classified.filter(item=>item.geo==="unverifiable").length+" no tienen geometría suficiente para confirmar si alcanzan esta ubicación.";
     if(complete){
       if(statusTitle)statusTitle.textContent=currentAlerts?"Se encontraron avisos oficiales vigentes":scheduledAlerts?"Se encontraron avisos oficiales programados":unconfirmedAlerts?"Hay avisos cuya vigencia debe confirmarse":"Sin avisos vigentes en la cobertura consultada";
-      if(statusDetail)statusDetail.textContent="Catálogo revisado dentro de la ventana reciente de "+(coverage.freshWindowHours||14)+" horas. En esta pasada se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados.";
+      if(statusDetail)statusDetail.textContent="Se procesaron "+downloaded+" de "+(discovered||downloaded)+" documentos detectados."+locationSummary;
       if(statusPanel)statusPanel.dataset.state="complete";
     }else{
       if(statusTitle)statusTitle.textContent=active.length?"Avisos encontrados · cobertura parcial":"No se pudo confirmar la ausencia de avisos";
-      if(statusDetail)statusDetail.textContent="Consulta parcial: "+downloaded+" documentos procesados de "+(discovered||"cantidad no informada")+" detectados. No interpretes una lista vacía como ausencia de riesgo.";
+      if(statusDetail)statusDetail.textContent="Consulta parcial: "+downloaded+" documentos procesados de "+(discovered||"cantidad no informada")+" detectados. No interpretes una lista vacía como ausencia de riesgo."+locationSummary;
       if(statusPanel)statusPanel.dataset.state="partial";
     }
     if(stale){
-      if(statusTitle)statusTitle.textContent="Datos oficiales desactualizados o sin fecha verificable";
-      if(statusDetail)statusDetail.textContent+=" La última actualización supera los 90 minutos o no tiene una fecha válida. No uses esta información para confirmar que no hay riesgo.";
+      if(statusTitle)statusTitle.textContent="Datos oficiales sin actualización verificable";
+      if(statusDetail)statusDetail.textContent+=staleCache
+        ?" No se pudo confirmar una actualización con el servidor. Esta copia no permite confirmar que no haya riesgo."
+        :" La última actualización supera los 90 minutos o no tiene una fecha válida. No uses esta información para confirmar que no hay riesgo.";
       if(statusPanel)statusPanel.dataset.state="stale";
     }
-    if(staleCache){
-      if(statusDetail)statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono porque no fue posible consultar el servidor.";
+    if(staleCache&&statusDetail){
+      statusDetail.textContent+=" Se está mostrando la última copia guardada en el teléfono.";
     }
     if(updated)updated.textContent="Fuente: Servicio Meteorológico Nacional · CAP. Última actualización del archivo: "+generated+".";
     const activeCount=document.getElementById("smn-active-count");
     const historyCount=document.getElementById("smn-history-count");
-    if(activeCount)activeCount.textContent=String(active.length);
-    if(historyCount)historyCount.textContent=String(history.length);
+    if(activeCount)activeCount.textContent=String(groupSmnAlerts(active).length);
+    if(historyCount)historyCount.textContent=String(groupSmnAlerts(history).length);
+    const unverifiedCount=document.getElementById("smn-unverified-count");
+    if(unverifiedCount)unverifiedCount.textContent=String(groupSmnAlerts(unverified).length);
   }catch(error){
     if(requestId!==smnAlertsRequest)return;
     if(statusTitle)statusTitle.textContent="No se pudieron verificar los avisos del SMN";
@@ -386,6 +568,7 @@ async function loadOfficialAlerts(){
     if(statusPanel)statusPanel.dataset.state="error";
     renderSmnAlerts(activeHost,[],"No hay datos vigentes verificables disponibles.");
     renderSmnAlerts(historyHost,[],"No se pudo cargar el historial de avisos.");
+    if(unverifiedHost)renderSmnAlerts(unverifiedHost,[],"No se pudieron cargar los avisos sin ubicación verificable.");
     if(updated)updated.textContent="No se pudo verificar la última actualización. Fuente prevista: Servicio Meteorológico Nacional · CAP.";
   }finally{
     if(button){button.disabled=false;button.textContent="↻ Actualizar";}
@@ -393,6 +576,7 @@ async function loadOfficialAlerts(){
 }
 document.getElementById("alerts-refresh")?.addEventListener("click",loadOfficialAlerts);
 loadOfficialAlerts();
+
 
 /* Selector de paisajes de Inicio: usa recursos locales del repositorio. */
 (()=>{
