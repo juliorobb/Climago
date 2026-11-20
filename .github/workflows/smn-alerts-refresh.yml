@@ -34,6 +34,28 @@ jobs:
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
 
+
+  catalog-preview:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 15
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate a live CAP catalog without publishing it
+        run: |
+          python scripts/refresh_smn_alerts.py
+          python -c "import json,sys; d=json.load(open('data/smn-alerts.json',encoding='utf-8')); c=d.get('coverage',{}); print(json.dumps({'status':d.get('status'),'coverage':c},ensure_ascii=False)); sys.exit(0 if d.get('status')=='ok' and c.get('complete') is True and c.get('discovered')==c.get('downloaded') and not c.get('feedErrors') and not c.get('documentErrors') else 1)"
+      - name: Upload full geometry-aware CAP catalog for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: smn-cap-geometry-pr15
+          path: data/smn-alerts.json
+          if-no-files-found: error
+          retention-days: 3
+
   refresh:
     if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
