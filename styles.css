@@ -134,3 +134,7 @@
 .smn-alert-level[data-level="naranja"]{color:#ffd0a1;border-color:#b96a2d;background:#4a2d1c}
 .smn-alert-level[data-level="rojo"]{color:#ffb5b5;border-color:#a83c4b;background:#48232b}
 .smn-alert-level[data-level="verde"]{color:#b8e6c8;border-color:#3d8a5d;background:#1d3b2a}
+
+.smn-alert-location-note{padding:9px 11px;border-left:3px solid #c49b52;background:rgba(196,155,82,.10);border-radius:6px;color:#e6d8bd;font-size:12px}
+.smn-alert-documents{display:grid;gap:6px;margin-top:8px;font-size:12px}
+.smn-alert-documents summary{cursor:pointer;color:#c7d5df}
