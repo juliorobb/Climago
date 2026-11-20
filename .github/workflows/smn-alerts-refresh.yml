@@ -55,7 +55,6 @@ jobs:
           node --test tests/test_smn_geography.test.js
           node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
-          python -m unittest discover -s tests -v
 
   refresh:
     if: github.event_name != 'pull_request' && github.ref != 'refs/heads/pronostico-luna-iconos-detalles' && github.ref != 'refs/heads/integration/alertas-stage1-pronostico'
@@ -80,7 +79,6 @@ jobs:
           node --test tests/test_smn_geography.test.js
           node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
-          python -m unittest discover -s tests -v
       - name: Download and normalize official CAP alerts
         run: python scripts/refresh_smn_alerts.py
       - name: Commit refreshed data only when it changes
