@@ -85,6 +85,40 @@ class CapGeometryIntegrationTests(unittest.TestCase):
         self.assertEqual(record["state"], "cancelled")
         self.assertEqual(record["areas"], [])
 
+    def test_cap_cancel_message_cancels_previously_active_alert(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        old = {
+            "identifier": "old-123", "url": "https://ssl.smn.gob.ar/old.xml",
+            "lastSeen": "2026-11-16T11:00:00Z", "expires": "2026-11-16T18:00:00Z",
+            "status": "Actual", "scope": "Public", "messageType": "Alert", "state": "active",
+        }
+        cancel = {
+            "identifier": "cancel-123", "url": "https://ssl.smn.gob.ar/cancel.xml",
+            "lastSeen": "2026-11-16T12:00:00Z", "messageType": "Cancel",
+            "referencedIdentifiers": ["old-123"], "state": "cancelled",
+        }
+        result = smn.reconcile_alerts([old], [cancel], {old["url"], cancel["url"]}, stamp)
+        previous = next(item for item in result if item.get("identifier") == "old-123")
+        self.assertEqual(previous["state"], "cancelled")
+        self.assertEqual(previous["cancelledBy"], "cancel-123")
+
+    def test_cap_update_replaces_referenced_previous_alert(self):
+        stamp = datetime.datetime(2026, 11, 16, 12, 0, tzinfo=datetime.timezone.utc)
+        old = {
+            "identifier": "old-123", "url": "https://ssl.smn.gob.ar/old.xml",
+            "lastSeen": "2026-11-16T11:00:00Z", "expires": "2026-11-16T18:00:00Z",
+            "status": "Actual", "scope": "Public", "messageType": "Alert", "state": "active",
+        }
+        update = {
+            "identifier": "update-123", "url": "https://ssl.smn.gob.ar/update.xml",
+            "lastSeen": "2026-11-16T12:00:00Z", "messageType": "Update",
+            "referencedIdentifiers": ["old-123"], "state": "active",
+        }
+        result = smn.reconcile_alerts([old], [update], {old["url"], update["url"]}, stamp)
+        identifiers = {item.get("identifier") for item in result}
+        self.assertNotIn("old-123", identifiers)
+        self.assertIn("update-123", identifiers)
+
 
 if __name__ == "__main__":
     unittest.main()
