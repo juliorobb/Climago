@@ -10,6 +10,8 @@ on:
       - "index.html"
       - "styles.css"
       - "tests/test_cap_geometry_integration.py"
+      - "tests/test_smn_geography.test.js"
+      - "tests/test_smn_service_worker.test.js"
   workflow_dispatch:
   # GitHub schedules run from the default branch (main). Keep the hourly cadence to limit load on the SMN.
 # Do not use this workflow as per-commit validation on app preview branches.
@@ -36,6 +38,8 @@ jobs:
         run: |
           node --check app.js
           node --check service-worker.js
+          node --test tests/test_smn_geography.test.js
+          node --test tests/test_smn_service_worker.test.js
           python -m py_compile scripts/refresh_smn_alerts.py
           python -m unittest discover -s tests -v
 
