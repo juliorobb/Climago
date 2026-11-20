@@ -72,3 +72,13 @@ test("SAT color is shown only when explicitly present in official CAP data", () 
   assert.equal(getSmnAlertLevel({headline:"Alerta roja por tormentas"}), "rojo");
   assert.equal(getSmnAlertLevel({severity:"Severe",headline:"Tormentas fuertes"}), "desconocido");
 });
+
+test("clasifica una geometría real descargada del CAP del SMN para Córdoba", () => {
+  const realSmnPolygon = [
+    [-64.06,-31.42],[-64.06,-31.52],[-64.32,-31.52],
+    [-64.32,-31.32],[-64.30,-31.30],[-64.06,-31.30],[-64.06,-31.42]
+  ];
+  const alert = {areas:[{polygons:[realSmnPolygon]}]};
+  assert.equal(getSmnGeographicStatus(alert, {lat:-31.4167,lon:-64.1833}), "local");
+  assert.equal(getSmnGeographicStatus(alert, {lat:-31.4167,lon:-63.5}), "other");
+});
