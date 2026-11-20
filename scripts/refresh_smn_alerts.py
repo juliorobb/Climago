@@ -65,6 +65,93 @@ def parse_time(value):
     return parsed.astimezone(timezone.utc)
 
 
+def cap_event_start(record):
+    """Use the later CAP effective/onset time as the earliest confirmed event start."""
+    candidates = [
+        parse_time(record.get("effective")),
+        parse_time(record.get("onset")),
+    ]
+    valid = [value for value in candidates if value is not None]
+    return max(valid) if valid else None
+
+def parse_polygon(value):
+    """Convert a complete CAP lat,lon ring into GeoJSON-order [lon, lat] pairs."""
+    points = []
+    for pair in (value or "").strip().split():
+        parts = pair.split(",")
+        if len(parts) != 2:
+            return []
+        try:
+            lat, lon = float(parts[0]), float(parts[1])
+        except ValueError:
+            return []
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return []
+        points.append([lon, lat])
+    if len(points) < 3 or len({tuple(point) for point in points}) < 3:
+        return []
+    if points[0] != points[-1]:
+        points.append(points[0])
+    return points
+
+
+def parse_circle(value):
+    parts = (value or "").strip().split()
+    if len(parts) != 2:
+        return None
+    coords = parts[0].split(",")
+    if len(coords) != 2:
+        return None
+    try:
+        lat, lon, radius_km = float(coords[0]), float(coords[1]), float(parts[1])
+    except ValueError:
+        return None
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180 and radius_km > 0):
+        return None
+    return {"lat": lat, "lon": lon, "radiusKm": radius_km}
+
+
+def cap_area(area):
+    description = first_text(area, "areadesc")
+    polygons = [ring for node in children(area, "polygon")
+                if (ring := parse_polygon("".join(node.itertext()))) ]
+    circles = [circle for node in children(area, "circle")
+               if (circle := parse_circle("".join(node.itertext()))) ]
+    geocodes = []
+    for node in children(area, "geocode"):
+        name = first_text(node, "valuename")
+        value = first_text(node, "value")
+        if name or value:
+            geocodes.append({"valueName": name, "value": value})
+    result = {
+        "description": description,
+        "polygons": polygons,
+        "circles": circles,
+        "geocodes": geocodes,
+    }
+    return result
+
+
+def referenced_identifiers(references):
+    """Extract the identifier from CAP reference triples: sender,identifier,sent."""
+    identifiers = []
+    for reference in references or []:
+        parts = str(reference).split(",")
+        if len(parts) == 3 and parts[1].strip():
+            identifiers.append(parts[1].strip())
+    return list(dict.fromkeys(identifiers))
+
+
+def referenced_ids_for(records, message_type):
+    wanted = str(message_type or "").lower()
+    return {
+        identifier
+        for item in records
+        if str(item.get("messageType", "")).lower() == wanted
+        for identifier in item.get("referencedIdentifiers", [])
+    }
+
+
 def request_text(url, accept):
     request = urllib.request.Request(url, headers={
         "User-Agent": USER_AGENT,
@@ -137,47 +224,79 @@ def cap_record(payload, url, stamp):
     except ET.ParseError as error:
         raise ValueError("XML CAP inválido: " + str(error))
     info_nodes = children(root, "info")
-    if not info_nodes:
+    message_type = first_text(root, "msgtype")
+    # CAP cancellation messages may legitimately contain no <info> block.
+    if not info_nodes and message_type.lower() != "cancel":
         raise ValueError("El documento no contiene bloques CAP <info>.")
-    info = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0])
+    preferred = next((n for n in info_nodes if first_text(n, "language").lower().startswith("es")), info_nodes[0] if info_nodes else None)
     areas = []
-    for area in children(info, "area"):
-        area_name = first_text(area, "areadesc")
-        if area_name and area_name not in areas:
-            areas.append(area_name)
+    for area in children(preferred, "area"):
+        parsed = cap_area(area)
+        if parsed not in areas:
+            areas.append(parsed)
     identifier = first_text(root, "identifier")
     if not identifier:
         raise ValueError("Documento CAP sin identifier.")
+    references = [v for v in (first_text(root, "references") or "").split() if v]
     record = {
         "identifier": identifier,
+        "geometrySchemaVersion": 1,
         "sender": first_text(root, "sender"),
         "sent": first_text(root, "sent"),
-        "messageType": first_text(root, "msgtype"),
+        "messageType": message_type,
         "status": first_text(root, "status"),
-        "event": first_text(info, "event"),
-        "headline": first_text(info, "headline"),
-        "description": first_text(info, "description"),
-        "instruction": first_text(info, "instruction"),
-        "severity": first_text(info, "severity"),
-        "urgency": first_text(info, "urgency"),
-        "certainty": first_text(info, "certainty"),
-        "effective": first_text(info, "effective"),
-        "onset": first_text(info, "onset"),
-        "expires": first_text(info, "expires"),
+        "references": references,
+        "referencedIdentifiers": referenced_identifiers(references),
+        "scope": first_text(root, "scope"),
+        "source": first_text(root, "source"),
+        "event": first_text(preferred, "event"),
+        "headline": first_text(preferred, "headline"),
+        "description": first_text(preferred, "description"),
+        "instruction": first_text(preferred, "instruction"),
+        "severity": first_text(preferred, "severity"),
+        "urgency": first_text(preferred, "urgency"),
+        "certainty": first_text(preferred, "certainty"),
+        "parameters": [{
+            "name": first_text(parameter, "valuename"),
+            "value": first_text(parameter, "value"),
+        } for parameter in children(preferred, "parameter")],
+        "effective": first_text(preferred, "effective"),
+        "onset": first_text(preferred, "onset"),
+        "expires": first_text(preferred, "expires"),
         "areas": areas,
+        "infoBlocks": [{
+            "language": first_text(info, "language"),
+            "event": first_text(info, "event"),
+            "headline": first_text(info, "headline"),
+            "description": first_text(info, "description"),
+            "instruction": first_text(info, "instruction"),
+            "severity": first_text(info, "severity"),
+            "urgency": first_text(info, "urgency"),
+            "certainty": first_text(info, "certainty"),
+            "parameters": [{
+                "name": first_text(parameter, "valuename"),
+                "value": first_text(parameter, "value"),
+            } for parameter in children(info, "parameter")],
+            "effective": first_text(info, "effective"),
+            "onset": first_text(info, "onset"),
+            "expires": first_text(info, "expires"),
+        } for info in info_nodes],
         "url": url,
-        "source": "Servicio Meteorológico Nacional · CAP",
+        "sourceLabel": "Servicio Meteorológico Nacional · CAP",
         "lastSeen": iso(stamp),
     }
     expiry = parse_time(record["expires"])
-    effective = parse_time(record["effective"] or record["onset"])
+    event_start = cap_event_start(record)
     status = (record["status"] or "").lower()
+    scope = (record["scope"] or "").lower()
     message_type = (record["messageType"] or "").lower()
-    if status == "cancel" or message_type == "cancel":
+    if message_type == "cancel":
         state = "cancelled"
     elif expiry and expiry < stamp:
         state = "expired"
-    elif effective and effective > stamp:
+    elif status != "actual" or scope != "public":
+        state = "unconfirmed"
+    elif event_start and event_start > stamp and expiry:
         state = "scheduled"
     elif expiry and expiry >= stamp:
         state = "active"
@@ -185,6 +304,105 @@ def cap_record(payload, url, stamp):
         state = "unconfirmed"
     record["state"] = state
     return record
+
+
+def merge_alert_records(retained, parsed_records):
+    """Keep one current record per CAP identifier; the newest parsed record wins."""
+    merged = {}
+    for item in retained:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    for item in parsed_records:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    return list(merged.values())
+
+def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stamp, previous_generated_at=""):
+    """Reconcile CAP lifecycle messages, including messages found in one batch."""
+    records = [dict(item) for item in parsed_records if isinstance(item, dict)]
+    previously_cancelled = {
+        item.get("identifier"): item.get("cancelledBy", "")
+        for item in previous_alerts
+        if isinstance(item, dict) and item.get("identifier") and item.get("state") == "cancelled"
+    }
+    cancelled_by = {}
+    updated_identifiers = referenced_ids_for(records, "update")
+    for item in records:
+        if str(item.get("messageType", "")).lower() == "cancel":
+            for identifier in item.get("referencedIdentifiers", []):
+                cancelled_by[identifier] = item.get("identifier", "")
+    reconciled_records = []
+    for item in records:
+        identifier = item.get("identifier")
+        msg_type = str(item.get("messageType", "")).lower()
+        if identifier in updated_identifiers and msg_type != "update":
+            continue
+        if identifier in cancelled_by or identifier in previously_cancelled:
+            item["state"] = "cancelled"
+            item["cancelledBy"] = cancelled_by.get(identifier) or previously_cancelled.get(identifier, "")
+        reconciled_records.append(item)
+
+    current_keys = {item.get("identifier") for item in reconciled_records}
+    parsed_urls = {item.get("url") for item in reconciled_records}
+    retained = []
+    cutoff = stamp - timedelta(hours=HISTORY_HOURS)
+    for original in previous_alerts:
+        if not isinstance(original, dict):
+            continue
+        old = dict(original)
+        identifier = old.get("identifier")
+        old_url = old.get("url") or old.get("documentUrl") or ""
+        last_seen = parse_time(old.get("lastSeen") or previous_generated_at)
+        if identifier and identifier in current_keys:
+            continue
+        if identifier and identifier in updated_identifiers:
+            continue
+        if old_url and old_url in parsed_urls:
+            continue
+        if last_seen and last_seen < cutoff:
+            continue
+        if identifier:
+            expiry = parse_time(old.get("expires"))
+            effective = cap_event_start(old)
+            status = str(old.get("status", "")).lower()
+            msg_type = str(old.get("messageType", "")).lower()
+            if old.get("state") == "cancelled" or identifier in cancelled_by or status == "cancel" or msg_type == "cancel":
+                old["state"] = "cancelled"
+                if identifier in cancelled_by:
+                    old["cancelledBy"] = cancelled_by[identifier]
+            elif expiry and expiry < stamp:
+                old["state"] = "expired"
+            elif old_url in current_catalog_urls:
+                if effective and effective > stamp:
+                    old["state"] = "scheduled"
+                elif expiry:
+                    old["state"] = "active"
+                else:
+                    old["state"] = "unconfirmed"
+            elif expiry:
+                old["state"] = "not_currently_listed"
+            else:
+                old["state"] = "unconfirmed"
+            old["lastSeen"] = iso(last_seen or stamp)
+        else:
+            old = {
+                "headline": old.get("title") or "Aviso CAP anterior (formato histórico)",
+                "description": old.get("description") or "",
+                "areas": old.get("areas") or [],
+                "url": old.get("url") or "",
+                "sent": old.get("sent") or "",
+                "severity": old.get("severity") or "",
+                "source": "Servicio Meteorológico Nacional · CAP (registro anterior sin vigencia verificable)",
+                "state": "unconfirmed",
+                "lastSeen": iso(last_seen or stamp),
+            }
+        retained.append(old)
+    all_alerts = merge_alert_records(retained, reconciled_records)
+    order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
+    all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
+    return all_alerts
 
 
 def load_previous():
@@ -257,66 +475,14 @@ def main():
         except Exception as error:
             failures.append({"url": url, "error": str(error)[:240]})
 
-    # Keep recently seen notices after they disappear from the source index.
-    # The old MVP RSS format is kept only as unverified legacy history, never as a confirmed live warning.
-    current_keys = {item["identifier"] for item in parsed_records}
-    parsed_urls = {item["url"] for item in parsed_records}
+    # Reconcile CAP Update/Cancel references against current and retained records.
     current_catalog_urls = set(unique_urls)
-    retained = []
-    cutoff = stamp - timedelta(hours=HISTORY_HOURS)
-    for old in previous_alerts:
-        if not isinstance(old, dict):
-            continue
-        identifier = old.get("identifier")
-        old_url = old.get("url") or old.get("documentUrl") or ""
-        last_seen = parse_time(old.get("lastSeen") or previous.get("generatedAt"))
-        if identifier and identifier in current_keys:
-            continue
-        if old_url and old_url in parsed_urls:
-            continue
-        if last_seen and last_seen < cutoff:
-            continue
-        if identifier:
-            expiry = parse_time(old.get("expires"))
-            effective = parse_time(old.get("effective") or old.get("onset"))
-            status = str(old.get("status", "")).lower()
-            msg_type = str(old.get("messageType", "")).lower()
-            if status == "cancel" or msg_type == "cancel":
-                old["state"] = "cancelled"
-            elif expiry and expiry < stamp:
-                old["state"] = "expired"
-            elif old_url in current_catalog_urls:
-                if effective and effective > stamp:
-                    old["state"] = "scheduled"
-                elif expiry:
-                    old["state"] = "active"
-                else:
-                    old["state"] = "unconfirmed"
-            elif expiry:
-                old["state"] = "not_currently_listed"
-            else:
-                old["state"] = "unconfirmed"
-            old["lastSeen"] = iso(last_seen or stamp)
-        else:
-            old = {
-                "headline": old.get("title") or "Aviso CAP anterior (formato histórico)",
-                "description": old.get("description") or "",
-                "areas": old.get("areas") or [],
-                "url": old.get("url") or "",
-                "sent": old.get("sent") or "",
-                "severity": old.get("severity") or "",
-                "source": "Servicio Meteorológico Nacional · CAP (registro anterior sin vigencia verificable)",
-                "state": "unconfirmed",
-                "lastSeen": iso(last_seen or stamp),
-            }
-        retained.append(old)
-
-    merged = {item.get("identifier") or item.get("url") or item.get("headline"): item for item in retained}
-    for item in parsed_records:
-        merged[item["identifier"]] = item
-    all_alerts = list(merged.values())
-    order = {"active": 0, "scheduled": 1, "unconfirmed": 2, "expired": 3, "cancelled": 4, "not_currently_listed": 5}
-    all_alerts.sort(key=lambda item: (order.get(item.get("state"), 9), item.get("sent") or ""), reverse=False)
+    all_alerts = reconcile_alerts(
+        previous_alerts, parsed_records, current_catalog_urls, stamp,
+        previous.get("generatedAt", "")
+    )
+    parsed_ids = {item.get("identifier") for item in parsed_records}
+    retained_count = sum(1 for item in all_alerts if item.get("identifier") not in parsed_ids)
 
     downloaded = len(parsed_records)
     # La cobertura solo es completa cuando todos los documentos del catálogo
@@ -367,7 +533,7 @@ def main():
         file.write("\n")
     print("SMN feeds:", json.dumps(feed_status, ensure_ascii=False))
     print("CAP links:", len(unique_urls), "| selected:", len(selected_urls), "| downloaded:", downloaded)
-    print("Complete:", complete, "| retained:", len(retained), "| status:", state)
+    print("Complete:", complete, "| retained:", retained_count, "| status:", state)
     if feed_failures or failures:
         print("Warnings:", json.dumps({"feeds": feed_failures, "documents": failures}, ensure_ascii=False))
 
