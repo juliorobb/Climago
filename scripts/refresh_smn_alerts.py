@@ -306,6 +306,19 @@ def cap_record(payload, url, stamp):
     return record
 
 
+def merge_alert_records(retained, parsed_records):
+    """Keep one current record per CAP identifier; the newest parsed record wins."""
+    merged = {}
+    for item in retained:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    for item in parsed_records:
+        key = item.get("identifier") or item.get("url") or item.get("headline")
+        if key:
+            merged[key] = item
+    return list(merged.values())
+
 def reconcile_alerts(previous_alerts, parsed_records, current_catalog_urls, stamp, previous_generated_at=""):
     """Reconcile CAP lifecycle messages, including messages found in one batch."""
     records = [dict(item) for item in parsed_records if isinstance(item, dict)]
